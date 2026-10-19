@@ -16,6 +16,25 @@
 > discrepancia entre este documento y el PRD, prevalece el PRD y la diferencia se deriva a un humano
 > (Principio III).
 
+## Clarifications
+
+### Session 2026-10-19
+
+- Q: ¿El horario máximo configurable para facturación y recordatorios es 23:39 o 23:59? → A: 23:59
+  (era un error de tipeo; se corrigieron RF-62, RF-152, AC-62 y AC-160 en `PRD.md`).
+- Q: Si el agente revisa la casilla sin ninguna factura emitida, ¿qué hace con los emails? → A: No
+  procesa ninguno; la primera revisión es la primera posterior a emitir la primera factura (se amplió
+  RF-107 en `PRD.md`).
+- Q: Al reintentar a mano un recordatorio fallido, si el cliente cambió de situación, ¿qué pasa? → A:
+  Se recalcula con la deuda vigente al reintentar y se bloquea (con mensaje, error sigue Pendiente)
+  si el cliente no tiene deuda vigente, está en revisión o está Inactivo (se amplió RF-178 en
+  `PRD.md`).
+- Q: Si al decidir sobre una factura su estado ya cambió desde que el usuario abrió la pantalla, ¿qué
+  pasa? → A: Se rechaza, se muestra un mensaje y se actualiza la vista (nuevos RF-218 y AC-240 en
+  `PRD.md`).
+- Q: Al reenviar el email de una factura tras una falla, ¿la deuda vigente total se recalcula? → A: Sí,
+  se calcula en cada intento de envío; la factura y su PDF no cambian (se amplió RF-88 en `PRD.md`).
+
 ## User Scenarios & Testing *(mandatory)*
 
 Personas (PRD, "Personas"): **Admin** (hoy el único usuario), **Editor** y **Consulta** (perfiles
@@ -162,7 +181,7 @@ Principio III); sin esta historia el circuito de cobranza no se cierra.
 **Independent Test**: con facturas en Pago recibido y Revisión manual y avisos Pendientes, tomar
 cada decisión posible y verificar estados, motivos, registro del usuario y listado de resueltos.
 
-**Acceptance Scenarios** (completos: AC-144 a AC-153 y AC-238):
+**Acceptance Scenarios** (completos: AC-144 a AC-153, AC-238 y AC-240):
 
 1. **Given** facturas en Pago recibido y Revisión manual, **When** un usuario abre la interfaz de
    revisión, **Then** las ve con su evidencia y motivo, y no ve facturas en otros estados (AC-144).
@@ -293,6 +312,8 @@ externa salvo la cotización.
 - Email con adjuntos "si" y "dudoso" a la vez: prevalece "dudoso" (orden de RF-123, AC-127).
 - Email solo con imagen embebida o con adjuntos de formatos no admitidos (.docx): se trata como sin
   adjunto (RF-116, RF-117, AC-106, AC-107).
+- Casilla con emails antes de que exista cualquier factura: no se procesa ninguno; al emitirse la
+  primera factura, la primera revisión procesa solo los recibidos desde ese día (RF-107).
 - Mismo email leído dos veces (mismo Message-ID): se procesa una sola vez (RF-109, AC-100).
 - Email enviado desde la propia casilla del sistema: se ignora (RF-110, AC-101).
 - Varias coincidencias de monto sin combinación más antigua única: Revisión manual con "no se pudo
@@ -305,6 +326,11 @@ externa salvo la cotización.
 - Revisión de casilla que dura más que el intervalo: la siguiente espera a que termine (RF-102).
 - Certificado de ARCA vencido, ilegible o a 30 días o menos de vencer: banner de certificado; en
   modo mock nunca se muestra (RF-97, RF-98, RF-208).
+- Reintento manual de un recordatorio fallido cuando el cliente ya pagó, quedó en revisión o fue dado
+  de baja: se bloquea con un mensaje y el error sigue Pendiente; si se envía, refleja la deuda del
+  momento del reintento (RF-178).
+- Decisión de un usuario sobre una factura que el agente u otro usuario cambió mientras tanto: se
+  rechaza y se actualiza la pantalla (RF-218, AC-240).
 - Servidor con reloj en UTC: los horarios se rigen igual por hora de Argentina (RNF-12, AC-229).
 
 ## Requirements *(mandatory)*
@@ -369,7 +395,7 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   con el motivo correspondiente ("cancelada", "facturación en curso" o "facturación del mes ya
   realizada") y la operación MUST rechazarse también si se invoca directamente.
 - **FR-015** (RF-62, RF-73, RF-91, RF-100, RF-152, RF-172, RF-173): Un Admin MUST poder configurar la
-  hora de facturación y la de recordatorios (00:00 a 23:39), el punto de venta (1 a 99999), el
+  hora de facturación y la de recordatorios (00:00 a 23:59), el punto de venta (1 a 99999), el
   intervalo de revisión de la casilla (5 a 60 min), la cantidad de reintentos (0 a 10), la espera
   entre reintentos (1 a 60 min) y los datos de la empresa emisora; los valores fuera de rango MUST
   rechazarse conservando el anterior.
@@ -386,7 +412,9 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   genera, sin esperar ni demorarse por otros clientes, al email de facturación del cliente, con el
   PDF de RF-93, la información de RF-88 y RF-89, la leyenda de homologación sin validez fiscal
   (RF-90), los datos de la empresa emisora y, como remitente y firma, su nombre de fantasía o, si no
-  existe, su razón social; un reintento de envío MUST NOT regenerar la factura.
+  existe, su razón social; un reintento de envío MUST NOT regenerar la factura. La deuda vigente
+  total del email MUST calcularse en cada intento de envío (automático o manual), sin modificar la
+  factura ni su PDF.
 - **FR-019** (RF-96): El sistema MUST NOT enviar ningún email a un cliente Inactivo.
 - **FR-020** (RF-97, RF-98): El sistema MUST mostrar el banner de certificado mientras el certificado
   de ARCA esté vencido o ilegible (no se puede facturar) o falten 30 días o menos para su
@@ -399,7 +427,9 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   revisiones; ante una falla, registrar un único error de proceso Pendiente, reintentar en cada
   intervalo y, al recuperarse, procesar los emails atrasados y resolver el error; la primera
   revisión procesa desde el día de la primera factura emitida y las siguientes solo los emails
-  nuevos.
+  nuevos. Mientras no exista ninguna factura emitida, el agente MUST NOT procesar ningún email (ni
+  avisos, ni historial, ni clasificación); la primera revisión es la primera posterior a la emisión
+  de la primera factura.
 - **FR-022** (RF-109 a RF-118): El agente MUST procesar cada email una sola vez por Message-ID,
   ignorar los enviados por la propia casilla, identificar al cliente por su email de facturación
   sin distinguir mayúsculas, registrar como aviso Pendiente los de remitentes desconocidos,
@@ -430,6 +460,9 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-028** (RF-143 a RF-148): Un Admin o Editor MUST poder pasar a Pagada o devolver a Pendiente de
   pago las facturas en Pago recibido o Revisión manual, pasar a Pagada una factura Pendiente de pago
   desde el listado de facturas y marcar avisos como Revisados, quedando registrado el usuario.
+- **FR-047** (RF-218): Si al cambiar el estado de una factura esta ya no está en el estado que el
+  usuario vio (porque la cambió el agente u otro usuario), el sistema MUST rechazar la acción,
+  mostrar un mensaje y actualizar la pantalla con el estado vigente.
 
 **Recordatorios y dashboard**
 
@@ -462,6 +495,10 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   proceso Pendiente con un único intento (regenerando y enviando la factura o reenviando solo el
   email, según la operación) o marcarlo como Resuelto; el dashboard MUST mostrar el banner de
   errores con la cantidad de errores Pendientes.
+- **FR-046** (RF-178): El reintento manual de un recordatorio MUST armarse con las facturas adeudadas
+  y la deuda vigente del cliente al momento del reintento, y MUST bloquearse (mostrando un mensaje y
+  dejando el error de proceso Pendiente) si el cliente no tiene deuda vigente, está en revisión o
+  está Inactivo.
 - **FR-036** (RF-182, RF-183): Si falla una acción iniciada por un usuario, el sistema MUST mostrarle
   un error sin reintentar automáticamente ni registrar un error de proceso.
 
@@ -569,8 +606,6 @@ Los criterios de aceptación transversales de FR-041 a FR-045 son AC-225 a AC-22
   crédito, otros comprobantes, prorrateos, intereses, portal de clientes, integración bancaria,
   bloqueo de cuentas, respaldos, simulación de fallas de ARCA o de dolarhoy.com en modo mock, entre
   otros).
-- Las horas configurables tienen como máximo 23:39 porque así lo fijan RF-62, RF-152, AC-62 y AC-160;
-  se respeta literalmente.
 - AC-109 a AC-111 (LLM real) y AC-232 a AC-234 (rendimiento) se verifican fuera de la suite
   automática, como indica el PRD; el resto de los AC se cubre con tests automatizados que no llaman
   a servicios reales.

@@ -128,7 +128,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-59: Si el proceso de facturación del período del mes en curso ya se ejecutó con "Facturar ahora" (RF-58), el agente no debe volver a ejecutarlo ese mes, ni el día 15 ni según RF-52; solo debe retomarlo si quedó interrumpido (RF-53).
 - RF-60: Mientras el período del mes en curso esté cancelado, el sistema debe deshabilitar el botón "Facturar ahora" e indicar que está deshabilitado porque la facturación del mes está cancelada.
 - RF-61: Mientras el proceso de facturación del período del mes en curso esté en ejecución, o una vez que terminó (se intentó generar la factura de todos los clientes facturables), el sistema debe deshabilitar el botón "Facturar ahora" e indicar el motivo: "facturación en curso" o "facturación del mes ya realizada".
-- RF-62: El sistema debe permitir a un Admin configurar la hora de facturación con un valor entre 00:00 y 23:39.
+- RF-62: El sistema debe permitir a un Admin configurar la hora de facturación con un valor entre 00:00 y 23:59.
 - RF-63: Si un producto tiene el precio fijado en dólares, el agente debe facturarlo en pesos usando la cotización del dólar blue venta publicada en dolarhoy.com al momento de facturar.
 - RF-64: Al facturar en pesos un producto con precio en dólares (RF-63), el agente debe redondear el importe en pesos de esa cuota al centavo más cercano.
 - RF-65: El agente debe registrar, con su valor, fuente y fecha de lectura, cada cotización que lee de dolarhoy.com.
@@ -154,7 +154,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-85: El agente debe enviar el email de cada factura apenas la genera, sin esperar a que se generen las de los demás clientes.
 - RF-86: El agente debe reintentar el envío del email de una factura (RF-171) sin volver a generar la factura.
 - RF-87: El agente no debe demorar la generación ni el envío de la factura de un cliente por los reintentos de otro cliente.
-- RF-88: El email de la factura (RF-84) debe informar el número, el período, el importe y el vencimiento de la factura, y la deuda vigente total del cliente, que es la suma de sus facturas adeudadas, aclarando cuando incluye facturas anteriores.
+- RF-88: El email de la factura (RF-84) debe informar el número, el período, el importe y el vencimiento de la factura, y la deuda vigente total del cliente, que es la suma de sus facturas adeudadas, aclarando cuando incluye facturas anteriores. La deuda vigente total se calcula al momento de cada intento de envío, incluidos los reintentos automáticos (RF-86) y manuales (RF-178); la factura y su PDF no cambian.
 - RF-89: El email de la factura (RF-84) debe pedirle al cliente que responda el email adjuntando el comprobante de pago.
 - RF-90: Mientras el sistema facture en el ambiente de homologación de ARCA, el agente debe indicar en el PDF y en el email de cada factura que el comprobante fue emitido en homologación y no tiene validez fiscal.
 - RF-91: El sistema debe permitir a un Admin configurar los datos de la empresa emisora: razón social, domicilio comercial, condición frente al IVA, número de ingresos brutos, fecha de inicio de actividades y, opcionalmente, un nombre de fantasía.
@@ -176,7 +176,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-104: Mientras la casilla no esté disponible, el agente debe volver a intentar la conexión en cada intervalo de revisión.
 - RF-105: Cuando la casilla vuelve a estar disponible, el agente debe procesar los emails recibidos durante la falla.
 - RF-106: Cuando la casilla vuelve a estar disponible, el agente debe pasar a Resuelto el error de proceso de revisión de la casilla.
-- RF-107: La primera vez que el agente revisa la casilla, debe procesar los emails recibidos desde el día en que se emitió la primera factura; los anteriores no se procesan.
+- RF-107: La primera vez que el agente revisa la casilla, debe procesar los emails recibidos desde el día en que se emitió la primera factura; los anteriores no se procesan. Mientras no exista ninguna factura emitida, el agente no debe procesar ningún email (no registra avisos, historial ni clasificaciones), y la primera revisión es la primera que ocurre después de emitirse la primera factura.
 - RF-108: En cada revisión posterior a la primera, el agente debe procesar solo los emails recibidos desde la revisión anterior.
 - RF-109: El agente debe procesar cada email recibido una sola vez, identificándolo por su Message-ID, aunque lo vuelva a leer de la casilla (por ejemplo, después de una falla según RF-105).
 - RF-110: El agente no debe procesar los emails cuyo remitente es la casilla del sistema.
@@ -224,13 +224,14 @@ Reglas que acompañan a las anteriores:
 - RF-146: El sistema debe permitir a un Admin o Editor devolver, desde la interfaz de revisión, una factura en estado Revisión manual a Pendiente de pago.
 - RF-147: El sistema debe permitir a un Admin o Editor pasar, desde el listado de facturas, una factura en estado Pendiente de pago a Pagada.
 - RF-148: El sistema debe permitir a un Admin o Editor marcar un aviso como Revisado desde la interfaz de revisión.
+- RF-218: Si un usuario intenta cambiar el estado de una factura (RF-143 a RF-147) y la factura ya no está en el estado que el usuario vio al abrir la pantalla, porque el agente u otro usuario la cambió, el sistema debe rechazar la acción, mostrarle un mensaje y actualizar la pantalla con el estado vigente.
 - RF-216: La interfaz de revisión debe listar las facturas que un usuario pasó de Pago recibido o Revisión manual a Pagada o a Pendiente de pago, con la decisión tomada, el usuario que la tomó, su fecha y hora, el estado y el motivo que tenía la factura, y los emails asociados con sus adjuntos, la clasificación del LLM de cada adjunto y el CUIT y el monto extraídos de cada comprobante; ordenadas de la decisión más reciente a la más antigua y filtrables por cliente y por rango de fechas de la decisión.
 
 ### Recordatorios y dashboard
 - RF-149: El agente debe enviar el último día de cada mes, a la hora de recordatorios (11:00 por defecto), un email recordatorio a cada cliente Activo con deuda vigente, tenga o no productos asignados, salvo a los clientes en revisión.
 - RF-150: El email recordatorio, automático o manual, debe detallar cada factura adeudada del cliente (número, período, importe y vencimiento) y el total a pagar, que es la suma de todas ellas.
 - RF-151: El email recordatorio, automático o manual, debe pedirle al cliente que responda el email adjuntando el comprobante de pago.
-- RF-152: El sistema debe permitir a un Admin configurar la hora de recordatorios con un valor entre 00:00 y 23:39.
+- RF-152: El sistema debe permitir a un Admin configurar la hora de recordatorios con un valor entre 00:00 y 23:59.
 - RF-153: El sistema debe mostrar un dashboard con el listado de los clientes con deuda vigente, con su razón social, su deuda vigente total, la cantidad de facturas adeudadas y si está en revisión.
 - RF-154: El sistema debe permitir enviar manualmente, desde el dashboard, un email recordatorio a un cliente con deuda vigente.
 - RF-155: El sistema no debe enviar el recordatorio automático de fin de mes a un cliente sin deuda vigente.
@@ -262,7 +263,7 @@ Reglas que acompañan a las anteriores:
 - RF-175: La interfaz de revisión debe listar los errores de proceso Pendientes con sus datos.
 - RF-176: El sistema debe permitir a un Admin o Editor reintentar manualmente, desde la interfaz de revisión y con un único intento, la operación de un error de proceso Pendiente de generación de factura, de envío de factura o de envío de recordatorio.
 - RF-177: En el reintento manual de un error de generación de factura, el sistema debe generar la factura y, si se genera, enviarla por email según RF-84.
-- RF-178: En el reintento manual de un error de envío de factura o de recordatorio, el sistema debe reenviar solo el email que falló, sin generar de nuevo la factura.
+- RF-178: En el reintento manual de un error de envío de factura o de recordatorio, el sistema debe reenviar solo el email que falló, sin generar de nuevo la factura. En el reintento manual de un error de envío de recordatorio, el sistema debe armar el recordatorio con las facturas adeudadas y la deuda vigente del cliente al momento del reintento, y debe bloquear el envío, mostrando un mensaje y dejando el error de proceso Pendiente, si el cliente no tiene deuda vigente, está en revisión o está Inactivo.
 - RF-179: Si el reintento manual tiene éxito, el sistema debe pasar el error de proceso a Resuelto.
 - RF-180: El sistema debe permitir a un Admin o Editor marcar un error de proceso Pendiente como Resuelto sin reintentarlo.
 - RF-181: Mientras haya al menos un error de proceso Pendiente, el sistema debe mostrar el banner de errores con la cantidad de errores Pendientes.
@@ -390,7 +391,7 @@ Reglas que acompañan a las anteriores:
 - AC-59 (RF-60): Dado el período del mes en curso cancelado, cuando un Admin abre la pantalla de facturación, entonces el botón "Facturar ahora" aparece deshabilitado con la indicación de que la facturación del mes está cancelada; y una solicitud directa al endpoint de facturación manual es rechazada sin generar ninguna factura.
 - AC-60 (RF-61): Dado el proceso de facturación del período del mes en curso en ejecución, cuando un Admin abre la pantalla de facturación, entonces el botón "Facturar ahora" aparece deshabilitado con la indicación "facturación en curso"; y una vez terminado el proceso, aparece deshabilitado con la indicación "facturación del mes ya realizada"; en ambos casos, una solicitud directa al endpoint de facturación manual es rechazada sin generar ninguna factura.
 - AC-61 (RF-62): Dado un Admin autenticado, cuando cambia la hora de facturación a 14:00, entonces el siguiente proceso de facturación del día 15 se inicia a las 14:00 hora de Argentina, con una tolerancia de ±1 minuto.
-- AC-62 (RF-62): Dado un Admin autenticado, cuando intenta configurar la hora de facturación en 23:40, entonces el sistema rechaza el valor y mantiene la hora anterior.
+- AC-62 (RF-62): Dado un Admin autenticado, cuando intenta configurar la hora de facturación en 24:00 o en 23:60, entonces el sistema rechaza el valor y mantiene la hora anterior; y cuando la configura en 23:59, el valor queda guardado.
 - AC-63 (RF-63): Dado un cliente con un producto asignado cuyo precio está fijado en dólares y dolarhoy.com respondiendo con una cotización del dólar blue venta de $1.500, cuando el agente genera la factura mensual, entonces convierte ese monto a pesos con la cotización de $1.500, y esa cotización y su fuente quedan registradas en la factura.
 - AC-64 (RF-64): Dado un producto con precio de USD 0,01 y una cotización de $1.555,50, cuando el agente lo factura, entonces el ítem se factura por $15,56 ($15,555 redondeado al centavo más cercano).
 - AC-65 (RF-67, RF-65, RF-66): Dadas tres cotizaciones registradas, leídas el 15/08 ($1.490), el 15/09 ($1.500) y el 20/09 ($1.520), y dolarhoy.com sin responder dentro de 10 s (RNF-07), cuando el agente factura un producto con precio en dólares, entonces usa la cotización del 20/09 ($1.520); y cuando dolarhoy.com responde, la cotización leída queda registrada con su valor, la fuente y la fecha de lectura.
@@ -491,6 +492,7 @@ AC-141 y AC-142 verifican una regla de resguardo que el flujo normal no produce 
 - AC-151 (RF-140): Dada una factura en Revisión manual con el motivo "monto no coincide", cuando un Admin o Editor la pasa a Pagada o la devuelve a Pendiente de pago, entonces la factura deja de mostrar ese motivo.
 - AC-152 (RF-144, RF-146, RF-134): Dada una factura que un usuario devolvió a Pendiente de pago y un cliente que no está en revisión, cuando llega después un comprobante clasificado como "si" con su CUIT y el monto exacto de esa factura, entonces el agente lo procesa y la factura pasa a Pago recibido.
 - AC-153 (RF-148): Dado un aviso Pendiente, cuando un Admin o Editor lo marca como Revisado, entonces el aviso deja de aparecer entre los Pendientes y queda registrado qué usuario lo revisó.
+- AC-240 (RF-218): Dada una factura en Pago recibido abierta por un Editor en la interfaz de revisión, cuando el agente la pasa a Revisión manual y después el Editor intenta pasarla a Pagada, entonces el sistema rechaza la acción, la factura sigue en Revisión manual, el Editor ve un mensaje y la pantalla muestra el estado vigente.
 - AC-238 (RF-216): Dada una factura en Revisión manual con el motivo "monto no coincide" y dos comprobantes asociados, cuando un Admin o Editor la pasa a Pagada, entonces la factura deja de aparecer entre los pagos a revisar y aparece entre los resueltos con la decisión "Pagada", el usuario que la tomó, la fecha y hora, el estado anterior "Revisión manual", el motivo "monto no coincide" y los dos comprobantes; y una factura que un usuario devolvió de Pago recibido a Pendiente de pago aparece con la decisión "Devuelta a Pendiente de pago".
 
 ### Recordatorios y dashboard
@@ -500,7 +502,7 @@ AC-141 y AC-142 verifican una regla de resguardo que el flujo normal no produce 
 - AC-157 (RF-149): Dada la hora de recordatorios por defecto, cuando llega el último día del mes, entonces el proceso de recordatorios se inicia a las 11:00 hora de Argentina, con una tolerancia de ±1 minuto.
 - AC-158 (RF-150, RF-151): Dado un cliente con dos facturas adeudadas en Pendiente de pago, una de agosto por $10.000 y otra de septiembre por $12.000, cuando se le envía el recordatorio automático o el manual, entonces el email detalla ambas facturas con su número, período, importe y vencimiento, informa un total a pagar de $22.000 y le pide responder adjuntando el comprobante de pago.
 - AC-159 (RF-152): Dado un Admin autenticado, cuando cambia la hora de recordatorios a 14:00, entonces el siguiente proceso de recordatorios de fin de mes se inicia a las 14:00 hora de Argentina, con una tolerancia de ±1 minuto.
-- AC-160 (RF-152): Dado un Admin autenticado, cuando intenta configurar la hora de recordatorios en 23:40, entonces el sistema rechaza el valor y mantiene la hora anterior.
+- AC-160 (RF-152): Dado un Admin autenticado, cuando intenta configurar la hora de recordatorios en 24:00 o en 23:60, entonces el sistema rechaza el valor y mantiene la hora anterior; y cuando la configura en 23:59, el valor queda guardado.
 - AC-161 (RF-153): Dado un usuario autenticado, cuando abre el dashboard, entonces ve listados todos los clientes con deuda vigente, cada uno con su razón social, su deuda vigente total, la cantidad de facturas adeudadas y si está en revisión, y ningún cliente sin deuda vigente.
 - AC-162 (RF-155): Dado un cliente cuyas facturas están todas en Pago recibido o Pagada, cuando el agente ejecuta el proceso de recordatorios de fin de mes, entonces no se envía ningún email a ese cliente.
 - AC-163 (RF-156): Dado un cliente sin deuda vigente, cuando un usuario intenta enviar el recordatorio manual desde el dashboard, entonces el sistema bloquea la acción, no envía ningún email y muestra un mensaje indicando que el cliente no tiene deuda pendiente.
