@@ -13,72 +13,72 @@ Audiencia: autor del PRD. Cada ítem pregunta si el requisito está bien escrito
 
 ## Validación de pagos — Completitud
 
-- [ ] CHK001 ¿Está definido en qué orden se procesan varios emails del mismo cliente detectados en una misma revisión de la casilla (por fecha de recepción u otro criterio), dado que el primero puede dejar al cliente "en revisión" y cambiar la regla que se aplica al segundo? [Gap, Spec §FR-024, PRD RF-128]
-- [ ] CHK002 ¿Está especificado qué pasa cuando un cliente reenvía un comprobante que ya validó una factura (mismo archivo, otro Message-ID) y tiene otra factura adeudada del mismo monto, para no imputar dos veces el mismo pago? [Gap, Spec §FR-022, Spec §FR-024]
-- [ ] CHK003 ¿Se define en qué moneda se asume el monto extraído del comprobante y qué ocurre si el comprobante está en dólares? [Gap, Ambiguity, PRD RF-120, RNF-13]
-- [ ] CHK004 ¿Está documentado que solo los emails de las reglas RF-128 quedan asociados a la revisión manual pendiente, o también se asocian los emails que disparan RF-130 a RF-137, de modo que la interfaz de revisión pueda mostrar "el email recibido" en todos los casos? [Consistency, PRD RF-139, RF-141]
-- [ ] CHK005 ¿Está definido qué datos del email y de los adjuntos se guardan y por cuánto tiempo, dado que los comprobantes contienen datos bancarios de terceros? [Gap, Spec §Key Entities]
+- [x] CHK001 ¿Está definido en qué orden se procesan varios emails del mismo cliente detectados en una misma revisión de la casilla (por fecha de recepción u otro criterio), dado que el primero puede dejar al cliente "en revisión" y cambiar la regla que se aplica al segundo? [Gap, Spec §FR-024, PRD RF-128]
+- [x] CHK002 ¿Está especificado qué pasa cuando un cliente reenvía un comprobante que ya validó una factura (mismo archivo, otro Message-ID) y tiene otra factura adeudada del mismo monto, para no imputar dos veces el mismo pago? [Gap, Spec §FR-022, Spec §FR-024]
+- [x] CHK003 ¿Se define en qué moneda se asume el monto extraído del comprobante y qué ocurre si el comprobante está en dólares? [Gap, Ambiguity, PRD RF-120, RNF-13]
+- [x] CHK004 ¿Está documentado que solo los emails de las reglas RF-128 quedan asociados a la revisión manual pendiente, o también se asocian los emails que disparan RF-130 a RF-137, de modo que la interfaz de revisión pueda mostrar "el email recibido" en todos los casos? [Consistency, PRD RF-139, RF-141]
+- [x] CHK005 ¿Está definido qué datos del email y de los adjuntos se guardan y por cuánto tiempo, dado que los comprobantes contienen datos bancarios de terceros? [Gap, Spec §Key Entities]
 
 ## Validación de pagos — Claridad y consistencia
 
-- [ ] CHK006 ¿La definición de "combinación más antigua" deja claro cómo se comparan dos facturas del mismo período (empate), y es consistente con AC-141 y AC-142? [Clarity, PRD Definiciones, AC-141, AC-142]
-- [ ] CHK007 ¿Está explícito que las facturas en Pago recibido no participan de la búsqueda de coincidencias de monto (no son "adeudadas"), y es consistente con el ejemplo de AC-162? [Consistency, PRD Definiciones, Spec §FR-024]
-- [ ] CHK008 ¿Son mutuamente excluyentes y exhaustivas las condiciones de RF-126 a RF-137 para todas las combinaciones de clasificación, deuda vigente y cliente en revisión, incluido un email "no" de un cliente en revisión? [Completeness, PRD RF-126 a RF-137]
-- [ ] CHK009 ¿Es objetivamente verificable el criterio "comprobante legible" de RNF-14 y la composición del set de prueba de AC-109 a AC-111 (quién lo arma, con qué tipos de comprobante y bancos)? [Measurability, PRD RNF-14, AC-109 a AC-111]
-- [ ] CHK010 ¿Está definido el tratamiento de un comprobante cuyo pagador es un tercero distinto del cliente (por ejemplo, un socio que transfiere con su CUIT), y es aceptable que siempre termine en "CUIT no coincide"? [Edge Case, Assumption, PRD RF-121, RF-133]
+- [x] CHK006 ¿La definición de "combinación más antigua" deja claro cómo se comparan dos facturas del mismo período (empate), y es consistente con AC-141 y AC-142? [Clarity, PRD Definiciones, AC-141, AC-142]
+- [x] CHK007 ¿Está explícito que las facturas en Pago recibido no participan de la búsqueda de coincidencias de monto (no son "adeudadas"), y es consistente con el ejemplo de AC-162? [Consistency, PRD Definiciones, Spec §FR-024]
+- [x] CHK008 ¿Son mutuamente excluyentes y exhaustivas las condiciones de RF-126 a RF-137 para todas las combinaciones de clasificación, deuda vigente y cliente en revisión, incluido un email "no" de un cliente en revisión? [Completeness, PRD RF-126 a RF-137]
+- [x] CHK009 ¿Es objetivamente verificable el criterio "comprobante legible" de RNF-14 y la composición del set de prueba de AC-109 a AC-111 (quién lo arma, con qué tipos de comprobante y bancos)? [Measurability, PRD RNF-14, AC-109 a AC-111]
+- [x] CHK010 ¿Está definido el tratamiento de un comprobante cuyo pagador es un tercero distinto del cliente (por ejemplo, un socio que transfiere con su CUIT), y es aceptable que siempre termine en "CUIT no coincide"? [Edge Case, Assumption, PRD RF-121, RF-133]
 
 ## Facturación y ARCA — Completitud
 
-- [ ] CHK011 ¿Está especificado qué hace el agente si llega el día 15 sin los datos obligatorios de la empresa emisora o sin punto de venta configurado? [Gap, Spec §FR-015, PRD RF-91, RF-92]
-- [ ] CHK012 ¿Se distingue entre una falla técnica de ARCA (timeout, red) y un rechazo de validación del comprobante (observaciones o errores de negocio), y se define si un rechazo también se reintenta según RF-171? [Gap, Clarity, PRD RF-171, RF-75]
-- [ ] CHK013 ¿Está definido qué pasa con el reintento manual de una generación fallida si el cliente, mientras tanto, quedó Inactivo, sin productos Activos o con otra condición frente al IVA? [Gap, Spec §FR-035, PRD RF-177]
-- [ ] CHK014 ¿Está definido si los productos, precios y asignaciones que se usan en un reintento (automático o manual) de generación son los vigentes al reintentar o los del primer intento? [Ambiguity, PRD RF-171, RF-177, AC-46]
-- [ ] CHK015 ¿Se documenta qué contiene el email de factura cuando el cliente está en revisión (RF-88 informa deuda vigente total, que incluye facturas en Revisión manual) y si debe aclararlo? [Clarity, PRD RF-88, AC-81]
+- [x] CHK011 ¿Está especificado qué hace el agente si llega el día 15 sin los datos obligatorios de la empresa emisora o sin punto de venta configurado? [Gap, Spec §FR-015, PRD RF-91, RF-92]
+- [x] CHK012 ¿Se distingue entre una falla técnica de ARCA (timeout, red) y un rechazo de validación del comprobante (observaciones o errores de negocio), y se define si un rechazo también se reintenta según RF-171? [Gap, Clarity, PRD RF-171, RF-75]
+- [x] CHK013 ¿Está definido qué pasa con el reintento manual de una generación fallida si el cliente, mientras tanto, quedó Inactivo, sin productos Activos o con otra condición frente al IVA? [Gap, Spec §FR-035, PRD RF-177]
+- [x] CHK014 ¿Está definido si los productos, precios y asignaciones que se usan en un reintento (automático o manual) de generación son los vigentes al reintentar o los del primer intento? [Ambiguity, PRD RF-171, RF-177, AC-46]
+- [x] CHK015 ¿Se documenta qué contiene el email de factura cuando el cliente está en revisión (RF-88 informa deuda vigente total, que incluye facturas en Revisión manual) y si debe aclararlo? [Clarity, PRD RF-88, AC-81]
 
 ## Facturación y ARCA — Claridad y consistencia
 
-- [ ] CHK016 ¿Es consistente "la cotización al momento de facturar" (RF-63) con la decisión de leerla una vez por corrida (research R-13), en particular para facturas generadas en reintentos horas o días después? [Conflict, PRD RF-63, research R-13]
-- [ ] CHK017 ¿Está cuantificado "apenas" en RF-52, RF-57 y RF-85 con el mismo margen que los AC ("dentro del minuto siguiente") para todos los casos, incluido el envío del email tras generar la factura? [Measurability, PRD RF-52, RF-57, RF-85]
-- [ ] CHK018 ¿Está definido el período de facturación cuando el proceso del mes se retoma tras una interrupción que cruza el cambio de mes (por ejemplo, se interrumpe el 31 y se retoma el 1)? [Edge Case, Gap, PRD RF-52, RF-53]
-- [ ] CHK019 ¿Son consistentes los motivos de deshabilitación del botón "Facturar ahora" (RF-60, RF-61) con el caso de un período reactivado (RF-56) cuya facturación todavía no empezó? [Consistency, PRD RF-56, RF-60, RF-61]
-- [ ] CHK020 ¿Está claro si el banner de certificado impide facturar (RF-97 dice "no se puede realizar la facturación") o solo avisa, y qué hace el proceso del día 15 en ese caso? [Ambiguity, PRD RF-97, Riesgos]
+- [x] CHK016 ¿Es consistente "la cotización al momento de facturar" (RF-63) con la decisión de leerla una vez por corrida (research R-13), en particular para facturas generadas en reintentos horas o días después? [Conflict, PRD RF-63, research R-13]
+- [x] CHK017 ¿Está cuantificado "apenas" en RF-52, RF-57 y RF-85 con el mismo margen que los AC ("dentro del minuto siguiente") para todos los casos, incluido el envío del email tras generar la factura? [Measurability, PRD RF-52, RF-57, RF-85]
+- [x] CHK018 ¿Está definido el período de facturación cuando el proceso del mes se retoma tras una interrupción que cruza el cambio de mes (por ejemplo, se interrumpe el 31 y se retoma el 1)? [Edge Case, Gap, PRD RF-52, RF-53]
+- [x] CHK019 ¿Son consistentes los motivos de deshabilitación del botón "Facturar ahora" (RF-60, RF-61) con el caso de un período reactivado (RF-56) cuya facturación todavía no empezó? [Consistency, PRD RF-56, RF-60, RF-61]
+- [x] CHK020 ¿Está claro si el banner de certificado impide facturar (RF-97 dice "no se puede realizar la facturación") o solo avisa, y qué hace el proceso del día 15 en ese caso? [Ambiguity, PRD RF-97, Riesgos]
 
 ## Fallas y recuperación — Cobertura de escenarios
 
-- [ ] CHK021 ¿Están definidos los requisitos cuando el proceso de recordatorios de fin de mes se interrumpe a mitad de la corrida y el sistema vuelve el mismo día (recuperación parcial), dado que la Fuera de Alcance solo excluye el día perdido completo? [Gap, Recovery, PRD RF-149, Fuera de Alcance]
-- [ ] CHK022 ¿Está especificado qué pasa con los reintentos automáticos pendientes cuando el sistema se reinicia (se reanudan con el mismo número de intento o empiezan de cero)? [Gap, Recovery, PRD RF-171]
-- [ ] CHK023 ¿Se define qué ocurre si un reintento automático de recordatorio se ejecuta después de que el cliente pagó, quedó en revisión o fue dado de baja, con la misma regla aclarada para el reintento manual (RF-178)? [Consistency, Spec §FR-046, PRD RF-171]
-- [ ] CHK024 ¿Está definido el comportamiento si la revisión de la casilla falla a mitad de procesar los emails (algunos procesados, otros no) y la relación con el error de proceso de RF-103? [Coverage, Exception Flow, PRD RF-103, RF-105, RF-109]
-- [ ] CHK025 ¿Se especifica si un error de proceso Pendiente de generación debe resolverse automáticamente cuando la factura se genera por otro camino (por ejemplo, una nueva corrida del mismo mes)? [Gap, PRD RF-174, RF-179]
-- [ ] CHK026 ¿Está definido qué pasa con un error de proceso Pendiente de un período cuyo mes ya terminó: puede reintentarse indefinidamente y con qué fechas (AC-76 cubre un caso)? [Clarity, PRD RF-81, RF-176]
+- [x] CHK021 ¿Están definidos los requisitos cuando el proceso de recordatorios de fin de mes se interrumpe a mitad de la corrida y el sistema vuelve el mismo día (recuperación parcial), dado que la Fuera de Alcance solo excluye el día perdido completo? [Gap, Recovery, PRD RF-149, Fuera de Alcance]
+- [x] CHK022 ¿Está especificado qué pasa con los reintentos automáticos pendientes cuando el sistema se reinicia (se reanudan con el mismo número de intento o empiezan de cero)? [Gap, Recovery, PRD RF-171]
+- [x] CHK023 ¿Se define qué ocurre si un reintento automático de recordatorio se ejecuta después de que el cliente pagó, quedó en revisión o fue dado de baja, con la misma regla aclarada para el reintento manual (RF-178)? [Consistency, Spec §FR-046, PRD RF-171]
+- [x] CHK024 ¿Está definido el comportamiento si la revisión de la casilla falla a mitad de procesar los emails (algunos procesados, otros no) y la relación con el error de proceso de RF-103? [Coverage, Exception Flow, PRD RF-103, RF-105, RF-109]
+- [x] CHK025 ¿Se especifica si un error de proceso Pendiente de generación debe resolverse automáticamente cuando la factura se genera por otro camino (por ejemplo, una nueva corrida del mismo mes)? [Gap, PRD RF-174, RF-179]
+- [x] CHK026 ¿Está definido qué pasa con un error de proceso Pendiente de un período cuyo mes ya terminó: puede reintentarse indefinidamente y con qué fechas (AC-76 cubre un caso)? [Clarity, PRD RF-81, RF-176]
 
 ## Fallas y recuperación — Medibilidad
 
-- [ ] CHK027 ¿Son verificables los tiempos de RNF-03 y RNF-04 ("sin contar los reintentos") cuando algunos clientes entran en reintento: se mide hasta el último cliente sin reintento o hasta que se intentó a todos? [Measurability, PRD RNF-03, RNF-04]
-- [ ] CHK028 ¿Es medible RNF-01 cuando un email tiene varios adjuntos, dado que el peor caso de RNF-02 (54 s) está calculado para un solo adjunto? [Conflict, PRD RNF-01, RNF-02]
-- [ ] CHK029 ¿Están definidos los timeouts de todas las dependencias externas, incluida la descarga de adjuntos grandes por IMAP y la firma en WSAA, o solo los de RNF-07? [Coverage, PRD RNF-07]
+- [x] CHK027 ¿Son verificables los tiempos de RNF-03 y RNF-04 ("sin contar los reintentos") cuando algunos clientes entran en reintento: se mide hasta el último cliente sin reintento o hasta que se intentó a todos? [Measurability, PRD RNF-03, RNF-04]
+- [x] CHK028 ¿Es medible RNF-01 cuando un email tiene varios adjuntos, dado que el peor caso de RNF-02 (54 s) está calculado para un solo adjunto? [Conflict, PRD RNF-01, RNF-02]
+- [x] CHK029 ¿Están definidos los timeouts de todas las dependencias externas, incluida la descarga de adjuntos grandes por IMAP y la firma en WSAA, o solo los de RNF-07? [Coverage, PRD RNF-07]
 
 ## Seguridad — Completitud y claridad
 
-- [ ] CHK030 ¿Está definido si al dar de baja a un usuario, cambiarle el perfil o cambiar su contraseña se cierran sus sesiones abiertas? [Gap, PRD RF-17, RF-18, RF-21, AC-17, AC-18]
-- [ ] CHK031 ¿Se especifica de dónde sale la dirección base de la URL de recuperación de contraseña (variable de entorno o configuración), que hoy no figura en la lista de variables de AGENTS.md? [Gap, PRD RF-24, AGENTS.md]
-- [ ] CHK032 ¿Están definidos los requisitos para impedir que `EMAIL_REDIRECT_TO` quede activo fuera de desarrollo, ya que redirigiría las facturas de todos los clientes? [Gap, Assumption, AGENTS.md]
-- [ ] CHK033 ¿Está documentado qué información sensible no debe aparecer en mensajes de error de proceso, logs ni historial (credenciales, contenido de comprobantes)? [Completeness, Spec §FR-041, Constitución IV]
-- [ ] CHK034 ¿Se define quién puede ver y descargar los adjuntos de los emails recibidos y si el perfil Consulta tiene el mismo acceso que Admin y Editor? [Clarity, PRD RF-11, RF-141, RF-198]
-- [ ] CHK035 ¿Están especificados los requisitos de auditoría para los cambios de configuración (quién cambió la hora, el punto de venta o los datos del emisor y cuándo)? [Gap, PRD RF-62, RF-73, RF-91]
+- [x] CHK030 ¿Está definido si al dar de baja a un usuario, cambiarle el perfil o cambiar su contraseña se cierran sus sesiones abiertas? [Gap, PRD RF-17, RF-18, RF-21, AC-17, AC-18]
+- [x] CHK031 ¿Se especifica de dónde sale la dirección base de la URL de recuperación de contraseña (variable de entorno o configuración), que hoy no figura en la lista de variables de AGENTS.md? [Gap, PRD RF-24, AGENTS.md]
+- [x] CHK032 ¿Están definidos los requisitos para impedir que `EMAIL_REDIRECT_TO` quede activo fuera de desarrollo, ya que redirigiría las facturas de todos los clientes? [Gap, Assumption, AGENTS.md]
+- [x] CHK033 ¿Está documentado qué información sensible no debe aparecer en mensajes de error de proceso, logs ni historial (credenciales, contenido de comprobantes)? [Completeness, Spec §FR-041, Constitución IV]
+- [x] CHK034 ¿Se define quién puede ver y descargar los adjuntos de los emails recibidos y si el perfil Consulta tiene el mismo acceso que Admin y Editor? [Clarity, PRD RF-11, RF-141, RF-198]
+- [x] CHK035 ¿Están especificados los requisitos de auditoría para los cambios de configuración (quién cambió la hora, el punto de venta o los datos del emisor y cuándo)? [Gap, PRD RF-62, RF-73, RF-91]
 
 ## Modos de ejecución — Consistencia
 
-- [ ] CHK036 ¿Es consistente la terminología de modos entre el PRD (modo mock y "modo real") y la Constitución (mock, homologación, producción), y está claro que "modo real" equivale a homologación en el MVP? [Consistency, PRD Definiciones, Constitución V]
-- [ ] CHK037 ¿Está definido el comportamiento del modo mock con `SCHEDULER_ENABLED=false` explícito: los emails cargados en la casilla simulada se procesan igual (RF-203 dice "en la siguiente revisión")? [Edge Case, PRD RF-203, RF-207]
-- [ ] CHK038 ¿Está especificado qué ve el usuario en las pantallas que dependen de servicios simulados (por ejemplo, la casilla simulada) cuando el modo mock se desactiva con datos ya cargados? [Coverage, PRD RF-204, RF-212]
-- [ ] CHK039 ¿Está documentado el requisito de que ningún artefacto del MVP (código, configuración, variables) permita apuntar a ARCA productivo, como criterio verificable además de la mención en Fuera de Alcance? [Measurability, Constitución V, PRD Fuera de Alcance]
+- [x] CHK036 ¿Es consistente la terminología de modos entre el PRD (modo mock y "modo real") y la Constitución (mock, homologación, producción), y está claro que "modo real" equivale a homologación en el MVP? [Consistency, PRD Definiciones, Constitución V]
+- [x] CHK037 ¿Está definido el comportamiento del modo mock con `SCHEDULER_ENABLED=false` explícito: los emails cargados en la casilla simulada se procesan igual (RF-203 dice "en la siguiente revisión")? [Edge Case, PRD RF-203, RF-207]
+- [x] CHK038 ¿Está especificado qué ve el usuario en las pantallas que dependen de servicios simulados (por ejemplo, la casilla simulada) cuando el modo mock se desactiva con datos ya cargados? [Coverage, PRD RF-204, RF-212]
+- [x] CHK039 ¿Está documentado el requisito de que ningún artefacto del MVP (código, configuración, variables) permita apuntar a ARCA productivo, como criterio verificable además de la mención en Fuera de Alcance? [Measurability, Constitución V, PRD Fuera de Alcance]
 
 ## Dependencias y supuestos
 
-- [ ] CHK040 ¿Está documentado qué pasa si dolarhoy.com cambia su formato de forma permanente: el sistema usaría la última cotización indefinidamente; hay un límite de antigüedad para la cotización de respaldo? [Assumption, Gap, PRD RF-66, RF-67, Riesgos]
-- [ ] CHK041 ¿Está validado el supuesto de que Gmail conserva todos los emails en `INBOX` (y no los mueve a pestañas, spam u otras carpetas) para la revisión de la casilla? [Assumption, PRD RF-99, research R-08]
-- [ ] CHK042 ¿Están documentados los límites de tamaño de adjunto aceptados por el LLM y qué pasa con un comprobante que los supera (hoy terminaría en "no se pudo procesar el comprobante" por un 413)? [Dependency, Edge Case, PRD RNF-02, RF-130]
+- [x] CHK040 ¿Está documentado qué pasa si dolarhoy.com cambia su formato de forma permanente: el sistema usaría la última cotización indefinidamente; hay un límite de antigüedad para la cotización de respaldo? [Assumption, Gap, PRD RF-66, RF-67, Riesgos]
+- [x] CHK041 ¿Está validado el supuesto de que Gmail conserva todos los emails en `INBOX` (y no los mueve a pestañas, spam u otras carpetas) para la revisión de la casilla? [Assumption, PRD RF-99, research R-08]
+- [x] CHK042 ¿Están documentados los límites de tamaño de adjunto aceptados por el LLM y qué pasa con un comprobante que los supera (hoy terminaría en "no se pudo procesar el comprobante" por un 413)? [Dependency, Edge Case, PRD RNF-02, RF-130]
 
 ## Notes
 
@@ -87,4 +87,5 @@ Audiencia: autor del PRD. Cada ítem pregunta si el requisito está bien escrito
 - `/speckit-implement` reads checklist checkbox state as a gate and must not modify markers
 - `checklists/requirements.md` has a separate built-in lifecycle maintained by `/speckit-specify` and `/speckit-clarify`
 - Si un ítem revela un hueco real, decidir la respuesta, corregir primero `PRD.md` y luego el spec, y recién entonces marcarlo
+- Revisión del 2026-10-20: el autor aprobó las recomendaciones; las respuestas están en `PRD.md` y en la sección Clarifications del spec. CHK031 se resolvió con `APP_URL` (RF-24, AC-251).
 - Ítems con mayor riesgo de rework: CHK001, CHK002, CHK012, CHK013, CHK016, CHK030 y CHK032

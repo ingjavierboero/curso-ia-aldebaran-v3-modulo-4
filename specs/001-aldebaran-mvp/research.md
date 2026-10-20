@@ -41,12 +41,14 @@ comportamiento definido en `PRD.md`; solo fijan el cómo.
 
 - **Decision**: node-cron ejecuta un `tick()` cada minuto. Cada tick evalúa, con el reloj de Argentina
   y el estado persistido:
-  - **Facturación**: si el período del mes en curso no está cancelado, no está `completado` y
-    (hoy ≥ 15 y hora ≥ hora de facturación) o el período quedó `en_curso` → ejecutar o retomar
-    (RF-51 a RF-53, RF-57, RF-59). Un período de un mes anterior nunca se factura (RF-52).
-  - **Recordatorios**: si es el último día del mes, hora ≥ hora de recordatorios y no hay corrida
-    registrada para ese mes → ejecutar (RF-149). No hay recuperación de días perdidos (Fuera de
-    Alcance).
+  - **Facturación**: si el período del mes en curso no está cancelado ni `completado` y
+    (día > 15, o día = 15 y hora ≥ hora de facturación) → ejecutar (RF-51, RF-52, RF-57, RF-59);
+    así, si el sistema vuelve el 17 a las 09:00, arranca en ese mismo tick (AC-53). Un período que
+    quedó `en_curso` se retoma siempre, aunque ya sea el mes siguiente (RF-53). Un período de un mes
+    anterior que nunca empezó no se factura (RF-52).
+  - **Recordatorios**: si es el último día del mes, hora ≥ hora de recordatorios y la corrida del mes
+    no terminó → ejecutar o retomar, enviando solo a los clientes sin recordatorio automático de ese
+    mes en `sent_emails` (RF-149, AC-246). Al día siguiente nunca se retoma (Fuera de Alcance).
   - **Casilla**: si no hay una revisión en curso y pasaron ≥ N minutos desde el inicio de la anterior
     → revisar (RF-99 a RF-102).
   - **Reintentos**: ejecutar las operaciones de `retry_queue` vencidas (RF-171).
@@ -66,6 +68,17 @@ comportamiento definido en `PRD.md`; solo fijan el cómo.
   importe, fecha), registra ese CAE; si no existe, vuelve a pedir el CAE. La factura pasa a
   `pendiente_de_pago` solo con CAE. En mock, el número es el siguiente en la base mock por punto de
   venta y el CAE son 14 dígitos aleatorios con vencimiento a 10 días (RF-186).
+- **Serialización**: todo pedido de número y de CAE (corrida, cola de reintentos y reintento manual)
+  pasa por un único candado por punto de venta, así que nunca hay dos solicitudes en paralelo.
+- **Liberación del número**: si `findVoucher` confirma que ARCA no autorizó el número reservado, la
+  factura `generando` lo libera (`number = null`) y el próximo intento consulta de nuevo
+  `FECompUltimoAutorizado`; así una factura fallida nunca bloquea la numeración de las siguientes.
+- **Datos del reintento**: mientras ARCA no haya autorizado el comprobante, cada intento recalcula los
+  ítems, la cotización y los datos del cliente vigentes (RF-171); si ya lo autorizó, se registra la
+  factura con los datos guardados de la solicitud autorizada.
+- **Rechazos**: una respuesta de ARCA con resultado rechazado (errores u observaciones de validación)
+  libera el número y no se encola: genera el error de proceso de inmediato con el mensaje de ARCA
+  (RF-171, AC-247).
 - **Rationale**: asegura un solo comprobante por factura aunque la respuesta se pierda (AC-73).
 - **Alternatives considered**: reintentar `FECAESolicitar` a ciegas (duplica comprobantes).
 
@@ -96,7 +109,10 @@ comportamiento definido en `PRD.md`; solo fijan el cómo.
   configura con `maxRetries: 0` y `timeout: 10_000`; la política de RNF-02 (reintentos a 2/4/8 s,
   códigos que se reintentan y los que no) se implementa en `adapters/llm/retry-policy.ts`, testeada
   con relojes falsos (AC-116 a AC-118). El prompt indica tomar el CUIT del ordenante, nunca el del
-  beneficiario (RF-121); el dominio descarta CUIT que no tengan 11 dígitos (RF-122).
+  beneficiario (RF-121) y clasificar como "dudoso" los pagos en una moneda distinta del peso
+  (RF-119, AC-244); el dominio descarta CUIT que no tengan 11 dígitos (RF-122). Los adjuntos de un
+  mismo email se clasifican en paralelo, para que el peor caso de un email siga siendo el de un
+  adjunto (54 s, RNF-01).
 - **Rationale**: salida estructurada evita parseos frágiles; la política propia cumple los tiempos
   exactos de RNF-02.
 - **Alternatives considered**: reintentos del SDK (no permiten fijar 2/4/8 s ni la lista exacta de
@@ -109,8 +125,9 @@ comportamiento definido en `PRD.md`; solo fijan el cómo.
     fantasía o la razón social (RF-215); timeout 30 s. `EMAIL_REDIRECT_TO` (solo desarrollo)
     reemplaza el destinatario.
   - **Lectura**: imapflow sobre `INBOX`, búsqueda `SINCE` desde la fecha de corte (primera factura o
-    inicio de la revisión anterior, con un día de margen) y deduplicación por `Message-ID` en la tabla
-    `received_emails` (RF-107 a RF-109). Se consideran adjuntos las partes con
+    inicio de la revisión anterior, con un día de margen), deduplicación por `Message-ID` en la tabla
+    `received_emails` y procesamiento en orden de fecha de recepción (RF-107 a RF-109, AC-243). Solo
+    se revisa `INBOX` (supuesto documentado en los Riesgos del PRD). Se consideran adjuntos las partes con
     `Content-Disposition: attachment` y tipo JPEG, PNG, GIF, WebP o PDF; las partes `inline` con
     `Content-ID` son imágenes embebidas y se ignoran (RF-116, RF-117).
   - **Mock**: la casilla simulada es la tabla `simulated_emails`; `mock-mailbox.ts` la lee como si
@@ -142,7 +159,10 @@ comportamiento definido en `PRD.md`; solo fijan el cómo.
 
 - **Decision**: tabla `sessions` con token aleatorio de 32 bytes (se guarda su SHA-256) en cookie
   `HttpOnly`, `SameSite=Lax`; vencimiento deslizante de 24 h desde la última actividad (RNF-10);
-  cerrar sesión borra la fila (AC-02). Contraseñas con bcrypt costo 12 (RNF-09). Los tokens de
+  cerrar sesión borra la fila (AC-02); la baja de un usuario borra todas sus sesiones y el cambio de
+  contraseña borra las demás (RF-18, RF-21, AC-249). La URL de recuperación se arma con `APP_URL`
+  (por defecto `http://localhost:5173`) y nunca con el header `Host`, para evitar el envenenamiento
+  del link (RF-24, AC-251). Contraseñas con bcrypt costo 12 (RNF-09). Los tokens de
   recuperación también se guardan hasheados, vencen a los 10 min y se invalidan al usarse o al emitir
   uno nuevo (RF-26 a RF-28). Los cambios de perfil se aplican en la siguiente solicitud porque el
   perfil se lee de la base en cada request (AC-17).
@@ -158,7 +178,11 @@ comportamiento definido en `PRD.md`; solo fijan el cómo.
   corre en línea; si falla, se encola con la espera configurada y el proceso sigue con el siguiente
   cliente (RF-85, RF-87). Al agotar los reintentos se crea el `process_error` Pendiente (RF-174).
   La revisión de la casilla no usa la cola: falla → error Pendiente único y reintento en el siguiente
-  intervalo (RF-103, RF-104). Las acciones de usuario no se encolan (RF-183).
+  intervalo (RF-103, RF-104). Las acciones de usuario no se encolan (RF-183). Tras un reinicio, la cola se
+  retoma con el número de intento guardado. Antes de ejecutar un reintento de recordatorio se
+  revalida al cliente: si ya no tiene deuda, está en revisión o está Inactivo, se cancela sin error y
+  se registra en el historial (RF-171, AC-247). Los rechazos de validación de ARCA no se encolan
+  (R-05).
 - **Rationale**: los reintentos sobreviven a reinicios y no bloquean el proceso.
 - **Alternatives considered**: `setTimeout` en memoria (se pierden al reiniciar).
 
@@ -188,10 +212,12 @@ adicionales).
   (RNF-07) y extrae el valor "Venta" del bloque "Dólar Blue"; devuelve centavos o falla. Se usa
   también en mock, como fija el PRD. Cada lectura exitosa se guarda en `exchange_rates`; ante una
   falla se usa la de `read_at` más reciente y se marca el banner (RF-65 a RF-69). La cotización se lee
-  una vez por proceso de facturación y se reutiliza para todos los clientes de esa corrida.
-- **Rationale**: es la fuente del PRD; leerla una vez por corrida evita 50 descargas y da el mismo
-  valor a todas las facturas del mes.
-- **Alternatives considered**: APIs de terceros (no son la fuente que fija el PRD).
+  en el momento de generar cada factura que tiene ítems en dólares, también en reintentos
+  automáticos y manuales (RF-63, AC-241).
+- **Rationale**: es lo que fija RF-63. Con 50 clientes en dólares son hasta 50 lecturas de ≤ 10 s, lo
+  que entra en RNF-03.
+- **Alternatives considered**: APIs de terceros (no son la fuente que fija el PRD); una lectura por
+  corrida (descartada el 2026-10-20: contradice RF-63).
 
 ## R-14 · Concurrencia en la interfaz de revisión (RF-218)
 

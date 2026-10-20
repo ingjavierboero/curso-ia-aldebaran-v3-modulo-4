@@ -57,7 +57,7 @@ clientes en ≤ 20 min sin contar reintentos (RNF-03 a RNF-06).
 código; modo mock sin ninguna otra variable de entorno.
 
 **Scale/Scope**: volumen de referencia de 50 clientes, 2 productos por cliente, 10 productos; un
-puñado de usuarios; ~15 pantallas; 218 RF y 240 AC.
+puñado de usuarios; ~15 pantallas; 220 RF y 251 AC.
 
 ## Constitution Check
 

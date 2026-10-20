@@ -16,6 +16,9 @@
 > discrepancia entre este documento y el PRD, prevalece el PRD y la diferencia se deriva a un humano
 > (Principio III).
 
+> **Terminología de modos**: lo que el PRD llama "modo real" es, en el MVP, el modo **homologación**
+> de la Constitución (Principio V); el modo producción no existe en el MVP.
+
 ## Clarifications
 
 ### Session 2026-10-19
@@ -35,6 +38,22 @@
 - Q: Al reenviar el email de una factura tras una falla, ¿la deuda vigente total se recalcula? → A: Sí,
   se calcula en cada intento de envío; la factura y su PDF no cambian (se amplió RF-88 en `PRD.md`).
 
+### Session 2026-10-20
+
+- Q: ¿Qué cotización usa cada facturación? → A: La leída en el momento de generar cada factura,
+  también en reintentos (RF-63, AC-241).
+- Q: ¿Qué leyendas lleva una factura en modo mock? → A: La de modo mock y además la de homologación
+  (RF-210, AC-207).
+- Q: Resolución del checklist `gate-requisitos.md` → A: se aprobaron las recomendaciones: orden de
+  emails por fecha (RF-108), moneda distinta del peso → "dudoso" (RF-119), asociación de emails
+  (RF-139), retención sin límite y sin auditoría de configuración (Fuera de Alcance), datos del
+  emisor faltantes (RF-219), rechazo de ARCA sin reintento y datos vigentes en reintentos (RF-171),
+  bloqueo del reintento manual (RF-177), email "dentro del minuto" (RF-85), retomar el período en el
+  mes siguiente (RF-53), recordatorios retomados el mismo día (RF-149), cierre de sesiones (RF-18,
+  RF-21), indicador de redirección (RF-220), medición de RNF-03/RNF-04 y nuevos riesgos y supuestos.
+- Q: ¿De dónde sale la dirección de la URL de recuperación? → A: De la variable `APP_URL` (por
+  defecto `http://localhost:5173`), nunca del header Host (RF-24, AC-251).
+
 ## User Scenarios & Testing *(mandatory)*
 
 Personas (PRD, "Personas"): **Admin** (hoy el único usuario), **Editor** y **Consulta** (perfiles
@@ -53,7 +72,7 @@ pantalla (RF-01); es la base de todas las demás historias.
 **Independent Test**: con el sistema vacío, registrar el primer Admin, crear un Editor y un
 Consulta, y verificar con cada uno qué pantallas y acciones quedan permitidas o rechazadas.
 
-**Acceptance Scenarios** (completos: AC-01 a AC-33, AC-211 a AC-218, AC-222 a AC-224):
+**Acceptance Scenarios** (completos: AC-01 a AC-33, AC-211 a AC-218, AC-222 a AC-224 y AC-249 a AC-251):
 
 1. **Given** el sistema sin usuarios, **When** se registra el primer usuario con una contraseña de
    7 caracteres, **Then** se rechaza; con 8 caracteres queda Activo con perfil Admin (AC-03).
@@ -111,7 +130,7 @@ facturas generadas y enviadas cada mes).
 "Facturar ahora") y verificar facturas, numeración, PDF, emails, ausencia de duplicados y casos
 excluidos.
 
-**Acceptance Scenarios** (completos: AC-51 a AC-91 y AC-237):
+**Acceptance Scenarios** (completos: AC-51 a AC-91, AC-237, AC-241 y AC-242):
 
 1. **Given** el día 15 a la hora de facturación (11:00 por defecto, hora de Argentina), **When** el
    agente ejecuta el proceso, **Then** se genera una factura por cada cliente facturable, en estado
@@ -145,7 +164,7 @@ controlados por el sistema) y el que más reduce el trabajo manual.
 **Independent Test**: con facturas adeudadas cargadas, inyectar emails con distintos adjuntos (con
 el LLM y la casilla simulados) y verificar el estado final y el motivo de cada factura.
 
-**Acceptance Scenarios** (completos: AC-92 a AC-108, AC-112 a AC-143, AC-230 y AC-231; AC-109 a
+**Acceptance Scenarios** (completos: AC-92 a AC-108, AC-112 a AC-143, AC-230, AC-231 y AC-243 a AC-245; AC-109 a
 AC-111 se verifican fuera de la suite automática):
 
 1. **Given** un cliente con una sola factura adeudada, **When** llega un comprobante "si" con su
@@ -206,7 +225,7 @@ pagos) funciona sin ella.
 **Independent Test**: con clientes en distintas situaciones de deuda, ejecutar el proceso de fin de
 mes y el envío manual y verificar quién recibe recordatorio y con qué contenido.
 
-**Acceptance Scenarios** (completos: AC-154 a AC-164, AC-88 y AC-89):
+**Acceptance Scenarios** (completos: AC-154 a AC-164, AC-88, AC-89 y AC-246):
 
 1. **Given** un cliente Activo con deuda vigente que no está en revisión, **When** se ejecuta el
    proceso de fin de mes, **Then** recibe un único recordatorio, registrado en su historial (AC-154).
@@ -231,7 +250,7 @@ pasan inadvertidas, pero el circuito feliz funciona.
 **Independent Test**: simular fallas de ARCA y del email y verificar intentos, esperas, registro del
 error, reintento manual y banner.
 
-**Acceptance Scenarios** (completos: AC-178 a AC-194):
+**Acceptance Scenarios** (completos: AC-178 a AC-194, AC-247 y AC-248):
 
 1. **Given** la configuración por defecto y ARCA sin responder, **When** se genera una factura,
    **Then** se hacen 4 intentos con 5 minutos (±1) de espera y se registra un error de proceso
@@ -346,8 +365,8 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   operación, salvo inicio de sesión, recuperación de contraseña, cambio de contraseña con token y,
   mientras no exista ningún usuario, el registro del primer Admin, que se deshabilita en cuanto
   existe un usuario.
-- **FR-002** (RF-02, RF-03, RNF-10): El sistema MUST permitir iniciar sesión con email y contraseña
-  solo a usuarios Activos, cerrar sesión y expirar la sesión tras 24 h de inactividad.
+- **FR-002** (RF-02, RF-03, RNF-10, RF-18, RF-21): El sistema MUST permitir iniciar sesión con email y contraseña
+  solo a usuarios Activos, cerrar sesión y expirar la sesión tras 24 h de inactividad. La baja de un usuario MUST cerrar todas sus sesiones y el cambio de contraseña MUST cerrar las demás sesiones del usuario.
 - **FR-003** (RF-06 a RF-13): El sistema MUST aplicar los permisos de cada perfil: Admin ve y hace
   todo; Editor ve todo salvo datos de usuarios y hace todo salvo gestionar usuarios, modificar la
   configuración, cancelar o reactivar períodos y "Facturar ahora"; Consulta ve lo mismo que Editor
@@ -364,7 +383,7 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-007** (RF-23 a RF-33): El sistema MUST ofrecer recuperación de contraseña por email con un
   token que vence a los 10 minutos, se invalida al usarse o al emitirse uno nuevo, se valida al
   abrir la URL y al confirmar, muestra el mismo mensaje exista o no el usuario, y ante un token
-  inválido muestra un error y redirige al inicio de sesión a los 5 segundos.
+  inválido muestra un error y redirige al inicio de sesión a los 5 segundos. La URL del email MUST armarse con `APP_URL` (por defecto `http://localhost:5173`) y nunca con datos de la solicitud.
 - **FR-008** (RNF-09): Las contraseñas MUST almacenarse solo como hash seguro (bcrypt con costo ≥ 12
   o argon2id), nunca en texto plano.
 
@@ -388,7 +407,7 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-013** (RF-52, RF-53, RF-59, RF-74, RF-75, RF-76): El agente MUST facturar el período al volver
   a funcionar si estaba detenido el día 15 (solo dentro del mismo mes), retomar procesos
   interrumpidos y garantizar una sola factura por cliente y período y un solo comprobante en ARCA
-  por factura, registrando el número y CAE ya otorgados si la respuesta se perdió.
+  por factura, registrando el número y CAE ya otorgados si la respuesta se perdió. Un proceso interrumpido MUST retomarse aunque ya haya empezado el mes siguiente, con las fechas de RF-79 a RF-81.
 - **FR-014** (RF-54 a RF-61): Un Admin MUST poder cancelar la facturación del mes en curso antes de
   que empiece, reactivarla mientras siga siendo ese mes (facturando de inmediato si ya pasó la
   hora del día 15) y ejecutar "Facturar ahora" con las mismas reglas; el botón MUST deshabilitarse
@@ -403,7 +422,7 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   la cotización del dólar blue venta de dolarhoy.com al facturar, redondeando cada cuota al
   centavo; registrar cada cotización leída; usar la última registrada si el sitio no responde
   (mostrando el banner de cotización, que un Admin o Editor confirma); y no facturar a clientes con
-  productos en dólares si no hay ninguna cotización.
+  productos en dólares si no hay ninguna cotización. La cotización MUST leerse en el momento de generar cada factura, también en reintentos automáticos y manuales.
 - **FR-017** (RF-77 a RF-83): El agente MUST informar y registrar en cada factura la condición frente
   al IVA vigente del cliente, asignar fecha de emisión, período de servicio y vencimiento según
   RF-79 a RF-81, y no facturar (registrando un fallo con el mensaje de RF-83) a un cliente sin
@@ -414,7 +433,7 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   (RF-90), los datos de la empresa emisora y, como remitente y firma, su nombre de fantasía o, si no
   existe, su razón social; un reintento de envío MUST NOT regenerar la factura. La deuda vigente
   total del email MUST calcularse en cada intento de envío (automático o manual), sin modificar la
-  factura ni su PDF.
+  factura ni su PDF. El email MUST enviarse dentro del minuto siguiente a la generación de la factura.
 - **FR-019** (RF-96): El sistema MUST NOT enviar ningún email a un cliente Inactivo.
 - **FR-020** (RF-97, RF-98): El sistema MUST mostrar el banner de certificado mientras el certificado
   de ARCA esté vencido o ilegible (no se puede facturar) o falten 30 días o menos para su
@@ -435,11 +454,11 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   sin distinguir mayúsculas, registrar como aviso Pendiente los de remitentes desconocidos,
   registrar en el historial del cliente cada email suyo y considerar posible comprobante solo los
   emails con al menos un adjunto de imagen (JPEG, PNG, GIF, WebP) o PDF no embebido, procesando
-  igual a clientes Activos e Inactivos.
+  igual a clientes Activos e Inactivos. Los emails de cada revisión MUST procesarse en orden de fecha de recepción, del más antiguo al más reciente.
 - **FR-023** (RF-119 a RF-125, RNF-02): El agente MUST clasificar cada adjunto con un LLM como "si",
   "no" o "dudoso", extraer de cada comprobante el CUIT del ordenante (11 dígitos, comparado solo por
   sus dígitos) y el monto, reintentar las fallas del LLM según RNF-02, asignar la clasificación del
-  email según el orden de RF-123 y registrar el resultado completo en el historial del cliente.
+  email según el orden de RF-123 y registrar el resultado completo en el historial del cliente. Un comprobante de un pago en una moneda distinta del peso MUST clasificarse como "dudoso".
 - **FR-024** (RF-126 a RF-137): El agente MUST aplicar a cada email con adjunto exactamente una de
   las reglas excluyentes RF-126 a RF-137, pasando a Pago recibido solo las facturas de la única
   coincidencia de monto o de la combinación más antigua, y a Revisión manual las facturas adeudadas
@@ -447,7 +466,7 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-025** (RF-138 a RF-140, RNF-13): El agente MUST registrar el motivo de cada pase a Revisión
   manual, asociar los emails nuevos a la revisión manual pendiente del cliente y evaluar las
   coincidencias de monto al centavo exacto; el motivo MUST dejar de mostrarse cuando la factura sale
-  de Revisión manual.
+  de Revisión manual. Todo email que dispara un cambio de estado (RF-128 a RF-137) MUST quedar asociado a cada factura afectada.
 - **FR-026** (Constitución, Principio III; PRD, definición de "Pagada"): El agente MUST NOT pasar
   nunca una factura a Pagada.
 
@@ -463,12 +482,17 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-047** (RF-218): Si al cambiar el estado de una factura esta ya no está en el estado que el
   usuario vio (porque la cambió el agente u otro usuario), el sistema MUST rechazar la acción,
   mostrar un mensaje y actualizar la pantalla con el estado vigente.
+- **FR-048** (RF-219): Si faltan los datos obligatorios de la empresa emisora o el punto de venta, el
+  agente MUST NOT generar la factura ni llamar a ARCA y MUST tratar la generación como fallida con el
+  mensaje "faltan los datos de la empresa emisora o el punto de venta".
+- **FR-049** (RF-220): Mientras la redirección de emails esté activa, el header MUST mostrar
+  "Emails redirigidos a <dirección>".
 
 **Recordatorios y dashboard**
 
 - **FR-029** (RF-149 a RF-152, RF-155): El agente MUST enviar el último día del mes, a la hora de
   recordatorios, un recordatorio a cada cliente Activo con deuda vigente que no está en revisión,
-  detallando cada factura adeudada y el total, y pidiendo responder con el comprobante.
+  detallando cada factura adeudada y el total, y pidiendo responder con el comprobante. Si el proceso se interrumpe, MUST retomarse ese mismo día solo para los clientes que no recibieron el recordatorio, nunca al día siguiente.
 - **FR-030** (RF-153, RF-154, RF-156, RF-157): El dashboard MUST listar los clientes con deuda vigente
   (razón social, deuda total, cantidad de facturas adeudadas, si está en revisión) y permitir el
   recordatorio manual, bloqueándolo para clientes sin deuda vigente, en revisión o Inactivos.
@@ -490,11 +514,11 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-034** (RF-171 a RF-174): El agente MUST reintentar las generaciones de factura, envíos de
   factura y recordatorios automáticos fallidos según la configuración (3 reintentos y 5 min por
   defecto) y, si siguen fallando, registrar un error de proceso Pendiente con operación, intentos,
-  último mensaje y, cuando corresponda, cliente y período.
-- **FR-035** (RF-176 a RF-181): Un Admin o Editor MUST poder reintentar manualmente un error de
+  último mensaje y, cuando corresponda, cliente y período. Un rechazo de validación de ARCA MUST NOT reintentarse automáticamente y registra el error de inmediato con el mensaje de ARCA; cada reintento de generación MUST usar los datos vigentes (cliente, productos, precios y cotización) salvo que ARCA ya haya autorizado el comprobante; un reintento automático de recordatorio cuyo cliente ya no corresponde MUST cancelarse sin error de proceso y quedar en el historial.
+- **FR-035** (RF-176 a RF-181, RF-177): Un Admin o Editor MUST poder reintentar manualmente un error de
   proceso Pendiente con un único intento (regenerando y enviando la factura o reenviando solo el
   email, según la operación) o marcarlo como Resuelto; el dashboard MUST mostrar el banner de
-  errores con la cantidad de errores Pendientes.
+  errores con la cantidad de errores Pendientes. El reintento manual de una generación MUST bloquearse con un mensaje, dejando el error Pendiente, si el cliente está Inactivo o sin productos Activos.
 - **FR-046** (RF-178): El reintento manual de un recordatorio MUST armarse con las facturas adeudadas
   y la deuda vigente del cliente al momento del reintento, y MUST bloquearse (mostrando un mensaje y
   dejando el error de proceso Pendiente) si el cliente no tiene deuda vigente, está en revisión o
@@ -517,7 +541,7 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-039** (RF-205 a RF-210): En modo mock el sistema MUST arrancar con MOCK_MODE como única
   variable, usar 20111111112 como CUIT emisor y ejecutar los procesos automáticos si no se indica
   otra cosa, ocultar el banner de certificado, mostrar el indicador de modo mock en el header y
-  marcar cada PDF y email como simulados.
+  marcar cada PDF y email como simulados. El PDF y el email de cada factura MUST llevar además la leyenda de homologación (RF-90).
 - **FR-040** (RF-211 a RF-213): Los datos del modo mock y los del modo real MUST mantenerse en bases
   separadas, y fuera del modo mock el sistema MUST negarse a arrancar si se le indica usar la base
   del modo mock.
@@ -583,7 +607,7 @@ Los criterios de aceptación transversales de FR-041 a FR-045 son AC-225 a AC-22
 - **SC-004** (RNF-01): el p95 del tiempo entre la detección de un email de respuesta y el registro de
   su resultado es menor a 60 segundos (AC-232).
 - **SC-005** (RNF-03 a RNF-06): con 50 clientes, la facturación mensual completa y los recordatorios
-  de fin de mes terminan cada uno en 20 minutos o menos, sin contar reintentos (AC-233, AC-234).
+  de fin de mes terminan cada uno en 20 minutos o menos, medidos hasta el primer intento con cada cliente y sin contar reintentos (AC-233, AC-234).
 - **SC-006** (RNF-14): la clasificación de adjuntos acierta en al menos el 95 % de cada clase y
   ningún comprobante legible se clasifica como "no" (AC-109 a AC-111).
 - **SC-007** (Objetivos; FR-026): el 0 % de las facturas pasa a Pagada sin la decisión de un usuario;
@@ -614,3 +638,6 @@ Los criterios de aceptación transversales de FR-041 a FR-045 son AC-225 a AC-22
 - Riesgos aceptados por el PRD: el crecimiento exponencial de la búsqueda de coincidencias con muchas
   facturas adeudadas y los requisitos de ARCA para el PDF productivo (QR RG 4892), que se resolverán
   antes de pasar a producción.
+- Riesgos aceptados agregados el 2026-10-20: un comprobante reenviado puede imputarse a otra factura
+  del mismo monto (lo frena la revisión humana de Pago recibido), y solo se revisa la carpeta INBOX
+  de la casilla.
