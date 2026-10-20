@@ -1,0 +1,13 @@
+# Secretos (Constitución IV): nunca se versionan
+.env
+certs/
+*.crt
+*.key
+*.pem
+
+# Bases SQLite locales (modo real y modo mock)
+data/
+
+# Dependencias y builds
+node_modules/
+dist/

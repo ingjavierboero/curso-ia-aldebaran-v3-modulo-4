@@ -39,7 +39,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 **Purpose**: monorepo, dependencias aprobadas y herramientas de test
 
 - [X] T001 Crear `package.json` raíz con workspaces `server` y `web` y los scripts `dev`, `dev:mock` (`MOCK_MODE=true`), `test`, `db:reset:mock` (borra `data/aldebaran-mock.db`) y `test:coverage-ac`, todos con `TZ=America/Argentina/Buenos_Aires` (plan.md, R-03)
-- [ ] T002 [P] Crear `.gitignore` con `.env`, `data/`, `certs/`, `*.crt`, `*.key`, `*.pem`, `node_modules/`, `dist/` (Constitución IV)
+- [X] T002 [P] Crear `.gitignore` con `.env`, `data/`, `certs/`, `*.crt`, `*.key`, `*.pem`, `node_modules/`, `dist/` (Constitución IV)
 - [ ] T003 [P] Crear `.env.example` con `ANTHROPIC_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `ARCA_CUIT`, `ARCA_CERT_PATH`, `ARCA_KEY_PATH`, `PORT`, `DATABASE_PATH`, `SCHEDULER_ENABLED`, `EMAIL_REDIRECT_TO`, `APP_URL`, `MOCK_MODE`, con valores de ejemplo no sensibles y un comentario por variable
 - [ ] T004 [P] Crear `server/package.json` y `server/tsconfig.json` (ESM, `strict`) con Express 5, drizzle-orm 0.45, better-sqlite3, drizzle-kit, @anthropic-ai/sdk, nodemailer, imapflow, node-cron, zod, bcrypt, pdfkit, node-forge, cheerio, fast-xml-parser y, en dev, vitest y supertest (research R-12)
 - [ ] T005 [P] Crear `web/package.json`, `web/tsconfig.json`, `web/vite.config.ts` (proxy `/api` → server) e `web/index.html` con React 19, Vite 8, antd 6, zustand 5, styled-components 6, react-router 8 y, en dev, vitest, @testing-library/react y jsdom; alias `@api-types` → `server/src/http/types.ts` (plan.md, Structure Decision)
