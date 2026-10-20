@@ -30,6 +30,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - **Casilla del sistema**: la casilla de email propia del sistema (GMAIL_USER; en modo mock, aldebaran-mock@gmail.com), desde la que se envían los emails y en la que se reciben las respuestas de los clientes.
 - **Modo mock**: modo de funcionamiento que se activa con la variable de entorno MOCK_MODE=true, en el que el sistema simula ARCA, el LLM y el email (SMTP e IMAP) y trabaja sobre una base de datos propia, separada de la del modo real. Con cualquier otro valor, o sin la variable, el sistema usa los servicios reales.
 - **Casilla simulada**: en modo mock, reemplaza a la casilla del sistema: guarda los emails que el sistema envía y los emails recibidos que carga un usuario.
+- **Redirección de emails**: modo de desarrollo que se activa con la variable de entorno EMAIL_REDIRECT_TO; mientras está definida, el sistema envía todos los emails a esa dirección en lugar de al destinatario original.
 - Factura:
   - **Pendiente de pago**: la factura fue generada, o un usuario la devolvió a este estado, y no tiene un comprobante válido. El agente sigue buscando su pago en la casilla.
   - **Pago recibido**: el agente validó un comprobante que cubre la factura; espera que un usuario lo analice.
@@ -76,15 +77,15 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-15: El sistema no debe permitir dar de alta ni modificar un usuario con un email que ya tiene otro usuario, sin distinguir mayúsculas de minúsculas.
 - RF-16: El sistema debe permitir a un Admin modificar el nombre y el email de un usuario.
 - RF-17: El sistema debe permitir a un Admin modificar el perfil de un usuario.
-- RF-18: El sistema debe permitir a un Admin dar de baja un usuario, que pasa a estado Inactivo.
+- RF-18: El sistema debe permitir a un Admin dar de baja un usuario, que pasa a estado Inactivo, y debe cerrar todas sus sesiones abiertas.
 - RF-19: El sistema debe permitir a un Admin reactivar un usuario Inactivo, que pasa a estado Activo.
 - RF-20: El sistema debe rechazar cualquier acción que deje al sistema sin ningún usuario Admin Activo (dar de baja al único Admin Activo o cambiarle el perfil).
 
 ### Contraseñas
-- RF-21: El sistema debe permitir a un usuario autenticado de cualquier perfil cambiar su propia contraseña desde su perfil, ingresando la contraseña actual y la nueva.
+- RF-21: El sistema debe permitir a un usuario autenticado de cualquier perfil cambiar su propia contraseña desde su perfil, ingresando la contraseña actual y la nueva; al cambiarla, el sistema debe cerrar las demás sesiones abiertas de ese usuario.
 - RF-22: El sistema debe rechazar cualquier contraseña de menos de 8 caracteres, tanto al registrar el primer Admin y al dar de alta un usuario como al cambiar la contraseña desde el perfil o desde la recuperación.
 - RF-23: El sistema debe permitir solicitar la recuperación de la contraseña desde la pantalla de inicio de sesión, ingresando el email del usuario.
-- RF-24: Cuando se solicita la recuperación para el email de un usuario Activo, el sistema debe enviarle un email con una URL que contiene un token de recuperación.
+- RF-24: Cuando se solicita la recuperación para el email de un usuario Activo, el sistema debe enviarle un email con una URL que contiene un token de recuperación. La URL se arma con la dirección de la aplicación configurada en la variable de entorno APP_URL (por defecto http://localhost:5173), nunca con datos de la solicitud recibida.
 - RF-25: Al solicitar la recuperación, el sistema debe mostrar el mismo mensaje de confirmación tanto si el email corresponde a un usuario Activo como si no.
 - RF-26: El sistema debe invalidar el token de recuperación a los 10 minutos del envío del email.
 - RF-27: El sistema debe invalidar el token de recuperación una vez que se usó para cambiar la contraseña.
@@ -119,7 +120,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 ### Facturación
 - RF-51: El agente debe generar el día 15 de cada mes, a la hora de facturación (11:00 por defecto), contra el ambiente de homologación de ARCA, una factura C por cada cliente Activo con al menos un producto Activo asignado, con el detalle de la cuota mensual de cada producto Activo asignado.
 - RF-52: Si el sistema no estaba en funcionamiento el día 15 a la hora de facturación, el agente debe ejecutar el proceso de facturación del período apenas vuelva a funcionar, siempre que sea dentro del mismo mes.
-- RF-53: Si el proceso de facturación de un período quedó interrumpido (por ejemplo, por un reinicio del sistema), el agente debe retomarlo apenas vuelva a funcionar, sin generar facturas duplicadas (RF-74, RF-75).
+- RF-53: Si el proceso de facturación de un período quedó interrumpido (por ejemplo, por un reinicio del sistema), el agente debe retomarlo apenas vuelva a funcionar, sin generar facturas duplicadas (RF-74, RF-75). Lo debe retomar aunque ya haya empezado el mes siguiente, completando el período interrumpido con las fechas de RF-79 a RF-81.
 - RF-54: El sistema debe permitir a un Admin cancelar la facturación del período del mes en curso mientras el proceso de facturación de ese período no haya empezado.
 - RF-55: El agente no debe ejecutar el proceso de facturación de un período cancelado, aunque se cumplan las condiciones de RF-51 o RF-52.
 - RF-56: El sistema debe permitir a un Admin reactivar la facturación de un período cancelado mientras siga siendo el mes de ese período.
@@ -129,7 +130,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-60: Mientras el período del mes en curso esté cancelado, el sistema debe deshabilitar el botón "Facturar ahora" e indicar que está deshabilitado porque la facturación del mes está cancelada.
 - RF-61: Mientras el proceso de facturación del período del mes en curso esté en ejecución, o una vez que terminó (se intentó generar la factura de todos los clientes facturables), el sistema debe deshabilitar el botón "Facturar ahora" e indicar el motivo: "facturación en curso" o "facturación del mes ya realizada".
 - RF-62: El sistema debe permitir a un Admin configurar la hora de facturación con un valor entre 00:00 y 23:59.
-- RF-63: Si un producto tiene el precio fijado en dólares, el agente debe facturarlo en pesos usando la cotización del dólar blue venta publicada en dolarhoy.com al momento de facturar.
+- RF-63: Si un producto tiene el precio fijado en dólares, el agente debe facturarlo en pesos usando la cotización del dólar blue venta publicada en dolarhoy.com, leída en el momento de generar cada factura, ya sea en el proceso automático, en "Facturar ahora", en un reintento automático o en un reintento manual.
 - RF-64: Al facturar en pesos un producto con precio en dólares (RF-63), el agente debe redondear el importe en pesos de esa cuota al centavo más cercano.
 - RF-65: El agente debe registrar, con su valor, fuente y fecha de lectura, cada cotización que lee de dolarhoy.com.
 - RF-66: Para RF-67, el agente debe tomar como última cotización registrada la de fecha de lectura más reciente.
@@ -150,8 +151,9 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-81: El agente debe asignar como fecha de vencimiento del pago de la factura el último día del mes del período facturado o, si la factura se genera después de ese día (por ejemplo, en un reintento manual), la fecha de emisión.
 - RF-82: Si un cliente no tiene cargada la condición frente al IVA (por ejemplo, un cliente registrado antes de que existiera ese dato), el agente no debe generar su factura.
 - RF-83: Cuando se aplica RF-82, el agente debe tratar la generación como fallida (RF-171 y RF-174) con el mensaje "el cliente no tiene cargada la condición frente al IVA".
+- RF-219: Si al generar la factura de un cliente faltan los datos obligatorios de la empresa emisora (RF-91) o el punto de venta (RF-73), el agente no debe generar la factura ni llamar a ARCA, y debe tratar la generación como fallida (RF-171 y RF-174) con el mensaje "faltan los datos de la empresa emisora o el punto de venta".
 - RF-84: Una vez generada la factura, el agente debe enviarla por email, como archivo PDF adjunto (RF-93), al email de facturación del cliente, informando que tiene una deuda pendiente.
-- RF-85: El agente debe enviar el email de cada factura apenas la genera, sin esperar a que se generen las de los demás clientes.
+- RF-85: El agente debe enviar el email de cada factura dentro del minuto siguiente a su generación, sin esperar a que se generen las de los demás clientes.
 - RF-86: El agente debe reintentar el envío del email de una factura (RF-171) sin volver a generar la factura.
 - RF-87: El agente no debe demorar la generación ni el envío de la factura de un cliente por los reintentos de otro cliente.
 - RF-88: El email de la factura (RF-84) debe informar el número, el período, el importe y el vencimiento de la factura, y la deuda vigente total del cliente, que es la suma de sus facturas adeudadas, aclarando cuando incluye facturas anteriores. La deuda vigente total se calcula al momento de cada intento de envío, incluidos los reintentos automáticos (RF-86) y manuales (RF-178); la factura y su PDF no cambian.
@@ -177,7 +179,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-105: Cuando la casilla vuelve a estar disponible, el agente debe procesar los emails recibidos durante la falla.
 - RF-106: Cuando la casilla vuelve a estar disponible, el agente debe pasar a Resuelto el error de proceso de revisión de la casilla.
 - RF-107: La primera vez que el agente revisa la casilla, debe procesar los emails recibidos desde el día en que se emitió la primera factura; los anteriores no se procesan. Mientras no exista ninguna factura emitida, el agente no debe procesar ningún email (no registra avisos, historial ni clasificaciones), y la primera revisión es la primera que ocurre después de emitirse la primera factura.
-- RF-108: En cada revisión posterior a la primera, el agente debe procesar solo los emails recibidos desde la revisión anterior.
+- RF-108: En cada revisión posterior a la primera, el agente debe procesar solo los emails recibidos desde la revisión anterior. En cada revisión, el agente debe procesar los emails en orden de fecha de recepción, del más antiguo al más reciente.
 - RF-109: El agente debe procesar cada email recibido una sola vez, identificándolo por su Message-ID, aunque lo vuelva a leer de la casilla (por ejemplo, después de una falla según RF-105).
 - RF-110: El agente no debe procesar los emails cuyo remitente es la casilla del sistema.
 - RF-111: El sistema debe validar que el remitente de cada email recibido coincida con el email de facturación de un cliente.
@@ -188,7 +190,7 @@ Para el MVP, la facturación se genera contra el **ambiente de homologación de 
 - RF-116: Para RF-115, el agente no debe considerar adjuntos las imágenes embebidas en el cuerpo del mensaje (por ejemplo, el logo de una firma).
 - RF-117: Para RF-115, el agente debe considerar adjuntos solo los archivos en formato imagen (JPEG, PNG, GIF o WebP) o PDF, e ignorar los archivos de otros formatos.
 - RF-118: El agente debe procesar los emails de un cliente Inactivo igual que los de un cliente Activo.
-- RF-119: El agente debe usar un LLM para clasificar cada adjunto del email, junto con el cuerpo del email, como "si", "no" o "dudoso" según corresponda o no a un pago.
+- RF-119: El agente debe usar un LLM para clasificar cada adjunto del email, junto con el cuerpo del email, como "si", "no" o "dudoso" según corresponda o no a un pago. El agente debe considerar que los pagos son en pesos: un comprobante de un pago en otra moneda se debe clasificar como "dudoso".
 - RF-120: Por cada comprobante, el agente debe extraer el CUIT y el monto pagado.
 - RF-121: El CUIT que el agente extrae de cada comprobante (RF-120) debe ser el de quien realizó el pago (ordenante u originante), nunca el del beneficiario.
 - RF-122: Si el CUIT extraído de un comprobante no tiene 11 dígitos, el agente debe considerarlo no extraído (RF-132).
@@ -212,7 +214,7 @@ Las reglas RF-126 a RF-137 se aplican a cada email con adjunto de un cliente, se
 
 Reglas que acompañan a las anteriores:
 - RF-138: Cada vez que el agente pasa facturas a Revisión manual, debe registrar el motivo indicado en la regla que lo disparó.
-- RF-139: Cuando se aplica RF-128, el agente debe asociar el email nuevo a la revisión manual pendiente del cliente.
+- RF-139: Cuando se aplica RF-128, el agente debe asociar el email nuevo a la revisión manual pendiente del cliente. Además, cada vez que una regla de RF-128 a RF-137 cambia el estado de una factura, el agente debe asociar el email que la disparó a esa factura.
 - RF-140: Cuando una factura sale de Revisión manual, el sistema debe dejar de mostrar su motivo.
 
 ### Revisión de pagos por el usuario
@@ -228,7 +230,7 @@ Reglas que acompañan a las anteriores:
 - RF-216: La interfaz de revisión debe listar las facturas que un usuario pasó de Pago recibido o Revisión manual a Pagada o a Pendiente de pago, con la decisión tomada, el usuario que la tomó, su fecha y hora, el estado y el motivo que tenía la factura, y los emails asociados con sus adjuntos, la clasificación del LLM de cada adjunto y el CUIT y el monto extraídos de cada comprobante; ordenadas de la decisión más reciente a la más antigua y filtrables por cliente y por rango de fechas de la decisión.
 
 ### Recordatorios y dashboard
-- RF-149: El agente debe enviar el último día de cada mes, a la hora de recordatorios (11:00 por defecto), un email recordatorio a cada cliente Activo con deuda vigente, tenga o no productos asignados, salvo a los clientes en revisión.
+- RF-149: El agente debe enviar el último día de cada mes, a la hora de recordatorios (11:00 por defecto), un email recordatorio a cada cliente Activo con deuda vigente, tenga o no productos asignados, salvo a los clientes en revisión. Si el proceso de recordatorios se interrumpe, el agente debe retomarlo ese mismo día apenas vuelva a funcionar, solo para los clientes que todavía no recibieron el recordatorio; nunca al día siguiente.
 - RF-150: El email recordatorio, automático o manual, debe detallar cada factura adeudada del cliente (número, período, importe y vencimiento) y el total a pagar, que es la suma de todas ellas.
 - RF-151: El email recordatorio, automático o manual, debe pedirle al cliente que responda el email adjuntando el comprobante de pago.
 - RF-152: El sistema debe permitir a un Admin configurar la hora de recordatorios con un valor entre 00:00 y 23:59.
@@ -256,13 +258,13 @@ Reglas que acompañan a las anteriores:
 - RF-170: El sistema debe permitir filtrar los reportes de facturación y de cobranza por un rango de períodos.
 
 ### Errores de procesos automáticos
-- RF-171: Si falla la generación de una factura (en ARCA, o por falta de cotización según RF-68), el envío del email de una factura o el envío de un recordatorio automático, el agente debe reintentar la operación hasta la cantidad de reintentos configurada (3 por defecto), esperando entre intentos la espera configurada (5 minutos por defecto).
+- RF-171: Si falla la generación de una factura (en ARCA, o por falta de cotización según RF-68), el envío del email de una factura o el envío de un recordatorio automático, el agente debe reintentar la operación hasta la cantidad de reintentos configurada (3 por defecto), esperando entre intentos la espera configurada (5 minutos por defecto). Un rechazo de ARCA por la validación del comprobante (no una falla de comunicación) no se reintenta automáticamente: el agente registra de inmediato el error de proceso con el mensaje de ARCA (RF-174), y el reintento manual (RF-176) sigue disponible. En cada reintento de generación, automático o manual, el agente debe usar los datos vigentes en ese momento (cliente, productos, precios, asignaciones y cotización), salvo que ARCA ya haya autorizado el comprobante (RF-76), en cuyo caso registra la factura con los datos de la solicitud autorizada. Si en un reintento automático de un recordatorio el cliente ya no tiene deuda vigente, está en revisión o está Inactivo, el agente debe cancelar el reintento sin registrar un error de proceso y dejarlo registrado en el historial del cliente.
 - RF-172: El sistema debe permitir a un Admin configurar la cantidad de reintentos con un valor entre 0 y 10.
 - RF-173: El sistema debe permitir a un Admin configurar la espera entre reintentos con un valor entre 1 y 60 minutos.
 - RF-174: Si la operación sigue fallando después del último reintento, el agente debe registrar un error de proceso Pendiente con la operación, la cantidad de intentos, el último mensaje de error y, cuando corresponda, el cliente y el período.
 - RF-175: La interfaz de revisión debe listar los errores de proceso Pendientes con sus datos.
 - RF-176: El sistema debe permitir a un Admin o Editor reintentar manualmente, desde la interfaz de revisión y con un único intento, la operación de un error de proceso Pendiente de generación de factura, de envío de factura o de envío de recordatorio.
-- RF-177: En el reintento manual de un error de generación de factura, el sistema debe generar la factura y, si se genera, enviarla por email según RF-84.
+- RF-177: En el reintento manual de un error de generación de factura, el sistema debe generar la factura y, si se genera, enviarla por email según RF-84. Si al reintentar el cliente está Inactivo o no tiene productos Activos asignados, el sistema debe bloquear el reintento mostrando un mensaje y dejar el error de proceso Pendiente.
 - RF-178: En el reintento manual de un error de envío de factura o de recordatorio, el sistema debe reenviar solo el email que falló, sin generar de nuevo la factura. En el reintento manual de un error de envío de recordatorio, el sistema debe armar el recordatorio con las facturas adeudadas y la deuda vigente del cliente al momento del reintento, y debe bloquear el envío, mostrando un mensaje y dejando el error de proceso Pendiente, si el cliente no tiene deuda vigente, está en revisión o está Inactivo.
 - RF-179: Si el reintento manual tiene éxito, el sistema debe pasar el error de proceso a Resuelto.
 - RF-180: El sistema debe permitir a un Admin o Editor marcar un error de proceso Pendiente como Resuelto sin reintentarlo.
@@ -297,16 +299,17 @@ Reglas que acompañan a las anteriores:
 - RF-207: En modo mock, si SCHEDULER_ENABLED no está definida, el agente debe ejecutar los procesos automáticos (facturación, recordatorios y revisión de la casilla).
 - RF-208: En modo mock, el sistema no debe mostrar el banner de certificado.
 - RF-209: En modo mock, el sistema debe mostrar en el header de todas las pantallas el indicador "Modo mock: ARCA, LLM y email simulados".
-- RF-210: En modo mock, el agente debe indicar en el PDF de cada factura y en cada email que envía que fue generado en modo mock y es simulado.
+- RF-210: En modo mock, el agente debe indicar en el PDF de cada factura y en cada email que envía que fue generado en modo mock y es simulado, además de la leyenda de homologación de RF-90 en el PDF y en el email de cada factura.
 - RF-211: En modo mock, el sistema debe usar siempre la base de datos data/aldebaran-mock.db, sin tener en cuenta DATABASE_PATH.
 - RF-212: Fuera del modo mock, el sistema no debe leer ni escribir la base de datos data/aldebaran-mock.db.
 - RF-213: Fuera del modo mock, si DATABASE_PATH apunta a data/aldebaran-mock.db, el sistema no debe arrancar y debe informar el error.
+- RF-220: Mientras la redirección de emails esté activa, el sistema debe mostrar en el header de todas las pantallas el indicador "Emails redirigidos a <dirección>".
 
 ## Requerimientos No Funcionales
 - RNF-01: El p95 del tiempo de procesamiento de un email de respuesta, medido desde que se detecta hasta que queda registrado el resultado (lectura, clasificación por LLM, validación y eventuales reintentos de RNF-02), debe ser menor a 60 segundos.
 - RNF-02: Ante una falla de una llamada al LLM, el agente debe reintentarla hasta 3 veces, esperando 2 s, 4 s y 8 s antes de cada reintento; si el cuarto intento también falla, marca como erróneo el procesamiento de ese adjunto (ver RF-123). Se considera falla: (a) que la llamada no responda dentro de 10 s; (b) un error de red o una respuesta HTTP 429 o 5xx; (c) una respuesta que no se puede interpretar o cuya clasificación no es "si", "no" ni "dudoso". Las respuestas HTTP 400, 401 y 403 no se reintentan y marcan el procesamiento del adjunto como erróneo de inmediato; tampoco se reintentan las demás respuestas 4xx (por ejemplo, 404 o 413), salvo 408 y 429, que se reintentan. Con estos valores, el peor caso de un adjunto (4 intentos × 10 s + 14 s de espera = 54 s) entra en el límite de RNF-01.
-- RNF-03: El proceso de facturación mensual, incluidos la generación de las facturas en ARCA y el envío de los emails de RF-84, no debe durar más de 20 minutos desde su inicio, sin contar los reintentos de RF-171.
-- RNF-04: El proceso de recordatorios de fin de mes, incluido el envío de los emails de RF-149, no debe durar más de 20 minutos desde su inicio, sin contar los reintentos de RF-171.
+- RNF-03: El proceso de facturación mensual, incluidos la generación de las facturas en ARCA y el envío de los emails de RF-84, no debe durar más de 20 minutos desde su inicio hasta que se intentó una vez generar la factura de cada cliente facturable, sin contar los reintentos de RF-171.
+- RNF-04: El proceso de recordatorios de fin de mes, incluido el envío de los emails de RF-149, no debe durar más de 20 minutos desde su inicio hasta que se intentó una vez enviar el recordatorio de cada cliente, sin contar los reintentos de RF-171.
 - RNF-05: El proceso de facturación mensual debe cumplir RNF-03 con al menos 50 clientes Activos, cada uno con hasta 2 productos asignados, y un catálogo de hasta 10 productos. Estos valores son el volumen de referencia, no límites del sistema.
 - RNF-06: El proceso de recordatorios de fin de mes debe cumplir RNF-04 con al menos 50 clientes Activos con deuda vigente. Este valor es el volumen de referencia, no un límite del sistema.
 - RNF-07: Una llamada a un servicio externo se considera fallida si no responde dentro de: 30 s para ARCA (WSAA y WSFEv1), 30 s para el servidor de email (SMTP e IMAP) y 10 s para dolarhoy.com.
@@ -342,6 +345,7 @@ Reglas que acompañan a las anteriores:
 - AC-18 (RF-18, RF-02): Dado un usuario Activo, cuando un Admin lo da de baja, entonces el usuario pasa a Inactivo y ya no puede iniciar sesión.
 - AC-19 (RF-19): Dado un usuario Inactivo, cuando un Admin lo reactiva, entonces el usuario pasa a Activo y puede iniciar sesión.
 - AC-20 (RF-20): Dado un único usuario Admin Activo, cuando un Admin intenta darlo de baja o cambiarle el perfil a Editor, entonces el sistema rechaza la acción y el usuario sigue Activo con perfil Admin; y dados dos usuarios Admin Activos, cuando un Admin da de baja a uno de ellos, la baja se realiza.
+- AC-249 (RF-18, RF-21): Dado un usuario con dos sesiones abiertas, cuando cambia su contraseña desde una de ellas, entonces la otra sesión queda cerrada y la actual sigue activa; y cuando un Admin lo da de baja, todas sus sesiones quedan cerradas.
 
 ### Contraseñas
 - AC-21 (RF-21): Dado un usuario autenticado de cualquier perfil, cuando cambia su contraseña desde su perfil ingresando la contraseña actual correcta y una nueva, entonces puede iniciar sesión con la nueva y no con la anterior.
@@ -350,6 +354,7 @@ Reglas que acompañan a las anteriores:
 - AC-24 (RF-22): Dado un Admin autenticado, cuando intenta dar de alta un usuario con una contraseña de 7 caracteres, entonces el sistema rechaza el alta.
 - AC-25 (RF-22): Dada la pantalla de cambio de contraseña abierta con un token válido, cuando el usuario confirma una nueva contraseña de 7 caracteres, entonces el sistema rechaza el cambio y la contraseña no cambia.
 - AC-26 (RF-23, RF-24): Dado un usuario Activo, cuando solicita la recuperación de contraseña con su email desde la pantalla de inicio de sesión, entonces recibe un email con una URL que contiene un token de recuperación.
+- AC-251 (RF-24): Dada APP_URL=https://aldebaran.empresa.com, cuando un usuario Activo solicita la recuperación de contraseña enviando la solicitud con el header Host: otro-sitio.com, entonces la URL del email empieza con https://aldebaran.empresa.com; y sin APP_URL definida, empieza con http://localhost:5173.
 - AC-27 (RF-25): Dado un email que no corresponde a ningún usuario Activo, cuando se solicita la recuperación de contraseña con ese email, entonces se muestra el mismo mensaje de confirmación que para un usuario Activo y no se envía ningún email.
 - AC-28 (RF-26, RF-29, RF-32): Dado un token de recuperación sin usar enviado hace 9 minutos, cuando el usuario ingresa a la URL, entonces el sistema muestra la pantalla de cambio de contraseña.
 - AC-29 (RF-26, RF-29, RF-30, RF-31): Dado un token de recuperación enviado hace 11 minutos, cuando el usuario ingresa a la URL, entonces el sistema muestra un mensaje de error y a los 5 segundos (±1 s) redirige al inicio de sesión.
@@ -399,6 +404,7 @@ Reglas que acompañan a las anteriores:
 - AC-67 (RF-68, RF-174): Dados un cliente con al menos un producto con precio en dólares, dolarhoy.com sin responder dentro de 10 s (RNF-07), ninguna cotización registrada anteriormente y la cantidad de reintentos configurada en 0, cuando el agente ejecuta el proceso de facturación, entonces no se genera la factura de ese cliente, no se le envía email de factura y se registra un error de proceso Pendiente de generación de factura para ese cliente.
 - AC-68 (RF-68): Dados un cliente con todos sus productos con precio en pesos, dolarhoy.com sin responder dentro de 10 s (RNF-07) y ninguna cotización registrada anteriormente, cuando el agente ejecuta el proceso de facturación, entonces la factura de ese cliente se genera, queda en Pendiente de pago y se le envía su email de factura.
 - AC-69 (RF-70): Dado el banner de cotización visible, cuando un Admin o Editor confirma la cotización, entonces el banner deja de mostrarse y queda registrado qué usuario la confirmó.
+- AC-241 (RF-63, RF-171): Dado un cliente con un producto en dólares cuya generación de factura falla en el primer intento con una cotización de $1.500, y dolarhoy.com publicando $1.520 al momento del reintento, cuando el agente reintenta y genera la factura, entonces la factura usa la cotización de $1.520 leída en el reintento.
 - AC-70 (RF-71, RF-72): Dado el punto de venta configurado en 3, cuando el agente genera una factura, entonces la solicitud a WSFEv1 de homologación usa el tipo de comprobante Factura C (código 11) y el punto de venta 3, y ambos quedan registrados en la factura.
 - AC-71 (RF-73): Dado un Admin autenticado, cuando intenta configurar el punto de venta en 0 o en 100000, entonces el sistema rechaza el valor y mantiene el punto de venta anterior; y cuando lo configura en 5, la siguiente factura se emite en el punto de venta 5.
 - AC-72 (RF-74): Dado un cliente al que ya se le generó la factura del período corriente, cuando el proceso de facturación se vuelve a ejecutar en el mismo mes, entonces no se genera otra factura para ese cliente ni se le envía otro email de factura.
@@ -407,6 +413,7 @@ Reglas que acompañan a las anteriores:
 - AC-75 (RF-79, RF-80, RF-81): Dado el proceso de facturación del 15/10/2026, cuando el agente genera la factura de un cliente, entonces la factura tiene fecha de emisión 15/10/2026, período de servicio del 01/10/2026 al 31/10/2026 y vencimiento del pago el 31/10/2026.
 - AC-76 (RF-79, RF-80, RF-81): Dado un error de proceso Pendiente de generación de la factura del período octubre de 2026, cuando un Admin o Editor lo reintenta manualmente el 03/11/2026 y la factura se genera, entonces la factura tiene fecha de emisión 03/11/2026, período de servicio del 01/10/2026 al 31/10/2026 y vencimiento del pago el 03/11/2026.
 - AC-77 (RF-82, RF-83): Dado un cliente Activo con un producto Activo asignado y sin condición frente al IVA, y la cantidad de reintentos configurada en 0, cuando el agente ejecuta el proceso de facturación, entonces no se genera la factura de ese cliente, no se llama a ARCA para ese cliente y se registra un error de proceso Pendiente de generación de factura con el mensaje "el cliente no tiene cargada la condición frente al IVA".
+- AC-242 (RF-219): Dada la empresa emisora sin razón social configurada y la cantidad de reintentos en 0, cuando el agente ejecuta el proceso de facturación, entonces no se genera ninguna factura, no se llama a ARCA y se registra un error de proceso Pendiente de generación de factura por cada cliente facturable con el mensaje "faltan los datos de la empresa emisora o el punto de venta".
 - AC-78 (RF-84): Dado que el proceso de facturación del día 15 generó una factura para un cliente, cuando la factura queda registrada, entonces se envía la factura por email al email de facturación del cliente informando que tiene una deuda pendiente, y el envío (fecha, hora y destinatario) queda registrado en el historial del cliente.
 - AC-79 (RF-85, RF-87): Dados dos clientes facturables y ARCA homologación que falla en el primer intento de generar la factura del primero, cuando el agente ejecuta el proceso de facturación, entonces el email de la factura del segundo cliente se envía sin esperar el reintento del primero, y el del primero se envía apenas se genera su factura.
 - AC-80 (RF-86): Dado un cliente cuya factura se generó y un servidor de email que rechaza el primer envío y acepta el segundo, cuando el agente reintenta el envío, entonces se envía el email de esa factura y en ARCA queda un único comprobante para ese cliente y período.
@@ -432,6 +439,7 @@ Reglas que acompañan a las anteriores:
 - AC-97 (RF-103, RF-104): Dado el servidor IMAP sin responder durante tres intervalos de revisión seguidos, cuando el agente intenta revisar la casilla en cada intervalo, entonces realiza un intento de conexión por intervalo y hay un único error de proceso Pendiente de revisión de la casilla.
 - AC-98 (RF-105, RF-106): Dado un error de proceso Pendiente de revisión de la casilla y dos emails de clientes llegados durante la falla, cuando la casilla vuelve a estar disponible en la siguiente revisión, entonces el agente procesa los dos emails y el error de proceso pasa a Resuelto.
 - AC-99 (RF-107, RF-108): Dada una casilla con emails de un cliente recibidos antes y después del día de la primera factura emitida, cuando el agente la revisa por primera vez, entonces procesa solo los recibidos desde ese día; y en la revisión siguiente procesa solo los emails que llegaron después.
+- AC-243 (RF-108): Dados dos emails de un mismo cliente con deuda vigente que no está en revisión, recibidos a las 10:00 (adjunto `dudoso_1.pdf`) y a las 10:05 (comprobante que coincide con una factura), y detectados en la misma revisión, cuando el agente los procesa, entonces procesa primero el de las 10:00 (motivo "clasificación dudosa") y luego el de las 10:05 (motivo "revisión manual pendiente").
 - AC-100 (RF-109): Dado un email ya procesado, cuando el agente lo vuelve a leer de la casilla con el mismo Message-ID, entonces no lo registra de nuevo en el historial, no lo envía al LLM y no cambia el estado de ninguna factura.
 - AC-101 (RF-110): Dado un email recibido cuyo remitente es la casilla del sistema, cuando el agente revisa la casilla, entonces no se registra como aviso, no se envía al LLM y no cambia el estado de ninguna factura.
 - AC-102 (RF-111, RF-113): Dado un email recibido cuyo remitente no coincide con el email de facturación de ningún cliente, cuando el agente lo procesa, entonces queda registrado como aviso Pendiente en la interfaz de revisión, no se envía al LLM y no cambia el estado de ninguna factura.
@@ -449,6 +457,7 @@ AC-109 a AC-111 evalúan al LLM real: se verifican fuera de la suite de tests au
 - AC-112 (RF-120, RF-124): Dado un email con un adjunto clasificado como "si", cuando el agente termina de procesarlo, entonces el CUIT y el monto extraídos del comprobante quedan registrados en el historial del cliente junto con la clasificación.
 - AC-113 (RF-120, RF-124, RF-123): Dado un email con tres adjuntos clasificados como "si", "si" y "no", cuando el agente termina de procesarlo, entonces quedan registrados en el historial del cliente la clasificación de cada adjunto, el CUIT y el monto de cada uno de los dos comprobantes y la clasificación del email "si".
 - AC-114 (RF-121, RF-122): Dado un comprobante de transferencia en el que figuran el CUIT del ordenante y el CUIT del beneficiario (el del emisor de la factura), cuando el agente lo clasifica como "si", entonces el CUIT extraído es el del ordenante; y si el CUIT que se lee tiene menos de 11 dígitos, se registra como no extraído.
+- AC-244 (RF-119): Dado un comprobante de una transferencia en dólares, cuando el agente lo clasifica con el LLM, entonces lo clasifica como "dudoso".
 - AC-115 (RF-124): Dado un email con adjunto cuyo procesamiento quedó marcado como erróneo, cuando el agente termina de procesarlo, entonces la marca de procesamiento erróneo queda registrada en el historial del cliente.
 - AC-116 (RNF-02): Dado un LLM que falla en los dos primeros intentos y en el tercero responde con una clasificación válida ("si", "no" o "dudoso"), cuando el agente procesa un email con un adjunto, entonces se realizan exactamente tres llamadas, con esperas de 2 s y 4 s entre ellas (±0,5 s cada una), y el email se procesa con la clasificación obtenida.
 - AC-117 (RNF-02): Dado un LLM que responde HTTP 401, cuando el agente procesa un email con un adjunto, entonces se realiza una sola llamada y el procesamiento queda marcado como erróneo.
@@ -459,6 +468,7 @@ AC-109 a AC-111 evalúan al LLM real: se verifican fuera de la suite de tests au
 - AC-122 (RF-128, RF-129, RF-138): Dado un cliente con una factura en Revisión manual y otra en Pendiente de pago, cuando envía un comprobante clasificado como "si" cuyo monto coincide exactamente con la factura Pendiente de pago, entonces ambas facturas quedan en Revisión manual con el motivo "revisión manual pendiente" (aunque la que ya estaba en Revisión manual tuviera otro motivo) y ninguna pasa a Pago recibido.
 - AC-123 (RF-128, RF-129, RF-138): Dado un cliente con una factura en Revisión manual y otra en Pendiente de pago, cuando envía un email con adjunto cuyo procesamiento queda marcado como erróneo, entonces ambas facturas quedan en Revisión manual con el motivo "revisión manual pendiente".
 - AC-124 (RF-139): Dado un cliente con una factura en Revisión manual que tiene un comprobante asociado, cuando envía un comprobante nuevo clasificado como "si", entonces la revisión manual del cliente queda con los dos comprobantes asociados.
+- AC-245 (RF-139): Dado un cliente con deuda vigente que no está en revisión, cuando envía un comprobante cuyo monto no coincide con ninguna factura, entonces sus facturas pasan a Revisión manual y el detalle de cada una muestra ese email asociado.
 - AC-125 (RF-130, RF-138): Dado un cliente con deuda vigente que no está en revisión y un LLM que responde HTTP 500 en los cuatro intentos, cuando el agente procesa un email con adjunto de ese cliente, entonces el procesamiento queda marcado como erróneo y las facturas adeudadas del cliente pasan a Revisión manual con el motivo "no se pudo procesar el comprobante".
 - AC-126 (RF-131, RF-138): Dado un cliente con deuda vigente que no está en revisión, cuando envía un email clasificado como "dudoso", entonces sus facturas adeudadas pasan a Revisión manual con el motivo "clasificación dudosa".
 - AC-127 (RF-123, RF-131): Dado un cliente con una sola factura adeudada de $10.000, en Pendiente de pago, cuando envía un email con dos adjuntos, uno clasificado como "si" con su CUIT por $10.000 y otro clasificado como "dudoso", entonces la factura pasa a Revisión manual con el motivo "clasificación dudosa" y no pasa a Pago recibido.
@@ -500,6 +510,7 @@ AC-141 y AC-142 verifican una regla de resguardo que el flujo normal no produce 
 - AC-155 (RF-149): Dado un cliente Activo sin productos asignados, con al menos una factura en Pendiente de pago y que no está en revisión, cuando el agente ejecuta el proceso de recordatorios de fin de mes, entonces se envía un único email recordatorio a ese cliente.
 - AC-156 (RF-149): Dado un cliente Activo en revisión al último día del mes, cuando el agente ejecuta el proceso de recordatorios, entonces no se envía ningún email a ese cliente.
 - AC-157 (RF-149): Dada la hora de recordatorios por defecto, cuando llega el último día del mes, entonces el proceso de recordatorios se inicia a las 11:00 hora de Argentina, con una tolerancia de ±1 minuto.
+- AC-246 (RF-149): Dado un proceso de recordatorios de fin de mes interrumpido después de enviar los recordatorios de algunos clientes, cuando el sistema vuelve a funcionar ese mismo día, entonces envía los recordatorios solo a los clientes que todavía no lo recibieron; y si vuelve al día siguiente, no envía ninguno.
 - AC-158 (RF-150, RF-151): Dado un cliente con dos facturas adeudadas en Pendiente de pago, una de agosto por $10.000 y otra de septiembre por $12.000, cuando se le envía el recordatorio automático o el manual, entonces el email detalla ambas facturas con su número, período, importe y vencimiento, informa un total a pagar de $22.000 y le pide responder adjuntando el comprobante de pago.
 - AC-159 (RF-152): Dado un Admin autenticado, cuando cambia la hora de recordatorios a 14:00, entonces el siguiente proceso de recordatorios de fin de mes se inicia a las 14:00 hora de Argentina, con una tolerancia de ±1 minuto.
 - AC-160 (RF-152): Dado un Admin autenticado, cuando intenta configurar la hora de recordatorios en 24:00 o en 23:60, entonces el sistema rechaza el valor y mantiene la hora anterior; y cuando la configura en 23:59, el valor queda guardado.
@@ -530,6 +541,7 @@ AC-141 y AC-142 verifican una regla de resguardo que el flujo normal no produce 
 - AC-179 (RF-171, RF-174): Dados la configuración de reintentos por defecto y el ambiente de homologación de ARCA sin responder dentro de 30 s (RNF-07) en ningún intento, cuando el agente intenta generar la factura de un cliente, entonces realiza 4 intentos, no se genera la factura, no se envía email de factura y se registra un error de proceso Pendiente con el cliente, la operación "generación de factura", el período, 4 intentos y el último mensaje de error.
 - AC-180 (RF-171, RF-174): Dados la configuración de reintentos por defecto y un servidor de email que rechaza todos los envíos a un cliente, cuando el agente intenta enviarle el email de su factura, entonces realiza 4 intentos, la factura queda en Pendiente de pago y se registra un error de proceso Pendiente con la operación "envío de factura".
 - AC-181 (RF-171, RF-174): Dados la configuración de reintentos por defecto y un servidor de email que rechaza todos los envíos a un cliente, cuando el agente intenta enviarle el recordatorio automático de fin de mes, entonces realiza 4 intentos y se registra un error de proceso Pendiente con la operación "envío de recordatorio".
+- AC-247 (RF-171): Dado ARCA homologación que rechaza la factura de un cliente por un error de validación, cuando el agente intenta generarla, entonces realiza un único intento y registra un error de proceso Pendiente con el mensaje de ARCA; y dado un reintento automático pendiente de un recordatorio cuyo cliente pagó todas sus facturas, cuando llega el momento del reintento, entonces no se envía el email, no se registra un error de proceso y la cancelación queda en el historial del cliente.
 - AC-182 (RF-172): Dado un Admin autenticado, cuando configura la cantidad de reintentos en 0 y luego falla una operación, entonces el agente realiza un solo intento y registra el error de proceso.
 - AC-183 (RF-172): Dado un Admin autenticado, cuando intenta configurar la cantidad de reintentos en 11, entonces el sistema rechaza el valor y mantiene la cantidad anterior.
 - AC-184 (RF-173): Dado un Admin autenticado, cuando configura la espera entre reintentos en 10 minutos y luego falla una operación, entonces el siguiente intento ocurre 10 minutos (±1 minuto) después.
@@ -539,6 +551,7 @@ AC-141 y AC-142 verifican una regla de resguardo que el flujo normal no produce 
 - AC-188 (RF-177, RF-84): Dado un error de proceso Pendiente de generación de factura y los servicios externos respondiendo, cuando un Admin o Editor lo reintenta manualmente y la factura se genera, entonces la factura se envía por email al email de facturación del cliente y el envío queda registrado en su historial.
 - AC-189 (RF-178, RF-179): Dado un error de proceso Pendiente de envío de factura y el servidor de email respondiendo, cuando un Admin o Editor lo reintenta manualmente, entonces se envía el email de esa factura, no se genera ninguna factura nueva en ARCA y el error de proceso pasa a Resuelto.
 - AC-190 (RF-176): Dado un error de proceso Pendiente y el servicio externo todavía fallando, cuando un Admin o Editor lo reintenta manualmente, entonces se realiza un único intento y el error de proceso sigue Pendiente con el nuevo mensaje de error.
+- AC-248 (RF-177): Dado un error de proceso Pendiente de generación de factura de un cliente que después fue dado de baja, cuando un Admin o Editor lo reintenta manualmente, entonces el sistema bloquea el reintento con un mensaje, no llama a ARCA y el error sigue Pendiente.
 - AC-191 (RF-180): Dado un error de proceso Pendiente, cuando un Admin o Editor lo marca como Resuelto, entonces deja de aparecer entre los Pendientes y queda registrado qué usuario lo resolvió.
 - AC-192 (RF-181): Dados dos errores de proceso Pendientes, cuando un usuario autenticado abre el dashboard, entonces ve el banner de errores con la cantidad 2.
 - AC-193 (RF-181): Dado un único error de proceso Pendiente, cuando pasa a Resuelto, entonces el banner de errores deja de mostrarse en el dashboard.
@@ -557,7 +570,7 @@ AC-141 y AC-142 verifican una regla de resguardo que el flujo normal no produce 
 - AC-204 (RF-205, RF-207): Dado MOCK_MODE=true como única variable de entorno definida, cuando arranca el sistema, entonces arranca, el agente ejecuta el proceso de facturación del día 15 y procesa los emails cargados en la casilla simulada.
 - AC-205 (RF-206): Dados el modo mock y ARCA_CUIT sin definir, cuando el agente genera una factura, entonces el PDF muestra 20111111112 como CUIT del emisor; y con ARCA_CUIT definida, muestra ese valor.
 - AC-206 (RF-208): Dados el modo mock y ningún certificado de ARCA configurado, cuando un usuario autenticado abre el dashboard, entonces no ve el banner de certificado.
-- AC-207 (RF-210): Dado el modo mock, cuando el agente envía el email de una factura o un recordatorio, entonces el PDF de la factura y el cuerpo de cada email indican que fueron generados en modo mock y son simulados.
+- AC-207 (RF-210): Dado el modo mock, cuando el agente envía el email de una factura o un recordatorio, entonces el PDF de la factura y el cuerpo de cada email indican que fueron generados en modo mock y son simulados, y el PDF y el email de la factura llevan además la leyenda de homologación sin validez fiscal.
 - AC-208 (RF-211, RF-212): Dados un cliente y una factura creados en modo mock, cuando el sistema se reinicia fuera del modo mock, entonces ni el cliente ni la factura aparecen; y dados un cliente y una factura creados fuera del modo mock, cuando el sistema se reinicia en modo mock, tampoco aparecen.
 - AC-209 (RF-211): Dados MOCK_MODE=true y DATABASE_PATH apuntando a la base del modo real, cuando se crea un cliente en modo mock, entonces el cliente queda en data/aldebaran-mock.db y la base del modo real no cambia.
 - AC-210 (RF-212, RF-213): Dados MOCK_MODE sin definir y DATABASE_PATH=data/aldebaran-mock.db, cuando se intenta arrancar el sistema, entonces no arranca, informa el error y data/aldebaran-mock.db no cambia.
@@ -574,6 +587,7 @@ AC-141 y AC-142 verifican una regla de resguardo que el flujo normal no produce 
 - AC-219 (RF-200, RF-13): Dado el modo mock, cuando un usuario Consulta intenta cargar un email recibido en la casilla simulada, entonces el sistema rechaza la acción y no se crea ningún email.
 - AC-220 (RF-204): Dado el sistema fuera del modo mock, cuando un Admin intenta abrir la casilla simulada o cargar un email en ella por endpoint, entonces el sistema rechaza el acceso y no se crea ningún email.
 - AC-221 (RF-198, RF-197): Dado el modo mock, con un email enviado a un cliente y un email recibido desde el email de facturación de un cliente en la casilla simulada, cuando un Editor o un usuario Consulta abre la casilla simulada, entonces ve solo el email recibido; y cuando la abre un Admin, ve los dos.
+- AC-250 (RF-220): Dada la variable EMAIL_REDIRECT_TO definida con dev@empresa.com, cuando un usuario autenticado abre cualquier pantalla, entonces el header muestra "Emails redirigidos a dev@empresa.com"; y sin la variable, el indicador no se muestra.
 
 ### Requerimientos no funcionales
 - AC-222 (RNF-10): Dado un usuario autenticado sin actividad durante 24 h, cuando realiza una nueva acción, entonces el sistema le exige iniciar sesión de nuevo.
@@ -612,6 +626,8 @@ AC-232 a AC-234 son pruebas de rendimiento: se verifican fuera de la suite de te
 - Recuperación de contraseña en modo mock.
 - Migrar o copiar datos entre la base del modo mock y la del modo real.
 - Simulación de fallas de ARCA en modo mock: el ARCA simulado autoriza todas las facturas.
+- Borrado o vencimiento de los emails recibidos y sus adjuntos: en este MVP se conservan sin límite.
+- Auditoría de los cambios de configuración (quién cambió cada valor y cuándo).
 - Activar el modo mock por servicio (por ejemplo, simular solo ARCA): MOCK_MODE simula ARCA, el LLM y el email juntos.
 - Simulación de dolarhoy.com en modo mock: la cotización se sigue leyendo del sitio real.
 
@@ -628,5 +644,7 @@ AC-232 a AC-234 son pruebas de rendimiento: se verifican fuera de la suite de te
 - Riesgo: la cotización del dólar blue de una fuente no oficial (dolarhoy.com) podría no ser válida para emitir una factura legal → mitigación: confirmar con el contador si esta modalidad es válida antes de pasar a facturación real en producción; mientras tanto, dejar registrada en cada factura la fuente y el valor de cotización utilizado para poder auditarlo.
 - Riesgo: MOCK_MODE queda activado por error en el ambiente real y la facturación real, los recordatorios y la revisión de la casilla dejan de ejecutarse → mitigación: indicador de modo mock en el header (RF-209) y base de datos propia del modo mock, que deja intactos los datos del modo real (RF-211, RF-212).
 - Riesgo: sin conexión a internet, en modo mock no se puede leer la cotización de dolarhoy.com y, con la base mock vacía, no hay ninguna cotización registrada, por lo que no se pueden facturar productos con precio en dólares (RF-68) → mitigación: para evaluar sin internet, usar productos con precio en pesos.
+- Riesgo: un cliente reenvía un comprobante ya validado y tiene otra factura adeudada del mismo monto, por lo que el agente lo imputa de nuevo → mitigación: la factura queda en Pago recibido y un usuario la revisa antes de pasarla a Pagada (RF-143); riesgo aceptado.
+- Supuesto: las respuestas de los clientes llegan a la bandeja de entrada (INBOX) de la casilla del sistema; los emails que Gmail mueve a spam u otras carpetas no se procesan → mitigación: revisar periódicamente la carpeta de spam de la casilla.
 - Dependencia: API de Claude · Gmail (SMTP e IMAP) · SQLite · ambiente de homologación de ARCA · dolarhoy.com (cotización del dólar blue). En modo mock, el sistema no depende de la API de Claude, de Gmail ni de ARCA.
 
