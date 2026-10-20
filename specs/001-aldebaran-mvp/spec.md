@@ -320,8 +320,9 @@ externa salvo la cotización.
 
 ### Edge Cases
 
-- Sistema detenido el día 15: se factura al volver dentro del mismo mes; nunca en el mes siguiente
-  (RF-52, AC-53).
+- Sistema detenido el día 15: se factura al volver dentro del mismo mes; nunca en el mes siguiente,
+  salvo un período que ya había empezado y quedó interrumpido, que se retoma igual (RF-52, RF-53,
+  AC-53).
 - ARCA autoriza la factura pero la respuesta no llega: el reintento registra el número y CAE ya
   otorgados, sin pedir otro comprobante (RF-76, AC-73).
 - Cliente sin condición frente al IVA: no se factura y se registra un error de proceso con el
@@ -438,6 +439,9 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-020** (RF-97, RF-98): El sistema MUST mostrar el banner de certificado mientras el certificado
   de ARCA esté vencido o ilegible (no se puede facturar) o falten 30 días o menos para su
   vencimiento.
+- **FR-048** (RF-219): Si faltan los datos obligatorios de la empresa emisora o el punto de venta, el
+  agente MUST NOT generar la factura ni llamar a ARCA y MUST tratar la generación como fallida con el
+  mensaje "faltan los datos de la empresa emisora o el punto de venta".
 
 **Control de pagos**
 
@@ -482,11 +486,6 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
 - **FR-047** (RF-218): Si al cambiar el estado de una factura esta ya no está en el estado que el
   usuario vio (porque la cambió el agente u otro usuario), el sistema MUST rechazar la acción,
   mostrar un mensaje y actualizar la pantalla con el estado vigente.
-- **FR-048** (RF-219): Si faltan los datos obligatorios de la empresa emisora o el punto de venta, el
-  agente MUST NOT generar la factura ni llamar a ARCA y MUST tratar la generación como fallida con el
-  mensaje "faltan los datos de la empresa emisora o el punto de venta".
-- **FR-049** (RF-220): Mientras la redirección de emails esté activa, el header MUST mostrar
-  "Emails redirigidos a <dirección>".
 
 **Recordatorios y dashboard**
 
@@ -559,6 +558,8 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   operación que redondea es la conversión de dólares a pesos.
 - **FR-045** (RNF-15): La interfaz MUST ofrecer tema claro y oscuro, seguir por defecto el del sistema
   operativo y recordar en el navegador la elección hecha desde el header.
+- **FR-049** (RF-220): Mientras la redirección de emails esté activa, el header MUST mostrar
+  "Emails redirigidos a <dirección>".
 
 Los criterios de aceptación transversales de FR-041 a FR-045 son AC-225 a AC-229 y AC-235 del PRD.
 

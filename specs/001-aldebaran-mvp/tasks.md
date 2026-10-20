@@ -110,18 +110,19 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [ ] T043 [P] [US1] Test de integración en `server/tests/integration/users/password-hash.test.ts`: la fila guardada tiene hash bcrypt con costo ≥ 12 y no contiene la contraseña (AC-224)
 - [ ] T044 [P] [US1] Test del sender SMTP en `server/tests/unit/adapters/smtp-sender.test.ts` con nodemailer mockeado: usa `GMAIL_USER` y `GMAIL_APP_PASSWORD`, aplica `EMAIL_REDIRECT_TO`, falla a los 30 s (AC-227, AC-228)
 - [ ] T045 [P] [US1] Test de componente en `web/tests/pages/reset-password.test.tsx`: token inválido muestra error y redirige al login a los 5 s (±1 s) con timers falsos; token válido muestra el formulario (AC-29, AC-30, AC-32)
+- [ ] T046 [P] [US1] Test de componente en `web/tests/components/app-layout.test.tsx`: con `emailRedirectTo` en `/api/setup`, el header muestra "Emails redirigidos a <dirección>" en todas las pantallas; sin la variable no se muestra (AC-250)
 
 ### Implementation for User Story 1
 
-- [ ] T046 [US1] Implementar `server/src/services/auth.ts` y `server/src/services/sessions.ts` (bcrypt costo 12, tokens hasheados, vencimiento deslizante) según research R-10. La baja de un usuario y el cambio de contraseña cierran sus sesiones (RF-18, RF-21)
-- [ ] T047 [US1] Implementar `server/src/http/middleware/session.ts` y `server/src/http/middleware/require-role.ts` (perfil leído de la base en cada request, RF-06 a RF-13)
-- [ ] T048 [US1] Implementar `server/src/http/routes/setup.ts` (con `emailRedirectTo`, RF-220) y `server/src/http/routes/auth.ts` según contracts/http-api.md
-- [ ] T049 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
-- [ ] T050 [P] [US1] Implementar `server/src/services/settings.ts` y `server/src/http/routes/settings.ts` con los rangos de data-model.md
-- [ ] T051 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
-- [ ] T052 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
-- [ ] T053 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`
-- [ ] T054 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta
+- [ ] T047 [US1] Implementar `server/src/services/auth.ts` y `server/src/services/sessions.ts` (bcrypt costo 12, tokens hasheados, vencimiento deslizante) según research R-10. La baja de un usuario y el cambio de contraseña cierran sus sesiones (RF-18, RF-21)
+- [ ] T048 [US1] Implementar `server/src/http/middleware/session.ts` y `server/src/http/middleware/require-role.ts` (perfil leído de la base en cada request, RF-06 a RF-13)
+- [ ] T049 [US1] Implementar `server/src/http/routes/setup.ts` (con `emailRedirectTo`, RF-220) y `server/src/http/routes/auth.ts` según contracts/http-api.md
+- [ ] T050 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
+- [ ] T051 [P] [US1] Implementar `server/src/services/settings.ts` y `server/src/http/routes/settings.ts` con los rangos de data-model.md
+- [ ] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
+- [ ] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
+- [ ] T054 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`, y el indicador de redirección de emails en `web/src/components/AppLayout.tsx` (RF-220)
+- [ ] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta
 
 **Checkpoint**: acceso y perfiles funcionando de forma independiente
 
@@ -135,17 +136,17 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T055 [P] [US2] Test de API en `server/tests/api/clients.test.ts`: alta con todos los obligatorios, rechazo sin cada uno, condición frente al IVA fuera de la lista de RF-38, CUIT con dígito inválido, CUIT y email duplicados (sin distinguir mayúsculas), baja y reactivación, Editor puede dar de alta (AC-08, AC-34, AC-38, AC-40 a AC-42)
-- [ ] T056 [P] [US2] Test de API en `server/tests/api/products.test.ts`: alta con moneda ARS o USD, precio 0 y -100 rechazados y 0,01 aceptado, desactivación y reactivación (AC-43, AC-44, AC-47, AC-48)
-- [ ] T057 [P] [US2] Test de API en `server/tests/api/assignments.test.ts`: Editor asigna productos Activos, no se asignan Inactivos, desasignación, eventos en el historial (AC-09, AC-49, AC-50)
+- [ ] T056 [P] [US2] Test de API en `server/tests/api/clients.test.ts`: alta con todos los obligatorios, rechazo sin cada uno, condición frente al IVA fuera de la lista de RF-38, CUIT con dígito inválido, CUIT y email duplicados (sin distinguir mayúsculas), baja y reactivación, Editor puede dar de alta (AC-08, AC-34, AC-38, AC-40 a AC-42)
+- [ ] T057 [P] [US2] Test de API en `server/tests/api/products.test.ts`: alta con moneda ARS o USD, precio 0 y -100 rechazados y 0,01 aceptado, desactivación y reactivación (AC-43, AC-44, AC-47, AC-48)
+- [ ] T058 [P] [US2] Test de API en `server/tests/api/assignments.test.ts`: Editor asigna productos Activos, no se asignan Inactivos, desasignación, eventos en el historial (AC-09, AC-49, AC-50)
 
 ### Implementation for User Story 2
 
-- [ ] T058 [P] [US2] Implementar `server/src/services/clients.ts` y `server/src/http/routes/clients.ts` (alta, modificación, baja, reactivación, detalle) con eventos de historial
-- [ ] T059 [P] [US2] Implementar `server/src/services/products.ts` y `server/src/http/routes/products.ts`
-- [ ] T060 [US2] Implementar la asignación `PUT /api/clients/:id/products` en `server/src/services/clients.ts` y su ruta
-- [ ] T061 [P] [US2] Implementar en web `ClientsPage`, `ClientDetailPage` y `ClientForm` en `web/src/pages/clients/`. `ClientDetailPage` incluye asignar y desasignar productos Activos (RF-49, RF-50)
-- [ ] T062 [P] [US2] Implementar en web `ProductsPage` y `ProductForm` en `web/src/pages/products/`
+- [ ] T059 [P] [US2] Implementar `server/src/services/clients.ts` y `server/src/http/routes/clients.ts` (alta, modificación, baja, reactivación, detalle) con eventos de historial
+- [ ] T060 [P] [US2] Implementar `server/src/services/products.ts` y `server/src/http/routes/products.ts`
+- [ ] T061 [US2] Implementar la asignación `PUT /api/clients/:id/products` en `server/src/services/clients.ts` y su ruta
+- [ ] T062 [P] [US2] Implementar en web `ClientsPage`, `ClientDetailPage` y `ClientForm` en `web/src/pages/clients/`. `ClientDetailPage` incluye asignar y desasignar productos Activos (RF-49, RF-50)
+- [ ] T063 [P] [US2] Implementar en web `ProductsPage` y `ProductForm` en `web/src/pages/products/`
 
 **Checkpoint**: clientes y productos listos para facturar
 
@@ -159,32 +160,32 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T063 [P] [US3] Test de `billing-dates.ts` en `server/tests/unit/domain/invoice-dates.test.ts`: emisión, período de servicio y vencimiento en el proceso del 15/10/2026 y en un reintento manual del 03/11/2026 (RF-79 a RF-81, AC-75, AC-76)
-- [ ] T064 [P] [US3] Test del lector de dolarhoy.com en `server/tests/unit/adapters/dolarhoy.test.ts` con un HTML de ejemplo en `server/tests/fixtures/dolarhoy.html`: extrae el blue venta en centavos, falla si cambió el formato y a los 10 s (RF-63, AC-228)
-- [ ] T065 [P] [US3] Test de integración en `server/tests/integration/billing/exchange-rate.test.ts`: conversión con la cotización leída y registro con valor, fuente y fecha; uso de la última por `read_at` si el sitio no responde y alta del banner; confirmación del banner por Admin o Editor; sin cotización no se factura a clientes con USD y sí a los de solo ARS (AC-63, AC-65, AC-66, AC-68, AC-69). Además: la cotización se lee al generar cada factura, también en reintentos automáticos y manuales (AC-241)
-- [ ] T066 [P] [US3] Test de integración en `server/tests/integration/billing/billing-run.test.ts`: una factura C por cliente Activo con productos Activos en estado Pendiente de pago; sin factura para clientes sin productos, con solo productos Inactivos o Inactivos; nombres, precios, asignaciones, razón social y condición frente al IVA vigentes al facturar sin alterar facturas emitidas; una sola factura por cliente y período aunque se repita la corrida o se retome una interrumpida (AC-36, AC-39, AC-45 a AC-51, AC-54, AC-72, AC-74, AC-85 a AC-87)
-- [ ] T067 [P] [US3] Test de integración en `server/tests/integration/billing/arca-idempotency.test.ts`: tipo 11 y punto de venta configurado en la solicitud; timeout después de autorizar → el siguiente intento registra el CAE de `findVoucher` sin pedir otro; cliente sin condición frente al IVA → sin llamada a ARCA y error de proceso Pendiente con el mensaje de RF-83 (con reintentos en 0); sin cotización → error de proceso Pendiente (AC-67, AC-70, AC-71, AC-73, AC-77). Además: pedidos de número y CAE serializados (un reintento de la cola no corre en paralelo con la corrida); número liberado si ARCA no lo autorizó, sin bloquear la factura siguiente; rechazo de validación sin reintento y con el mensaje de ARCA; datos vigentes en cada reintento salvo comprobante ya autorizado; sin datos del emisor o sin punto de venta → error sin llamar a ARCA (AC-242, AC-247, research R-05)
-- [ ] T068 [P] [US3] Test de integración en `server/tests/integration/billing/scheduling.test.ts` con reloj falso: arranque a las 11:00 del 15 (±1 min) y no a las 11:00 UTC; recuperación el 17/10 y no en noviembre; período cancelado no se factura; reactivación el 20/10 dispara la facturación y el 01/11 se rechaza; "Facturar ahora" el 05/10 impide la corrida del 15; cambio de hora a 14:00 (AC-52, AC-53, AC-55, AC-57, AC-58, AC-61, AC-229). Además: el sistema que vuelve el 17/10 a las 09:00 arranca dentro del minuto; un período `en_curso` interrumpido el 31/10 se retoma el 01/11 (AC-53, RF-53)
-- [ ] T069 [P] [US3] Test de API en `server/tests/api/billing.test.ts`: estado del botón "Facturar ahora" con sus motivos, rechazo directo del endpoint si está cancelado, en curso o realizado, rechazo de cancelar un período iniciado, solo Admin (AC-56, AC-59, AC-60, AC-216)
-- [ ] T070 [P] [US3] Test de integración en `server/tests/integration/billing/invoice-email.test.ts`: email al email de facturación con el PDF, número, período, importe, vencimiento, deuda vigente calculada al enviar e indicación de facturas anteriores, pedido de comprobante, leyenda de homologación, remitente y firma con nombre de fantasía o razón social, registro en el historial (AC-78, AC-81, AC-82, AC-237, RF-88 aclarado). Además: el email sale dentro del minuto siguiente a la generación (RF-85)
-- [ ] T071 [P] [US3] Test de `server/src/documents/invoice-pdf.ts` en `server/tests/unit/documents/invoice-pdf.test.ts`: el texto del PDF contiene todos los campos de RF-93, los datos del emisor y su CUIT, la cotización si hubo USD y la leyenda de homologación (AC-83, AC-84)
-- [ ] T072 [P] [US3] Test de los adapters reales de ARCA en `server/tests/unit/adapters/arca-soap.test.ts` con `fetch` mockeado: TRA firmado con el certificado y la clave de las variables de entorno, cacheo del token, XML de `FECAESolicitar` con Concepto 2, fechas de servicio y `CondicionIVAReceptorId`, timeout a los 30 s (AC-70, AC-227, AC-228)
-- [ ] T073 [P] [US3] Test de integración en `server/tests/integration/billing/certificate-banner.test.ts`: banner si el certificado venció o no se puede leer, con fecha si vence en 30 días y sin banner a 31 días (AC-90, AC-91)
+- [ ] T064 [P] [US3] Test de `billing-dates.ts` en `server/tests/unit/domain/invoice-dates.test.ts`: emisión, período de servicio y vencimiento en el proceso del 15/10/2026 y en un reintento manual del 03/11/2026 (RF-79 a RF-81, AC-75, AC-76)
+- [ ] T065 [P] [US3] Test del lector de dolarhoy.com en `server/tests/unit/adapters/dolarhoy.test.ts` con un HTML de ejemplo en `server/tests/fixtures/dolarhoy.html`: extrae el blue venta en centavos, falla si cambió el formato y a los 10 s (RF-63, AC-228)
+- [ ] T066 [P] [US3] Test de integración en `server/tests/integration/billing/exchange-rate.test.ts`: conversión con la cotización leída y registro con valor, fuente y fecha; uso de la última por `read_at` si el sitio no responde y alta del banner; confirmación del banner por Admin o Editor; sin cotización no se factura a clientes con USD y sí a los de solo ARS (AC-63, AC-65, AC-66, AC-68, AC-69). Además: la cotización se lee al generar cada factura, también en reintentos automáticos y manuales (AC-241)
+- [ ] T067 [P] [US3] Test de integración en `server/tests/integration/billing/billing-run.test.ts`: una factura C por cliente Activo con productos Activos en estado Pendiente de pago; sin factura para clientes sin productos, con solo productos Inactivos o Inactivos; nombres, precios, asignaciones, razón social y condición frente al IVA vigentes al facturar sin alterar facturas emitidas; una sola factura por cliente y período aunque se repita la corrida o se retome una interrumpida (AC-36, AC-39, AC-45 a AC-51, AC-54, AC-72, AC-74, AC-85 a AC-87)
+- [ ] T068 [P] [US3] Test de integración en `server/tests/integration/billing/arca-idempotency.test.ts`: tipo 11 y punto de venta configurado en la solicitud; timeout después de autorizar → el siguiente intento registra el CAE de `findVoucher` sin pedir otro; cliente sin condición frente al IVA → sin llamada a ARCA y error de proceso Pendiente con el mensaje de RF-83 (con reintentos en 0); sin cotización → error de proceso Pendiente (AC-67, AC-70, AC-71, AC-73, AC-77). Además: pedidos de número y CAE serializados (un reintento de la cola no corre en paralelo con la corrida); número liberado si ARCA no lo autorizó, sin bloquear la factura siguiente; rechazo de validación sin reintento y con el mensaje de ARCA; datos vigentes en cada reintento salvo comprobante ya autorizado; sin datos del emisor o sin punto de venta → error sin llamar a ARCA (AC-242, AC-247, research R-05)
+- [ ] T069 [P] [US3] Test de integración en `server/tests/integration/billing/scheduling.test.ts` con reloj falso: arranque a las 11:00 del 15 (±1 min) y no a las 11:00 UTC; recuperación el 17/10 y no en noviembre; período cancelado no se factura; reactivación el 20/10 dispara la facturación y el 01/11 se rechaza; "Facturar ahora" el 05/10 impide la corrida del 15; cambio de hora a 14:00 (AC-52, AC-53, AC-55, AC-57, AC-58, AC-61, AC-229). Además: el sistema que vuelve el 17/10 a las 09:00 arranca dentro del minuto; un período `en_curso` interrumpido el 31/10 se retoma el 01/11 (AC-53, RF-53)
+- [ ] T070 [P] [US3] Test de API en `server/tests/api/billing.test.ts`: estado del botón "Facturar ahora" con sus motivos, rechazo directo del endpoint si está cancelado, en curso o realizado, rechazo de cancelar un período iniciado, solo Admin (AC-56, AC-59, AC-60, AC-216)
+- [ ] T071 [P] [US3] Test de integración en `server/tests/integration/billing/invoice-email.test.ts`: email al email de facturación con el PDF, número, período, importe, vencimiento, deuda vigente calculada al enviar e indicación de facturas anteriores, pedido de comprobante, leyenda de homologación, remitente y firma con nombre de fantasía o razón social, registro en el historial (AC-78, AC-81, AC-82, AC-237, RF-88 aclarado). Además: el email sale dentro del minuto siguiente a la generación (RF-85)
+- [ ] T072 [P] [US3] Test de `server/src/documents/invoice-pdf.ts` en `server/tests/unit/documents/invoice-pdf.test.ts`: el texto del PDF contiene todos los campos de RF-93, los datos del emisor y su CUIT, la cotización si hubo USD y la leyenda de homologación (AC-83, AC-84)
+- [ ] T073 [P] [US3] Test de los adapters reales de ARCA en `server/tests/unit/adapters/arca-soap.test.ts` con `fetch` mockeado: TRA firmado con el certificado y la clave de las variables de entorno, cacheo del token, XML de `FECAESolicitar` con Concepto 2, fechas de servicio y `CondicionIVAReceptorId`, timeout a los 30 s (AC-70, AC-227, AC-228)
+- [ ] T074 [P] [US3] Test de integración en `server/tests/integration/billing/certificate-banner.test.ts`: banner si el certificado venció o no se puede leer, con fecha si vence en 30 días y sin banner a 31 días (AC-90, AC-91)
 
 ### Implementation for User Story 3
 
-- [ ] T074 [P] [US3] Agregar a `server/src/domain/billing-dates.ts` las fechas de emisión, servicio y vencimiento de la factura
-- [ ] T075 [P] [US3] Implementar `server/src/adapters/fx/dolarhoy.ts` con cheerio y timeout de 10 s (research R-13)
-- [ ] T076 [P] [US3] Implementar `server/src/adapters/arca/wsaa.ts` (TRA, firma CMS con node-forge, cache en `arca_tokens`), `server/src/adapters/arca/wsfev1.ts` (fast-xml-parser) y `server/src/adapters/arca/certificate.ts`, y registrarlos en `server/src/adapters/index.ts` (research R-06)
-- [ ] T077 [US3] Implementar `server/src/services/exchange-rates.ts` (lectura al generar cada factura, también en reintentos, registro, respaldo y banner, RF-63 a RF-70)
-- [ ] T078 [US3] Implementar `server/src/services/process-errors.ts` con el alta de errores Pendientes (RF-174); los reintentos se agregan en US7
-- [ ] T079 [US3] Implementar `server/src/services/billing.ts`: armado de ítems, snapshots, generación idempotente con estado `generando` y recuperación por `findVoucher` (research R-05, RF-71 a RF-83, RF-94, RF-95). Incluye el candado por punto de venta, la liberación del número, los rechazos sin encolar, los datos vigentes en reintentos y el control de datos del emisor (research R-05, RF-171, RF-219)
-- [ ] T080 [US3] Implementar `server/src/services/billing-periods.ts` (cancelar, reactivar, "Facturar ahora", estados del botón, RF-54 a RF-61)
-- [ ] T081 [P] [US3] Implementar `server/src/documents/invoice-pdf.ts` con pdfkit (RF-90, RF-92, RF-93)
-- [ ] T082 [US3] Implementar la plantilla de factura en `server/src/documents/email-templates.ts` y `server/src/services/invoice-email.ts` (deuda vigente calculada en cada intento, RF-84 a RF-90, RF-96, RF-215)
-- [ ] T083 [US3] Implementar `server/src/jobs/billing-job.ts` y su condición en el tick de `server/src/jobs/scheduler.ts`, retomando períodos `en_curso` al arrancar (research R-04)
-- [ ] T084 [US3] Implementar `server/src/services/banners.ts` (certificado y cotización), `server/src/http/routes/billing.ts`, `GET /api/invoices` básico en `server/src/http/routes/invoices.ts` y la parte de banners de `GET /api/dashboard` en `server/src/http/routes/dashboard.ts`
-- [ ] T085 [P] [US3] Implementar en web `BillingPage` (estado del período, "Facturar ahora", cancelar y reactivar), `InvoicesPage` básica y `web/src/components/Banners.tsx`. El banner de cotización incluye el botón para confirmarla (RF-70)
+- [ ] T075 [P] [US3] Agregar a `server/src/domain/billing-dates.ts` las fechas de emisión, servicio y vencimiento de la factura
+- [ ] T076 [P] [US3] Implementar `server/src/adapters/fx/dolarhoy.ts` con cheerio y timeout de 10 s (research R-13)
+- [ ] T077 [P] [US3] Implementar `server/src/adapters/arca/wsaa.ts` (TRA, firma CMS con node-forge, cache en `arca_tokens`), `server/src/adapters/arca/wsfev1.ts` (fast-xml-parser) y `server/src/adapters/arca/certificate.ts`, y registrarlos en `server/src/adapters/index.ts` (research R-06)
+- [ ] T078 [US3] Implementar `server/src/services/exchange-rates.ts` (lectura al generar cada factura, también en reintentos, registro, respaldo y banner, RF-63 a RF-70)
+- [ ] T079 [US3] Implementar `server/src/services/process-errors.ts` con el alta de errores Pendientes (RF-174); los reintentos se agregan en US7
+- [ ] T080 [US3] Implementar `server/src/services/billing.ts`: armado de ítems, snapshots, generación idempotente con estado `generando` y recuperación por `findVoucher` (research R-05, RF-71 a RF-83, RF-94, RF-95). Incluye el candado por punto de venta, la liberación del número, los rechazos sin encolar, los datos vigentes en reintentos y el control de datos del emisor (research R-05, RF-171, RF-219)
+- [ ] T081 [US3] Implementar `server/src/services/billing-periods.ts` (cancelar, reactivar, "Facturar ahora", estados del botón, RF-54 a RF-61)
+- [ ] T082 [P] [US3] Implementar `server/src/documents/invoice-pdf.ts` con pdfkit (RF-90, RF-92, RF-93)
+- [ ] T083 [US3] Implementar la plantilla de factura en `server/src/documents/email-templates.ts` y `server/src/services/invoice-email.ts` (deuda vigente calculada en cada intento, RF-84 a RF-90, RF-96, RF-215)
+- [ ] T084 [US3] Implementar `server/src/jobs/billing-job.ts` y su condición en el tick de `server/src/jobs/scheduler.ts`, retomando períodos `en_curso` al arrancar (research R-04)
+- [ ] T085 [US3] Implementar `server/src/services/banners.ts` (certificado y cotización), `server/src/http/routes/billing.ts`, `GET /api/invoices` básico en `server/src/http/routes/invoices.ts` y la parte de banners de `GET /api/dashboard` en `server/src/http/routes/dashboard.ts`
+- [ ] T086 [P] [US3] Implementar en web `BillingPage` (estado del período, "Facturar ahora", cancelar y reactivar), `InvoicesPage` básica y `web/src/components/Banners.tsx`. El banner de cotización incluye el botón para confirmarla (RF-70)
 
 **Checkpoint**: facturación mensual de punta a punta con ARCA mock
 
@@ -198,24 +199,24 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T086 [P] [US4] Test de `server/src/domain/email-classification.ts` en `server/tests/unit/domain/email-classification.test.ts`: orden error > dudoso > si > no (RF-123, AC-113, AC-127, AC-136)
-- [ ] T087 [P] [US4] Test de `server/src/domain/amount-matching.ts` en `server/tests/unit/domain/amount-matching.test.ts`: coincidencia única, por combinación, de todas, por comprobante y por suma, combinación más antigua, sin combinación más antigua, diferencia de un centavo, monto cero (AC-133 a AC-142, AC-230, AC-231)
-- [ ] T088 [P] [US4] Test de `server/src/domain/payment-rules.ts` en `server/tests/unit/domain/payment-rules.test.ts`: exactamente una regla por caso con su motivo literal, para "no", sin deuda, cliente en revisión, error, dudoso, CUIT o monto no extraído, CUIT distinto (también con guiones), validable con y sin coincidencias (RF-126 a RF-137, AC-119 a AC-123, AC-125 a AC-132, AC-143)
-- [ ] T089 [P] [US4] Test de `server/src/adapters/llm/retry-policy.ts` en `server/tests/unit/adapters/llm-retry-policy.test.ts` con timers falsos: esperas de 2, 4 y 8 s, éxito al tercer intento, 401 y 404 sin reintento, 429 y 408 con reintento, timeout de 10 s, respuesta ininterpretable, error tras el cuarto intento (RNF-02, AC-116 a AC-118, AC-125)
-- [ ] T090 [P] [US4] Test de `server/src/adapters/llm/anthropic.ts` en `server/tests/unit/adapters/anthropic.test.ts` con el SDK mockeado: usa `ANTHROPIC_API_KEY` y el modelo de AGENTS.md, envía el cuerpo del email y el adjunto como bloque image o document, toma el CUIT del ordenante y descarta CUIT de menos de 11 dígitos (RF-119 a RF-122, AC-114, AC-226). Además: un pago en otra moneda se clasifica "dudoso" y los adjuntos de un mismo email se clasifican en paralelo (AC-244, RNF-01)
-- [ ] T091 [P] [US4] Test de `server/src/adapters/mail/imap-mailbox.ts` en `server/tests/unit/adapters/imap-mailbox.test.ts` con imapflow mockeado: búsqueda desde la fecha de corte, imágenes embebidas ignoradas, solo JPEG, PNG, GIF, WebP y PDF, timeout de 30 s (RF-116, RF-117, AC-106, AC-107, AC-228)
-- [ ] T092 [P] [US4] Test de integración en `server/tests/integration/payments/mailbox-check.test.ts` con reloj falso: revisión cada 15 min desde el inicio de la anterior, sin solaparse, nuevo intervalo aplicado, falla → un único error Pendiente con un intento por intervalo, recuperación que procesa los atrasados y resuelve el error, primera revisión desde la primera factura, sin facturas no se procesa nada, siguientes solo los nuevos (AC-92, AC-93, AC-95 a AC-99, RF-107 aclarado)
-- [ ] T093 [P] [US4] Test de integración en `server/tests/integration/payments/email-processing.test.ts`: Message-ID repetido, remitente propio ignorado, aviso para desconocidos, remitente sin distinguir mayúsculas, registro en el historial, sin adjunto sin efecto, cliente Inactivo procesado, registro de clasificación, CUIT, monto y marca de error, asociación a la revisión pendiente, cambio de email y de CUIT del cliente, factura devuelta a Pendiente que vuelve a validarse (AC-35, AC-37, AC-100 a AC-105, AC-108, AC-112, AC-115, AC-120, AC-121, AC-124, AC-152). Además: emails de una misma revisión en orden de recepción y email asociado a cada factura cuyo estado cambió (AC-243, AC-245)
+- [ ] T087 [P] [US4] Test de `server/src/domain/email-classification.ts` en `server/tests/unit/domain/email-classification.test.ts`: orden error > dudoso > si > no (RF-123, AC-113, AC-127, AC-136)
+- [ ] T088 [P] [US4] Test de `server/src/domain/amount-matching.ts` en `server/tests/unit/domain/amount-matching.test.ts`: coincidencia única, por combinación, de todas, por comprobante y por suma, combinación más antigua, sin combinación más antigua, diferencia de un centavo, monto cero (AC-133 a AC-142, AC-230, AC-231)
+- [ ] T089 [P] [US4] Test de `server/src/domain/payment-rules.ts` en `server/tests/unit/domain/payment-rules.test.ts`: exactamente una regla por caso con su motivo literal, para "no", sin deuda, cliente en revisión, error, dudoso, CUIT o monto no extraído, CUIT distinto (también con guiones), validable con y sin coincidencias (RF-126 a RF-137, AC-119 a AC-123, AC-125 a AC-132, AC-143)
+- [ ] T090 [P] [US4] Test de `server/src/adapters/llm/retry-policy.ts` en `server/tests/unit/adapters/llm-retry-policy.test.ts` con timers falsos: esperas de 2, 4 y 8 s, éxito al tercer intento, 401 y 404 sin reintento, 429 y 408 con reintento, timeout de 10 s, respuesta ininterpretable, error tras el cuarto intento (RNF-02, AC-116 a AC-118, AC-125)
+- [ ] T091 [P] [US4] Test de `server/src/adapters/llm/anthropic.ts` en `server/tests/unit/adapters/anthropic.test.ts` con el SDK mockeado: usa `ANTHROPIC_API_KEY` y el modelo de AGENTS.md, envía el cuerpo del email y el adjunto como bloque image o document, toma el CUIT del ordenante y descarta CUIT de menos de 11 dígitos (RF-119 a RF-122, AC-114, AC-226). Además: un pago en otra moneda se clasifica "dudoso" y los adjuntos de un mismo email se clasifican en paralelo (AC-244, RNF-01)
+- [ ] T092 [P] [US4] Test de `server/src/adapters/mail/imap-mailbox.ts` en `server/tests/unit/adapters/imap-mailbox.test.ts` con imapflow mockeado: búsqueda desde la fecha de corte, imágenes embebidas ignoradas, solo JPEG, PNG, GIF, WebP y PDF, timeout de 30 s (RF-116, RF-117, AC-106, AC-107, AC-228)
+- [ ] T093 [P] [US4] Test de integración en `server/tests/integration/payments/mailbox-check.test.ts` con reloj falso: revisión cada 15 min desde el inicio de la anterior, sin solaparse, nuevo intervalo aplicado, falla → un único error Pendiente con un intento por intervalo, recuperación que procesa los atrasados y resuelve el error, primera revisión desde la primera factura, sin facturas no se procesa nada, siguientes solo los nuevos (AC-92, AC-93, AC-95 a AC-99, RF-107 aclarado)
+- [ ] T094 [P] [US4] Test de integración en `server/tests/integration/payments/email-processing.test.ts`: Message-ID repetido, remitente propio ignorado, aviso para desconocidos, remitente sin distinguir mayúsculas, registro en el historial, sin adjunto sin efecto, cliente Inactivo procesado, registro de clasificación, CUIT, monto y marca de error, asociación a la revisión pendiente, cambio de email y de CUIT del cliente, factura devuelta a Pendiente que vuelve a validarse (AC-35, AC-37, AC-100 a AC-105, AC-108, AC-112, AC-115, AC-120, AC-121, AC-124, AC-152). Además: emails de una misma revisión en orden de recepción y email asociado a cada factura cuyo estado cambió (AC-243, AC-245)
 
 ### Implementation for User Story 4
 
-- [ ] T094 [P] [US4] Implementar `server/src/domain/email-classification.ts`
-- [ ] T095 [P] [US4] Implementar `server/src/domain/amount-matching.ts` según research R-09
-- [ ] T096 [US4] Implementar `server/src/domain/payment-rules.ts` usando `amount-matching.ts`, `cuit.ts` y `money.ts`
-- [ ] T097 [P] [US4] Implementar `server/src/adapters/llm/retry-policy.ts` y `server/src/adapters/llm/anthropic.ts` (herramienta con esquema de salida, `maxRetries: 0`, `timeout: 10_000`) y registrarlo en `server/src/adapters/index.ts` (research R-07)
-- [ ] T098 [P] [US4] Implementar `server/src/adapters/mail/imap-mailbox.ts` y registrarlo en `server/src/adapters/index.ts` (research R-08)
-- [ ] T099 [US4] Implementar `server/src/services/payment-processing.ts`: identificación del cliente, avisos, clasificación por adjunto, decisión de `payment-rules.ts`, transiciones con `invoice-status.ts`, motivos, `invoice_emails` e historial en una transacción
-- [ ] T100 [US4] Implementar `server/src/services/mailbox-check.ts` y `server/src/jobs/mailbox-job.ts` con su condición en el tick (RF-99 a RF-109)
+- [ ] T095 [P] [US4] Implementar `server/src/domain/email-classification.ts`
+- [ ] T096 [P] [US4] Implementar `server/src/domain/amount-matching.ts` según research R-09
+- [ ] T097 [US4] Implementar `server/src/domain/payment-rules.ts` usando `amount-matching.ts`, `cuit.ts` y `money.ts`
+- [ ] T098 [P] [US4] Implementar `server/src/adapters/llm/retry-policy.ts` y `server/src/adapters/llm/anthropic.ts` (herramienta con esquema de salida, `maxRetries: 0`, `timeout: 10_000`) y registrarlo en `server/src/adapters/index.ts` (research R-07)
+- [ ] T099 [P] [US4] Implementar `server/src/adapters/mail/imap-mailbox.ts` y registrarlo en `server/src/adapters/index.ts` (research R-08)
+- [ ] T100 [US4] Implementar `server/src/services/payment-processing.ts`: identificación del cliente, avisos, clasificación por adjunto, decisión de `payment-rules.ts`, transiciones con `invoice-status.ts`, motivos, `invoice_emails` e historial en una transacción
+- [ ] T101 [US4] Implementar `server/src/services/mailbox-check.ts` y `server/src/jobs/mailbox-job.ts` con su condición en el tick (RF-99 a RF-109)
 
 **Checkpoint**: el circuito facturar → recibir comprobante → Pago recibido o Revisión manual funciona con fakes
 
@@ -229,15 +230,15 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T101 [P] [US5] Test de API en `server/tests/api/review.test.ts`: listado de pagos con evidencia y motivo y sin otros estados, avisos Pendientes, pasar a Pagada o devolver a Pendiente desde Pago recibido y Revisión manual, motivo eliminado, pasar a Pagada desde el listado, aviso Revisado con usuario, resueltos con decisión, usuario, fecha, estado y motivo previos y comprobantes, filtros por cliente y fechas (AC-10, AC-144 a AC-151, AC-153, AC-238)
-- [ ] T102 [P] [US5] Test de API en `server/tests/api/review-conflict.test.ts`: cambio de estado con `expectedStatus` desactualizado → `409` con el estado vigente y sin cambios (AC-240)
-- [ ] T103 [P] [US5] Test de componente en `web/tests/pages/review.test.tsx`: ante `409` se muestra el mensaje y se recarga la vista (AC-240)
+- [ ] T102 [P] [US5] Test de API en `server/tests/api/review.test.ts`: listado de pagos con evidencia y motivo y sin otros estados, avisos Pendientes, pasar a Pagada o devolver a Pendiente desde Pago recibido y Revisión manual, motivo eliminado, pasar a Pagada desde el listado, aviso Revisado con usuario, resueltos con decisión, usuario, fecha, estado y motivo previos y comprobantes, filtros por cliente y fechas (AC-10, AC-144 a AC-151, AC-153, AC-238)
+- [ ] T103 [P] [US5] Test de API en `server/tests/api/review-conflict.test.ts`: cambio de estado con `expectedStatus` desactualizado → `409` con el estado vigente y sin cambios (AC-240)
+- [ ] T104 [P] [US5] Test de componente en `web/tests/pages/review.test.tsx`: ante `409` se muestra el mensaje y se recarga la vista (AC-240)
 
 ### Implementation for User Story 5
 
-- [ ] T104 [US5] Implementar `server/src/services/review.ts` (pagos, avisos, resueltos y transiciones de usuario con `UPDATE ... WHERE status = ?`, research R-14)
-- [ ] T105 [US5] Implementar `server/src/http/routes/review.ts` y `POST /api/invoices/:id/status` en `server/src/http/routes/invoices.ts`
-- [ ] T106 [P] [US5] Implementar en web `ReviewPage` con las pestañas Pagos, Avisos, Errores (vacía hasta US7) y Resueltos en `web/src/pages/review/`, y el botón "Pasar a Pagada" en `InvoicesPage` para facturas Pendiente de pago, con `expectedStatus` (RF-147)
+- [ ] T105 [US5] Implementar `server/src/services/review.ts` (pagos, avisos, resueltos y transiciones de usuario con `UPDATE ... WHERE status = ?`, research R-14)
+- [ ] T106 [US5] Implementar `server/src/http/routes/review.ts` y `POST /api/invoices/:id/status` en `server/src/http/routes/invoices.ts`
+- [ ] T107 [P] [US5] Implementar en web `ReviewPage` con las pestañas Pagos, Avisos, Errores (vacía hasta US7) y Resueltos en `web/src/pages/review/`, y el botón "Pasar a Pagada" en `InvoicesPage` para facturas Pendiente de pago, con `expectedStatus` (RF-147)
 
 **Checkpoint**: el circuito de cobranza se cierra con la decisión humana
 
@@ -251,17 +252,17 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 9 ⚠️
 
-- [ ] T107 [P] [US9] Test de integración en `server/tests/integration/mock/end-to-end.test.ts` con el modo mock real: arranque solo con `MOCK_MODE`, facturación del día 15, sin llamadas a ARCA, al LLM ni a Gmail, clasificación por nombre de archivo y cambios de estado con sus motivos, procesamiento en la siguiente revisión (AC-196 a AC-199, AC-203, AC-204)
-- [ ] T108 [P] [US9] Test de integración en `server/tests/integration/mock/mock-markings.test.ts`: PDF y emails marcados como simulados, CUIT emisor `20111111112` o `ARCA_CUIT`, sin banner de certificado (AC-205 a AC-207). Además: el PDF y el email de cada factura llevan también la leyenda de homologación (AC-207)
-- [ ] T109 [P] [US9] Test de integración en `server/tests/integration/mock/db-separation.test.ts`: datos creados en un modo no aparecen en el otro; error de arranque con `DATABASE_PATH` apuntando a la base mock fuera de mock (AC-208 a AC-210)
-- [ ] T110 [P] [US9] Test de API en `server/tests/api/mock-mailbox.test.ts`: Admin ve enviados y recibidos, Editor y Consulta solo recibidos de clientes, Consulta no puede cargar, email con remitente propio ignorado, recuperación de contraseña rechazada en mock, casilla inaccesible fuera de mock (AC-200 a AC-202, AC-219 a AC-221)
-- [ ] T111 [P] [US9] Test de componente en `web/tests/components/header.test.tsx`: indicador "Modo mock: ARCA, LLM y email simulados" solo en mock y sin opción de recuperar contraseña en el login (AC-195, AC-202). Además: indicador "Emails redirigidos a <dirección>" solo con `EMAIL_REDIRECT_TO` definida (AC-250)
+- [ ] T108 [P] [US9] Test de integración en `server/tests/integration/mock/end-to-end.test.ts` con el modo mock real: arranque solo con `MOCK_MODE`, facturación del día 15, sin llamadas a ARCA, al LLM ni a Gmail, clasificación por nombre de archivo y cambios de estado con sus motivos, procesamiento en la siguiente revisión (AC-196 a AC-199, AC-203, AC-204)
+- [ ] T109 [P] [US9] Test de integración en `server/tests/integration/mock/mock-markings.test.ts`: PDF y emails marcados como simulados, CUIT emisor `20111111112` o `ARCA_CUIT`, sin banner de certificado (AC-205 a AC-207). Además: el PDF y el email de cada factura llevan también la leyenda de homologación (AC-207)
+- [ ] T110 [P] [US9] Test de integración en `server/tests/integration/mock/db-separation.test.ts`: datos creados en un modo no aparecen en el otro; error de arranque con `DATABASE_PATH` apuntando a la base mock fuera de mock (AC-208 a AC-210)
+- [ ] T111 [P] [US9] Test de API en `server/tests/api/mock-mailbox.test.ts`: Admin ve enviados y recibidos, Editor y Consulta solo recibidos de clientes, Consulta no puede cargar, email con remitente propio ignorado, recuperación de contraseña rechazada en mock, casilla inaccesible fuera de mock (AC-200 a AC-202, AC-219 a AC-221)
+- [ ] T112 [P] [US9] Test de componente en `web/tests/components/header.test.tsx`: indicador "Modo mock: ARCA, LLM y email simulados" solo en mock y sin opción de recuperar contraseña en el login (AC-195, AC-202)
 
 ### Implementation for User Story 9
 
-- [ ] T112 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (multipart, `403` fuera de mock, visibilidad por perfil)
-- [ ] T113 [US9] Agregar las marcas de modo mock (RF-210), conservando la leyenda de homologación, a `server/src/documents/invoice-pdf.ts` y `server/src/documents/email-templates.ts`, y ocultar el banner de certificado en mock en `server/src/services/banners.ts` (RF-208)
-- [ ] T114 [P] [US9] Implementar en web `MockMailboxPage` (listado, detalle con adjuntos y formulario de carga) en `web/src/pages/mock-mailbox/`, el indicador en `web/src/components/AppLayout.tsx` y el ocultamiento de la recuperación en `LoginPage`, y el indicador de redirección de emails en `AppLayout.tsx` (RF-220)
+- [ ] T113 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (multipart, `403` fuera de mock, visibilidad por perfil)
+- [ ] T114 [US9] Agregar las marcas de modo mock (RF-210), conservando la leyenda de homologación, a `server/src/documents/invoice-pdf.ts` y `server/src/documents/email-templates.ts`, y ocultar el banner de certificado en mock en `server/src/services/banners.ts` (RF-208)
+- [ ] T115 [P] [US9] Implementar en web `MockMailboxPage` (listado, detalle con adjuntos y formulario de carga) en `web/src/pages/mock-mailbox/`, el indicador en `web/src/components/AppLayout.tsx` y el ocultamiento de la recuperación en `LoginPage`
 
 **Checkpoint**: quickstart.md §2 se puede recorrer completo
 
@@ -275,15 +276,15 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T115 [P] [US6] Test de integración en `server/tests/integration/reminders/reminders-run.test.ts` con reloj falso: inicio a las 11:00 del último día (±1 min) y a las 14:00 tras el cambio, un único recordatorio por cliente Activo con deuda y sin revisión (también sin productos), ninguno a clientes en revisión, sin deuda o Inactivos, contenido con cada factura, total y pedido de comprobante (AC-88, AC-154 a AC-159, AC-162). Además: una corrida interrumpida se retoma el mismo día solo para los clientes que faltan y nunca al día siguiente (AC-246)
-- [ ] T116 [P] [US6] Test de API en `server/tests/api/dashboard.test.ts`: listado de clientes con deuda vigente con total, cantidad y si está en revisión; recordatorio manual por cualquier perfil registrado con el usuario y visible para Editor y Consulta; bloqueos con mensaje para clientes sin deuda, en revisión o Inactivos (AC-12, AC-13, AC-89, AC-161, AC-163, AC-164)
+- [ ] T116 [P] [US6] Test de integración en `server/tests/integration/reminders/reminders-run.test.ts` con reloj falso: inicio a las 11:00 del último día (±1 min) y a las 14:00 tras el cambio, un único recordatorio por cliente Activo con deuda y sin revisión (también sin productos), ninguno a clientes en revisión, sin deuda o Inactivos, contenido con cada factura, total y pedido de comprobante (AC-88, AC-154 a AC-159, AC-162). Además: una corrida interrumpida se retoma el mismo día solo para los clientes que faltan y nunca al día siguiente (AC-246)
+- [ ] T117 [P] [US6] Test de API en `server/tests/api/dashboard.test.ts`: listado de clientes con deuda vigente con total, cantidad y si está en revisión; recordatorio manual por cualquier perfil registrado con el usuario y visible para Editor y Consulta; bloqueos con mensaje para clientes sin deuda, en revisión o Inactivos (AC-12, AC-13, AC-89, AC-161, AC-163, AC-164)
 
 ### Implementation for User Story 6
 
-- [ ] T117 [US6] Implementar `server/src/services/reminders.ts` (armado con las facturas adeudadas actuales y validaciones) y la plantilla de recordatorio en `server/src/documents/email-templates.ts`
-- [ ] T118 [US6] Implementar `server/src/jobs/reminders-job.ts` con `reminder_runs` y su condición en el tick, retomando el mismo día una corrida interrumpida (RF-149)
-- [ ] T119 [US6] Completar `GET /api/dashboard` con el listado de deuda y agregar `POST /api/clients/:id/reminder` en `server/src/http/routes/dashboard.ts`
-- [ ] T120 [P] [US6] Implementar en web `DashboardPage` con el listado, los banners y el botón de recordatorio en `web/src/pages/DashboardPage.tsx`
+- [ ] T118 [US6] Implementar `server/src/services/reminders.ts` (armado con las facturas adeudadas actuales y validaciones) y la plantilla de recordatorio en `server/src/documents/email-templates.ts`
+- [ ] T119 [US6] Implementar `server/src/jobs/reminders-job.ts` con `reminder_runs` y su condición en el tick, retomando el mismo día una corrida interrumpida (RF-149)
+- [ ] T120 [US6] Completar `GET /api/dashboard` con el listado de deuda y agregar `POST /api/clients/:id/reminder` en `server/src/http/routes/dashboard.ts`
+- [ ] T121 [P] [US6] Implementar en web `DashboardPage` con el listado, los banners y el botón de recordatorio en `web/src/pages/DashboardPage.tsx`
 
 **Checkpoint**: recordatorios y dashboard funcionando
 
@@ -297,16 +298,16 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 7 ⚠️
 
-- [ ] T121 [P] [US7] Test de integración en `server/tests/integration/errors/retry-queue.test.ts` con reloj falso: segundo intento a los 5 min (±1) con éxito sin error; 4 intentos y error Pendiente con cliente, operación, período, intentos y último mensaje para generación, envío de factura y recordatorio; reintentos en 0 → un intento; espera de 10 min; otro cliente no espera los reintentos; reenvío sin regenerar la factura (AC-79, AC-80, AC-178 a AC-182, AC-184). Además: la cola se retoma tras un reinicio con el intento guardado y un reintento de recordatorio se cancela sin error si el cliente ya no corresponde (AC-247)
-- [ ] T122 [P] [US7] Test de API en `server/tests/api/process-errors.test.ts`: listado de Pendientes sin Resueltos, reintento manual con un único intento que genera y envía la factura, reenvío solo del email, error que sigue Pendiente con el nuevo mensaje, marcar Resuelto con usuario, banner con la cantidad y que desaparece, recordatorio manual fallido sin error de proceso (AC-186 a AC-194). Además: el reintento manual de una generación se bloquea con mensaje si el cliente está Inactivo o sin productos Activos (AC-248)
-- [ ] T123 [P] [US7] Test de API en `server/tests/api/reminder-retry.test.ts`: reintento manual de un recordatorio recalculado con la deuda actual y bloqueado con mensaje, dejando el error Pendiente, si el cliente no tiene deuda, está en revisión o está Inactivo (RF-178 aclarado, FR-046)
+- [ ] T122 [P] [US7] Test de integración en `server/tests/integration/errors/retry-queue.test.ts` con reloj falso: segundo intento a los 5 min (±1) con éxito sin error; 4 intentos y error Pendiente con cliente, operación, período, intentos y último mensaje para generación, envío de factura y recordatorio; reintentos en 0 → un intento; espera de 10 min; otro cliente no espera los reintentos; reenvío sin regenerar la factura (AC-79, AC-80, AC-178 a AC-182, AC-184). Además: la cola se retoma tras un reinicio con el intento guardado y un reintento de recordatorio se cancela sin error si el cliente ya no corresponde (AC-247)
+- [ ] T123 [P] [US7] Test de API en `server/tests/api/process-errors.test.ts`: listado de Pendientes sin Resueltos, reintento manual con un único intento que genera y envía la factura, reenvío solo del email, error que sigue Pendiente con el nuevo mensaje, marcar Resuelto con usuario, banner con la cantidad y que desaparece, recordatorio manual fallido sin error de proceso (AC-186 a AC-194). Además: el reintento manual de una generación se bloquea con mensaje si el cliente está Inactivo o sin productos Activos (AC-248)
+- [ ] T124 [P] [US7] Test de API en `server/tests/api/reminder-retry.test.ts`: reintento manual de un recordatorio recalculado con la deuda actual y bloqueado con mensaje, dejando el error Pendiente, si el cliente no tiene deuda, está en revisión o está Inactivo (RF-178 aclarado, FR-046)
 
 ### Implementation for User Story 7
 
-- [ ] T124 [US7] Implementar `server/src/jobs/retry-queue.ts` y conectarlo a `billing.ts`, `invoice-email.ts` y `reminders.ts` (research R-11, RF-171 a RF-174)
-- [ ] T125 [US7] Completar `server/src/services/process-errors.ts` con reintento manual, resolución y conteo para el banner (RF-176 a RF-181, FR-046)
-- [ ] T126 [US7] Agregar las rutas de errores a `server/src/http/routes/review.ts` y el banner de errores a `server/src/services/banners.ts`
-- [ ] T127 [P] [US7] Completar la pestaña Errores de `ReviewPage` y el banner de errores en `web/src/components/Banners.tsx`
+- [ ] T125 [US7] Implementar `server/src/jobs/retry-queue.ts` y conectarlo a `billing.ts`, `invoice-email.ts` y `reminders.ts` (research R-11, RF-171 a RF-174)
+- [ ] T126 [US7] Completar `server/src/services/process-errors.ts` con reintento manual, resolución y conteo para el banner (RF-176 a RF-181, FR-046)
+- [ ] T127 [US7] Agregar las rutas de errores a `server/src/http/routes/review.ts` y el banner de errores a `server/src/services/banners.ts`
+- [ ] T128 [P] [US7] Completar la pestaña Errores de `ReviewPage` y el banner de errores en `web/src/components/Banners.tsx`
 
 **Checkpoint**: las fallas quedan visibles y se pueden resolver
 
@@ -320,15 +321,15 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 8 ⚠️
 
-- [ ] T128 [P] [US8] Test de API en `server/tests/api/listings.test.ts`: listado y detalle de clientes, productos y facturas con sus campos, filtros de facturas por estado, cliente y período, filtro de clientes por estado y búsqueda por razón social o CUIT, detalle de factura con cambios de estado y emails, descarga del PDF por cualquier perfil (AC-165 a AC-169, AC-175, AC-176, AC-236, AC-239)
-- [ ] T129 [P] [US8] Test de API en `server/tests/api/history.test.ts`: historial con todos los eventos de AC-170 en orden y con su actor (AC-170)
-- [ ] T130 [P] [US8] Test de API en `server/tests/api/reports.test.ts`: reportes de facturación, cobranza y deuda con los valores de los AC, filtro por rango de períodos y CSV con las mismas filas y columnas (AC-171 a AC-174, AC-177)
+- [ ] T129 [P] [US8] Test de API en `server/tests/api/listings.test.ts`: listado y detalle de clientes, productos y facturas con sus campos, filtros de facturas por estado, cliente y período, filtro de clientes por estado y búsqueda por razón social o CUIT, detalle de factura con cambios de estado y emails, descarga del PDF por cualquier perfil (AC-165 a AC-169, AC-175, AC-176, AC-236, AC-239)
+- [ ] T130 [P] [US8] Test de API en `server/tests/api/history.test.ts`: historial con todos los eventos de AC-170 en orden y con su actor (AC-170)
+- [ ] T131 [P] [US8] Test de API en `server/tests/api/reports.test.ts`: reportes de facturación, cobranza y deuda con los valores de los AC, filtro por rango de períodos y CSV con las mismas filas y columnas (AC-171 a AC-174, AC-177)
 
 ### Implementation for User Story 8
 
-- [ ] T131 [US8] Completar `server/src/http/routes/invoices.ts` con filtros, detalle y PDF, y `server/src/http/routes/clients.ts` con filtros, búsqueda e historial
-- [ ] T132 [P] [US8] Implementar `server/src/services/reports.ts`, el generador CSV en `server/src/documents/csv.ts` y `server/src/http/routes/reports.ts`
-- [ ] T133 [P] [US8] Completar en web `InvoicesPage` (filtros y detalle), `ClientDetailPage` (historial) y agregar `ReportsPage` con descarga CSV en `web/src/pages/`
+- [ ] T132 [US8] Completar `server/src/http/routes/invoices.ts` con filtros, detalle y PDF, y `server/src/http/routes/clients.ts` con filtros, búsqueda e historial
+- [ ] T133 [P] [US8] Implementar `server/src/services/reports.ts`, el generador CSV en `server/src/documents/csv.ts` y `server/src/http/routes/reports.ts`
+- [ ] T134 [P] [US8] Completar en web `InvoicesPage` (filtros y detalle), `ClientDetailPage` (historial) y agregar `ReportsPage` con descarga CSV en `web/src/pages/`
 
 **Checkpoint**: todas las historias funcionan de forma independiente
 
@@ -338,14 +339,14 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 **Purpose**: barridos transversales, evaluaciones externas y gates de la Constitución
 
-- [ ] T134 [P] Test de API en `server/tests/api/permissions.test.ts`: Admin, Editor y Consulta pueden leer los listados, el dashboard, la revisión, los reportes y el historial (los datos de usuarios solo Admin); un usuario Consulta recibe `403` en cada endpoint de escritura salvo recordatorio manual y su propia contraseña, y nada cambia (AC-04, AC-07, AC-11, AC-217)
-- [ ] T135 [P] Script de evaluación del LLM real en `server/scripts/eval/llm-classification.ts` (`npm run eval:llm -w server`) con el set de ≥ 20 adjuntos por clase en `server/scripts/eval/fixtures/` (no versionado si contiene datos reales) y reporte de aciertos por clase (AC-109 a AC-111, RNF-14)
-- [ ] T136 [P] Scripts de rendimiento en `server/scripts/eval/performance.ts` (`npm run eval:perf -w server`) para p95 por email, 50 facturas y 50 recordatorios (AC-232 a AC-234)
-- [ ] T137 Ejecutar `gitleaks detect` sobre todo el historial y corregir cualquier hallazgo (AC-225, SC-009)
-- [ ] T138 Ejecutar `npm run test:coverage-ac` y agregar los tests que falten hasta que no quede ningún AC sin cubrir (SC-010)
-- [ ] T139 Recorrer `specs/001-aldebaran-mvp/quickstart.md` §1 y §2 y registrar el resultado
-- [ ] T140 [P] Verificar que los comandos y variables documentados en `AGENTS.md` coinciden con los scripts y con `.env.example`, y actualizar la documentación si cambió algo
-- [ ] T141 Abrir el PR de la rama `001-aldebaran-mvp` a `main` con el resumen de historias completadas y gates cumplidos (`npm run test`, `npm run test:coverage-ac`, gitleaks, quickstart), para la revisión humana que exige la Constitución
+- [ ] T135 [P] Test de API en `server/tests/api/permissions.test.ts`: Admin, Editor y Consulta pueden leer los listados, el dashboard, la revisión, los reportes y el historial (los datos de usuarios solo Admin); un usuario Consulta recibe `403` en cada endpoint de escritura salvo recordatorio manual y su propia contraseña, y nada cambia (AC-04, AC-07, AC-11, AC-217)
+- [ ] T136 [P] Script de evaluación del LLM real en `server/scripts/eval/llm-classification.ts` (`npm run eval:llm -w server`) con el set de ≥ 20 adjuntos por clase en `server/scripts/eval/fixtures/` (no versionado si contiene datos reales) y reporte de aciertos por clase (AC-109 a AC-111, RNF-14)
+- [ ] T137 [P] Scripts de rendimiento en `server/scripts/eval/performance.ts` (`npm run eval:perf -w server`) para p95 por email, 50 facturas y 50 recordatorios (AC-232 a AC-234)
+- [ ] T138 Ejecutar `gitleaks detect` sobre todo el historial y corregir cualquier hallazgo (AC-225, SC-009)
+- [ ] T139 Ejecutar `npm run test:coverage-ac` y agregar los tests que falten hasta que no quede ningún AC sin cubrir (SC-010)
+- [ ] T140 Recorrer `specs/001-aldebaran-mvp/quickstart.md` §1 y §2 y registrar el resultado
+- [ ] T141 [P] Verificar que los comandos y variables documentados en `AGENTS.md` coinciden con los scripts y con `.env.example`, y actualizar la documentación si cambió algo
+- [ ] T142 Abrir el PR de la rama `001-aldebaran-mvp` a `main` con el resumen de historias completadas y gates cumplidos (`npm run test`, `npm run test:coverage-ac`, gitleaks, quickstart), para la revisión humana que exige la Constitución
 
 ---
 
@@ -364,7 +365,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - **US6 (Phase 9)**: depende de US3; puede ir en paralelo con US4, US5 y US9
 - **US7 (Phase 10)**: depende de US3 y US6 (reintenta generación, envío de factura y recordatorios)
 - **US8 (Phase 11)**: depende de US3; puede ir en paralelo con US4 en adelante
-- **Polish (Phase 12)**: depende de todas las historias; T141 (PR a `main`) es la última tarea
+- **Polish (Phase 12)**: depende de todas las historias; T142 (PR a `main`) es la última tarea
 
 ### Within Each User Story
 
@@ -420,6 +421,6 @@ Task: "Implementar adapters/mail/imap-mailbox.ts"
 
 - [P] = archivos distintos, sin dependencias pendientes
 - Cada test cita sus AC; `npm run test:coverage-ac` debe terminar sin faltantes
-- Todo el trabajo se hace en la rama `001-aldebaran-mvp`; se integra a `main` con un único PR revisado por un humano al terminar (T141, Constitución, Flujo de desarrollo)
+- Todo el trabajo se hace en la rama `001-aldebaran-mvp`; se integra a `main` con un único PR revisado por un humano al terminar (T142, Constitución, Flujo de desarrollo)
 - Commit después de cada tarea o grupo lógico, con Conventional Commits en español
 - Ningún paso apunta a ARCA productivo; no existe modo producción en el MVP
