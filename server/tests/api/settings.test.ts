@@ -125,6 +125,43 @@ describe('valores fuera de rango (se rechazan y se conserva el anterior)', () =>
   });
 });
 
+describe('datos de la empresa emisora (RF-91)', () => {
+  it('AC-252: la condición frente al IVA solo admite las cuatro de RF-91; IVA Responsable Inscripto se rechaza y se conserva la anterior', async () => {
+    const t = createTestApp();
+    const { agent } = await loggedInAgent(t, { role: 'admin' });
+    expect((await agent.put('/api/settings').send({ issuerIvaCondition: 'Responsable Monotributo' })).status).toBe(200);
+
+    const res = await agent.put('/api/settings').send({ issuerIvaCondition: 'IVA Responsable Inscripto' });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body.error.details)).toContain('issuerIvaCondition');
+    expect(current(t)?.issuerIvaCondition).toBe('Responsable Monotributo');
+
+    for (const condition of [
+      'Monotributista Social',
+      'Monotributo Trabajador Independiente Promovido',
+      'IVA Sujeto Exento',
+      'Responsable Monotributo',
+    ]) {
+      expect((await agent.put('/api/settings').send({ issuerIvaCondition: condition })).status, condition).toBe(200);
+      expect(current(t)?.issuerIvaCondition).toBe(condition);
+    }
+  });
+
+  it('AC-253: la fecha de inicio de actividades 31/02/2020 se rechaza y se conserva la anterior; 29/02/2024 se acepta', async () => {
+    const t = createTestApp();
+    const { agent } = await loggedInAgent(t, { role: 'admin' });
+    await agent.put('/api/settings').send({ issuerActivityStartDate: '2020-01-01' });
+
+    const res = await agent.put('/api/settings').send({ issuerActivityStartDate: '2020-02-31' });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body.error.details)).toContain('issuerActivityStartDate');
+    expect(current(t)?.issuerActivityStartDate).toBe('2020-01-01');
+
+    expect((await agent.put('/api/settings').send({ issuerActivityStartDate: '2024-02-29' })).status).toBe(200);
+    expect(current(t)?.issuerActivityStartDate).toBe('2024-02-29');
+  });
+});
+
 describe('permisos (RF-10, RF-13)', () => {
   it('AC-215: un Editor o un usuario Consulta no puede cambiar ningún valor de la configuración y el valor no cambia', async () => {
     const t = createTestApp();
