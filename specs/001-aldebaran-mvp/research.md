@@ -258,8 +258,13 @@ adicionales).
     y `Cache-Control: private, no-store` (AC-255).
   - **Para toda la app**: `http/middleware/security-headers.ts` agrega a cada respuesta de la API
     `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin` y una
-    CSP restrictiva, y la configuración de Vite agrega a la web la CSP `default-src 'self'` con
-    `script-src 'self'` (AC-256). En desarrollo, Vite necesita `'unsafe-inline'` en estilos por antd.
+    CSP restrictiva. Con `npm start`, `http/static-web.ts` sirve la web compilada (`web/dist`, con
+    fallback a `index.html` para las rutas de la web) con la CSP `default-src 'self'; script-src 'self';
+    style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'` (AC-256); antd
+    necesita `'unsafe-inline'` en estilos. En `vite dev` (`npm run dev` y `dev:mock`), `server.headers`
+    aplica la misma política más `'unsafe-inline'` en `script-src`, que necesita el preámbulo de React
+    Refresh de `@vitejs/plugin-react`. Esa excepción no reabre el XSS por adjuntos, que se sirven con
+    su propia CSP `sandbox` en todos los modos.
   - Los adjuntos se sirven desde endpoints propios (`GET /api/attachments/:id` y los de la casilla
     simulada), siempre con sesión y con el helper.
 - **Rationale**: la firma del archivo no la controla el campo `Content-Type` del email; `nosniff`

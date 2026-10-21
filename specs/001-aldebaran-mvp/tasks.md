@@ -112,7 +112,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T045 [P] [US1] Test de componente en `web/tests/pages/reset-password.test.tsx`: token inválido muestra error y redirige al login a los 5 s (±1 s) con timers falsos; token válido muestra el formulario (AC-29, AC-30, AC-32)
 - [X] T046 [P] [US1] Test de componente en `web/tests/components/app-layout.test.tsx`: con `emailRedirectTo` en `/api/setup`, el header muestra "Emails redirigidos a <dirección>" en todas las pantallas; sin la variable no se muestra (AC-250)
 - [ ] T143 [P] [US1] Ampliar `server/tests/api/settings.test.ts`: la condición frente al IVA del emisor solo admite Responsable Monotributo, Monotributista Social, Monotributo Trabajador Independiente Promovido o IVA Sujeto Exento (IVA Responsable Inscripto se rechaza y se conserva el anterior), y la fecha de inicio de actividades 31/02/2020 se rechaza y 29/02/2024 se acepta (AC-252, AC-253)
-- [ ] T144 [P] [US1] Test de API en `server/tests/api/security-headers.test.ts`: toda respuesta de la API, con o sin sesión, lleva `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy` y una CSP restrictiva; y test en `web/tests/security-headers.test.ts` de que la configuración de Vite sirve la web con una CSP que solo permite scripts propios (AC-256)
+- [ ] T144 [P] [US1] Test de API en `server/tests/api/security-headers.test.ts`: toda respuesta de la API, con o sin sesión, lleva `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy` y una CSP restrictiva; y test en `web/tests/security-headers.test.ts` de que la configuración de Vite sirve la web con una CSP que solo permite scripts propios (AC-256). Además: la web compilada servida por Express (con un `index.html` de prueba en un directorio temporal) responde con la CSP estricta, y la configuración de Vite en desarrollo solo agrega `'unsafe-inline'` en `script-src`
 
 ### Implementation for User Story 1
 
@@ -124,9 +124,9 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
 - [ ] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
 - [ ] T054 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`, y el indicador de redirección de emails en `web/src/components/AppLayout.tsx` (RF-220)
-- [ ] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta
+- [ ] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta. La condición frente al IVA del emisor se elige de un selector con las cuatro condiciones de RF-91, no con texto libre
 - [ ] T145 [US1] Restringir en `server/src/http/routes/settings.ts` y `server/src/http/types.ts` la condición frente al IVA del emisor a la lista de RF-91 (AC-252, AC-253)
-- [ ] T146 [US1] Implementar `server/src/http/middleware/security-headers.ts`, montarlo en `server/src/app.ts` y agregar la CSP de la web en `web/vite.config.ts` (research R-16, AC-256)
+- [ ] T146 [US1] Implementar `server/src/http/middleware/security-headers.ts`, montarlo en `server/src/app.ts` y agregar la CSP de la web en `web/vite.config.ts` (research R-16, AC-256). Además: implementar `server/src/http/static-web.ts`, montarlo en `server/src/app.ts` cuando existe `web/dist`, y sumar los scripts `build` y `start` al `package.json` raíz
 
 **Checkpoint**: acceso y perfiles funcionando de forma independiente
 
