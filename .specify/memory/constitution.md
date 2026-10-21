@@ -112,7 +112,9 @@ servicios reales sin efecto fiscal (homologación) y solo al final emitir compro
   - Cada RF/AC tocado tiene su test referenciado.
   - El circuito afectado funciona en modo mock (`npm run dev:mock`).
   - No hay secretos en el diff ni referencias a endpoints productivos de ARCA.
-- La revisión humana es obligatoria antes de integrar cambios a `main`.
+- La revisión humana es obligatoria antes de integrar cambios a `main`: el trabajo se hace en la rama
+  de la feature y cada fase de `tasks.md` se integra con su propio PR contra `main`, revisado por un
+  humano. Los PRs de fase nunca se encadenan entre sí.
 
 ## Governance
 
@@ -129,4 +131,4 @@ servicios reales sin efecto fiscal (homologación) y solo al final emitir compro
   principios; toda excepción MUST justificarse por escrito y aprobarse por un humano.
 - La guía operativa del día a día está en `AGENTS.md` y la especificación del producto en `PRD.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-19 | **Last Amended**: 2026-10-19
+**Version**: 1.1.0 | **Ratified**: 2026-10-19 | **Last Amended**: 2026-10-21
