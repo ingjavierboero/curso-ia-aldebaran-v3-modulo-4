@@ -203,9 +203,11 @@ reemplaza una pieza del stack:
 | `supertest` | server (dev) | tests de la API |
 | `@testing-library/react`, `jsdom` | web (dev) | tests de componentes |
 | `gitleaks` (binario) | repo | escaneo de secretos (AC-225), fuera de npm |
+| `dayjs` | web | valores de los selectores de fecha y hora de antd; es la misma versión que ya trae antd |
 
 **Estado**: aprobadas por el responsable del proyecto el 2026-10-20 (Constitución, Restricciones
-adicionales).
+adicionales). `dayjs` se aprobó el 2026-10-21, al pedir los selectores de fecha y hora de antd en la
+configuración.
 
 ## R-13 · Cotización del dólar
 
