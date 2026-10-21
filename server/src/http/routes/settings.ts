@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { AppContext } from '../../context.ts';
 import { getSettings, updateSettings } from '../../services/settings.ts';
 import { onlyAdmin } from '../middleware/require-role.ts';
-import type { SettingsDto } from '../types.ts';
+import { ISSUER_IVA_CONDITIONS, type IssuerIvaCondition, type SettingsDto } from '../types.ts';
 import { parse } from '../validate.ts';
 
 /** `HH:MM` entre 00:00 y 23:59 (RF-62, RF-152). */
@@ -41,7 +41,9 @@ const updateSchema = z.strictObject({
   // Datos de la empresa emisora (RF-91); el nombre de fantasía es opcional y se puede quitar.
   issuerBusinessName: text('La razón social'),
   issuerAddress: text('El domicilio comercial'),
-  issuerIvaCondition: text('La condición frente al IVA'),
+  issuerIvaCondition: z.enum(ISSUER_IVA_CONDITIONS, {
+    error: `La condición frente al IVA debe ser ${ISSUER_IVA_CONDITIONS.join(', ')}.`,
+  }),
   issuerGrossIncomeNumber: text('El número de ingresos brutos'),
   issuerActivityStartDate: calendarDate,
   issuerTradeName: text('El nombre de fantasía').nullable(),
@@ -51,7 +53,12 @@ const updateSchema = z.strictObject({
 export function settingsRouter(ctx: AppContext): Router {
   const router = Router();
   // El CUIT del emisor no se configura: sale de ARCA_CUIT (o del valor del modo mock, RF-206).
-  const toDto = (): SettingsDto => ({ ...getSettings(ctx.db), issuerCuit: ctx.env.arcaCuit });
+  // La columna es texto: solo se guardan valores de ISSUER_IVA_CONDITIONS, validados al escribir.
+  const toDto = (): SettingsDto => {
+    const current = getSettings(ctx.db);
+    const issuerIvaCondition = current.issuerIvaCondition as IssuerIvaCondition | null;
+    return { ...current, issuerIvaCondition, issuerCuit: ctx.env.arcaCuit };
+  };
 
   router.get('/settings', (_req, res) => {
     res.json(toDto());

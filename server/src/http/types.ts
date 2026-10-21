@@ -44,7 +44,7 @@ export interface SettingsDto {
   pointOfSale: number | null;
   issuerBusinessName: string | null;
   issuerAddress: string | null;
-  issuerIvaCondition: string | null;
+  issuerIvaCondition: IssuerIvaCondition | null;
   issuerGrossIncomeNumber: string | null;
   issuerActivityStartDate: string | null;
   issuerTradeName: string | null;
