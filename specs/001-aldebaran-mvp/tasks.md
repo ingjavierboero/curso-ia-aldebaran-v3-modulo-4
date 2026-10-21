@@ -101,7 +101,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T037 [P] [US1] Test de API en `server/tests/api/auth.test.ts`: registro del primer Admin y bloqueo posterior, login de Activos, rechazo de contraseña incorrecta y de Inactivos, logout, rechazo sin sesión en todo endpoint salvo los públicos (AC-01, AC-02, AC-03, AC-18, AC-19, AC-211, AC-212)
+- [X] T037 [P] [US1] Test de API en `server/tests/api/auth.test.ts`: registro del primer Admin y bloqueo posterior, login de Activos, rechazo de contraseña incorrecta y de Inactivos, logout, rechazo sin sesión en todo endpoint salvo los públicos (AC-01, AC-02, AC-03, AC-18, AC-19, AC-211, AC-212)
 - [ ] T038 [P] [US1] Test de API en `server/tests/api/session.test.ts`: sesión vencida a las 24 h de inactividad y vigente a las 23 h con reloj falso (AC-222, AC-223). Además: la baja de un usuario cierra todas sus sesiones y el cambio de contraseña cierra las demás (AC-249)
 - [ ] T039 [P] [US1] Test de API en `server/tests/api/users.test.ts`: alta, modificación, cambio de perfil aplicado en la siguiente acción, baja y reactivación, email único sin distinguir mayúsculas, protección del último Admin Activo, listado sin hash y acceso solo Admin (AC-05, AC-14 a AC-20, AC-168, AC-213, AC-214)
 - [ ] T040 [P] [US1] Test de API en `server/tests/api/settings.test.ts`: Admin guarda el intervalo de revisión y los demás valores; rechaza fuera de rango conservando el anterior (horas 24:00 y 23:60 rechazadas, 23:59 aceptada; punto de venta 0 y 100000; intervalo 4 y 61; reintentos 11; espera 0 y 61); Editor y Consulta no pueden modificar (AC-06, AC-62, AC-71, AC-94, AC-160, AC-183, AC-185, AC-215)
