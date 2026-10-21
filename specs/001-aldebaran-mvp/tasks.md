@@ -119,7 +119,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T049 [US1] Implementar `server/src/http/routes/setup.ts` (con `emailRedirectTo`, RF-220) y `server/src/http/routes/auth.ts` según contracts/http-api.md
 - [X] T050 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
 - [X] T051 [P] [US1] Implementar `server/src/services/settings.ts` y `server/src/http/routes/settings.ts` con los rangos de data-model.md
-- [ ] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
+- [X] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
 - [ ] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
 - [ ] T054 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`, y el indicador de redirección de emails en `web/src/components/AppLayout.tsx` (RF-220)
 - [ ] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta
