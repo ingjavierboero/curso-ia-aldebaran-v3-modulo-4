@@ -128,8 +128,9 @@ comportamiento definido en `PRD.md`; solo fijan el cómo.
     inicio de la revisión anterior, con un día de margen), deduplicación por `Message-ID` en la tabla
     `received_emails` y procesamiento en orden de fecha de recepción (RF-107 a RF-109, AC-243). Solo
     se revisa `INBOX` (supuesto documentado en los Riesgos del PRD). Se consideran adjuntos las partes con
-    `Content-Disposition: attachment` y tipo JPEG, PNG, GIF, WebP o PDF; las partes `inline` con
-    `Content-ID` son imágenes embebidas y se ignoran (RF-116, RF-117).
+    `Content-Disposition: attachment`; las partes `inline` con `Content-ID` son imágenes embebidas y
+    se ignoran (RF-116). El formato de cada adjunto se determina por su firma y no por el tipo
+    declarado (RF-117, research R-16).
   - **Mock**: la casilla simulada es la tabla `simulated_emails`; `mock-mailbox.ts` la lee como si
     fuera IMAP y `mock-sender` escribe en ella (RF-196, RF-203).
 - **Rationale**: es el stack de `AGENTS.md`; Message-ID como clave cumple RF-109 aunque se relea.
@@ -238,3 +239,33 @@ adicionales).
   AC-111 y AC-232 a AC-234), para el gate de la Constitución.
 - **Rationale**: Constitución I y SC-010.
 - **Alternatives considered**: tests E2E con navegador (lentos; se reservan para el quickstart manual).
+
+## R-16 · Adjuntos como contenido no confiable (RF-117, RNF-16)
+
+- **Contexto**: en la versión anterior del curso, un `comprobante.html` con un script, enviado por
+  email con un tipo declarado falso, se servía inline desde la app y operaba con la sesión del Admin.
+- **Decision**:
+  - **Al recibir**: `domain/file-signature.ts` detecta el formato real por los primeros bytes
+    (`%PDF-`, `\x89PNG\r\n\x1a\n`, `\xFF\xD8\xFF`, `GIF87a`/`GIF89a`, `RIFF....WEBP`) y devuelve el
+    tipo MIME verificado o `null`. El procesamiento de emails solo considera adjuntos los que tienen
+    tipo verificado, y guarda ese tipo, nunca el declarado (AC-254). Lo mismo al cargar emails en la
+    casilla simulada: se aceptan archivos de cualquier formato (para poder probar RF-117), pero se
+    guarda el tipo verificado o `application/octet-stream`.
+  - **Al servir**: un único helper `http/attachment-response.ts` arma toda respuesta con un adjunto:
+    `Content-Type` verificado; `Content-Disposition: inline` solo para PDF e imágenes verificadas y
+    `attachment` para el resto, con el nombre de archivo saneado; `X-Content-Type-Options: nosniff`;
+    `Content-Security-Policy: sandbox; default-src 'none'; img-src 'self'; style-src 'unsafe-inline'`;
+    y `Cache-Control: private, no-store` (AC-255).
+  - **Para toda la app**: `http/middleware/security-headers.ts` agrega a cada respuesta de la API
+    `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin` y una
+    CSP restrictiva, y la configuración de Vite agrega a la web la CSP `default-src 'self'` con
+    `script-src 'self'` (AC-256). En desarrollo, Vite necesita `'unsafe-inline'` en estilos por antd.
+  - Los adjuntos se sirven desde endpoints propios (`GET /api/attachments/:id` y los de la casilla
+    simulada), siempre con sesión y con el helper.
+- **Rationale**: la firma del archivo no la controla el campo `Content-Type` del email; `nosniff`
+  impide que el navegador reinterprete el archivo; `sandbox` evita que un PDF o una imagen ejecuten
+  scripts con el origen de la app aunque el visor lo permita; servir el resto como descarga cierra el
+  vector del HTML.
+- **Alternatives considered**: servir los adjuntos desde otro dominio (más infraestructura para un
+  sistema interno); confiar en el tipo declarado o en la extensión (es justo lo que explotó el
+  ataque).

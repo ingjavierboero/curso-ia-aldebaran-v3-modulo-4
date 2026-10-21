@@ -7,6 +7,9 @@ API JSON que consume `web/`. Autenticación por cookie de sesión (research R-10
   `403` perfil sin permiso o acción no disponible en el modo, `404`, `409` conflicto de estado o de
   unicidad, `422` regla de negocio (por ejemplo, recordatorio a cliente en revisión).
 - Ninguna respuesta incluye `passwordHash` (RF-07).
+- Toda respuesta lleva `X-Content-Type-Options: nosniff` y una CSP restrictiva (RNF-16, AC-256).
+- Los adjuntos se sirven con su tipo verificado, `inline` solo si son PDF o imagen y si no como
+  descarga, con `nosniff` y `Content-Security-Policy: sandbox` (RNF-16, research R-16).
 - Columna **Perfiles**: A = Admin, E = Editor, C = Consulta, — = sin sesión.
 
 ## Autenticación y cuenta
@@ -65,6 +68,7 @@ API JSON que consume `web/`. Autenticación por cookie de sesión (research R-10
 | GET `/api/review/payments` | A E C | Facturas en Pago recibido y Revisión manual con su evidencia | RF-141 |
 | GET `/api/review/resolved?clientId=&from=&to=` | A E C | Decisiones tomadas | RF-216 |
 | GET `/api/review/notices` | A E C | Avisos Pendientes | RF-142 |
+| GET `/api/attachments/:id` | A E C | Adjunto de un email recibido, servido según RNF-16 | RF-141, RF-217, RNF-16 |
 | POST `/api/review/notices/:id/reviewed` | A E | | RF-148 |
 | GET `/api/review/errors` | A E C | Errores de proceso Pendientes | RF-175 |
 | POST `/api/review/errors/:id/retry` | A E | Un único intento; `422` si el cliente ya no corresponde | RF-176 a RF-179, FR-046 |
@@ -93,5 +97,5 @@ API JSON que consume `web/`. Autenticación por cookie de sesión (research R-10
 | Método y ruta | Perfiles | Descripción | Requisitos |
 |---------------|----------|-------------|------------|
 | GET `/api/mock-mailbox` | A E C | Admin: todo; Editor y Consulta: solo recibidos de clientes | RF-197, RF-198, AC-221 |
-| POST `/api/mock-mailbox/received` | A E | Multipart: `from`, `subject`, `body`, `attachments[]` | RF-200 a RF-202, AC-219 |
-| GET `/api/mock-mailbox/:id/attachments/:attachmentId` | A E C | Descarga de adjuntos | RF-197 |
+| POST `/api/mock-mailbox/received` | A E | JSON: `from`, `subject`, `body`, `attachments[]` con `filename`, `mimeType` y `contentBase64` (límite 30 MB) | RF-200 a RF-202, AC-219 |
+| GET `/api/mock-mailbox/:id/attachments/:attachmentId` | A E C | Adjunto servido según RNF-16 | RF-197, RNF-16, AC-255 |

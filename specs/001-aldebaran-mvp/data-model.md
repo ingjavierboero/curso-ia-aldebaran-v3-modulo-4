@@ -165,7 +165,8 @@ factura y a la revisión manual pendiente del cliente.
 
 ### received_attachments
 
-`received_email_id`, `filename`, `mime_type`, `content` (blob), `classification`
+`received_email_id`, `filename`, `mime_type` (verificado por la firma del archivo, nunca el declarado;
+research R-16), `content` (blob), `classification`
 (`si` \| `no` \| `dudoso` \| `error`), `extracted_cuit` (null si no se extrajo o no tiene 11 dígitos),
 `extracted_amount_cents` (null si no se extrajo), `extracted_amount_raw` (para RNF-13).
 
@@ -183,7 +184,8 @@ Sin facturas emitidas no se procesa nada (RF-107 aclarado).
 
 `direction` (`enviado` \| `recibido`), `message_id` (UNIQUE, generado al cargar, RF-202), `from_address`,
 `to_address`, `subject`, `body`, `created_at` (fecha de envío o de carga, RF-201),
-`loaded_by_user_id`. Sus adjuntos en `simulated_attachments` (`filename`, `mime_type`, `content`).
+`loaded_by_user_id`. Sus adjuntos en `simulated_attachments` (`filename`, `mime_type` verificado o
+`application/octet-stream`, `content`).
 
 ## Procesos automáticos y errores
 
@@ -224,7 +226,9 @@ interrumpida el mismo día (RF-149, AC-246).
 | retry_count | 3 | 0 a 10 |
 | retry_wait_minutes | 5 | 1 a 60 |
 | point_of_sale | — | 1 a 99999 |
-| issuer_business_name, issuer_address, issuer_iva_condition, issuer_gross_income_number, issuer_activity_start_date | — | obligatorios para facturar |
+| issuer_business_name, issuer_address, issuer_gross_income_number | — | obligatorios para facturar |
+| issuer_iva_condition | — | obligatorio; `Responsable Monotributo`, `Monotributista Social`, `Monotributo Trabajador Independiente Promovido` o `IVA Sujeto Exento` (RF-91) |
+| issuer_activity_start_date | — | obligatorio; fecha existente del calendario (RF-91) |
 | issuer_trade_name | null | opcional (RF-215) |
 
 El CUIT emisor no se guarda: sale de `ARCA_CUIT` (o `20111111112` en mock, RF-206).
