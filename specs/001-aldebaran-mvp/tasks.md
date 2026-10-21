@@ -86,7 +86,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T032 [P] Implementar `server/tests/helpers/fakes.ts`: fakes programables de `ArcaClient`, `AttachmentClassifier`, `MailSender`, `Mailbox` y `ExchangeRateSource` que simulan éxito, error, timeout y códigos HTTP, y registran las llamadas
 - [X] T033 Implementar `server/src/services/history.ts`: registra eventos en `client_events` dentro de la transacción del cambio (RF-163)
 - [X] T034 Implementar `server/src/http/types.ts`, `server/src/http/middleware/errors.ts` (formato de error de contracts/http-api.md, sin filtrar secretos), `server/src/http/validate.ts` (zod) y `server/src/app.ts`
-- [ ] T035 Implementar `server/src/jobs/scheduler.ts` (tick por minuto con node-cron y candados por proceso) y `server/src/index.ts` (env → modo → db → adapters → app → scheduler)
+- [X] T035 Implementar `server/src/jobs/scheduler.ts` (tick por minuto con node-cron y candados por proceso) y `server/src/index.ts` (env → modo → db → adapters → app → scheduler)
 - [ ] T036 [P] Implementar `web/src/main.tsx`, `web/src/router.tsx`, `web/src/api/client.ts` (fetch con cookies y manejo de errores), `web/src/components/AppLayout.tsx` y `web/src/theme/` con el selector de tema del header
 
 **Checkpoint**: `npm run test` en verde con los tests de esta fase; `npm run dev:mock` arranca con una página vacía
