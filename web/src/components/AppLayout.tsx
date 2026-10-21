@@ -1,14 +1,22 @@
-import { Button, Dropdown, Layout, Space, Tag, Typography } from 'antd';
+import type { Role } from '@api-types';
+import { Button, Dropdown, Layout, Menu, Space, Tag, Typography } from 'antd';
 import { useEffect } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { ROLE_LABELS, useSessionStore } from '../stores/session.ts';
 import { ThemeSelector } from '../theme/theme.tsx';
 
 const { Header, Content } = Layout;
 
+/** Secciones del menú y los perfiles que las ven (RF-06 a RF-11); cada historia agrega las suyas. */
+const SECTIONS: Array<{ path: string; label: string; roles: Role[] }> = [
+  { path: '/usuarios', label: 'Usuarios', roles: ['admin'] },
+  { path: '/configuracion', label: 'Configuración', roles: ['admin', 'editor', 'consulta'] },
+];
+
 /**
  * Estructura común de todas las pantallas: header con el nombre del sistema, el indicador de
- * redirección de emails (RF-220), el menú del usuario con sesión y el selector de tema (RNF-15).
+ * redirección de emails (RF-220), la navegación según el perfil, el menú del usuario con sesión y
+ * el selector de tema (RNF-15).
  */
 export function AppLayout() {
   const setup = useSessionStore((state) => state.setup);
@@ -16,6 +24,8 @@ export function AppLayout() {
   const loadSetup = useSessionStore((state) => state.loadSetup);
   const logout = useSessionStore((state) => state.logout);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const sections = user ? SECTIONS.filter((section) => section.roles.includes(user.role)) : [];
 
   useEffect(() => {
     loadSetup().catch(() => {
@@ -46,6 +56,15 @@ export function AppLayout() {
           </Typography.Title>
           {setup?.emailRedirectTo && <Tag color="warning">Emails redirigidos a {setup.emailRedirectTo}</Tag>}
         </Space>
+        {sections.length > 0 && (
+          <Menu
+            mode="horizontal"
+            theme="dark"
+            style={{ flex: 1, minWidth: 0, background: 'transparent' }}
+            selectedKeys={sections.filter(({ path }) => pathname.startsWith(path)).map(({ path }) => path)}
+            items={sections.map(({ path, label }) => ({ key: path, label: <Link to={path}>{label}</Link> }))}
+          />
+        )}
         <Space size="middle">
           {user && (
             <Dropdown menu={userMenu} trigger={['click']}>

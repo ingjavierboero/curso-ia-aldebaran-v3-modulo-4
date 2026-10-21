@@ -24,6 +24,16 @@ export interface UserDto {
   status: EntityStatus;
 }
 
+/** Condiciones frente al IVA que admite la empresa emisora (RF-91). */
+export const ISSUER_IVA_CONDITIONS = [
+  'Responsable Monotributo',
+  'Monotributista Social',
+  'Monotributo Trabajador Independiente Promovido',
+  'IVA Sujeto Exento',
+] as const;
+
+export type IssuerIvaCondition = (typeof ISSUER_IVA_CONDITIONS)[number];
+
 /** `GET/PUT /api/settings` (RF-62, RF-73, RF-91, RF-100, RF-152, RF-172, RF-173). */
 export interface SettingsDto {
   mailboxIntervalMinutes: number;
