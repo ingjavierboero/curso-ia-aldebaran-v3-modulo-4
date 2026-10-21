@@ -77,7 +77,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T023 [P] Implementar `server/src/domain/money.ts`
 - [X] T024 [P] Implementar `server/src/domain/cuit.ts`
 - [X] T025 [P] Implementar `server/src/domain/billing-dates.ts` con `Intl.DateTimeFormat` y zona `America/Argentina/Buenos_Aires`
-- [ ] T026 [P] Implementar `server/src/domain/invoice-status.ts`
+- [X] T026 [P] Implementar `server/src/domain/invoice-status.ts`
 - [ ] T027 Implementar `server/src/adapters/types.ts` con las interfaces de contracts/adapters.md y `server/src/adapters/clock.ts`
 - [ ] T028 [P] Implementar `server/src/adapters/arca/endpoints.ts` (solo homologación) y `server/src/adapters/arca/mock.ts`
 - [ ] T029 [P] Implementar `server/src/domain/mock-classifier.ts` y `server/src/adapters/llm/mock.ts`
