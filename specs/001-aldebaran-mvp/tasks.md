@@ -75,7 +75,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T021 Implementar `server/src/db/schema.ts` con todas las tablas, índices únicos y columnas de data-model.md, y generar la migración inicial en `server/drizzle/`
 - [X] T022 Implementar `server/src/db/client.ts` (abre la base resuelta por `mode.ts` y aplica migraciones al arrancar) y `server/tests/helpers/test-db.ts` (SQLite en memoria con migraciones y builders de datos de prueba)
 - [X] T023 [P] Implementar `server/src/domain/money.ts`
-- [ ] T024 [P] Implementar `server/src/domain/cuit.ts`
+- [X] T024 [P] Implementar `server/src/domain/cuit.ts`
 - [ ] T025 [P] Implementar `server/src/domain/billing-dates.ts` con `Intl.DateTimeFormat` y zona `America/Argentina/Buenos_Aires`
 - [ ] T026 [P] Implementar `server/src/domain/invoice-status.ts`
 - [ ] T027 Implementar `server/src/adapters/types.ts` con las interfaces de contracts/adapters.md y `server/src/adapters/clock.ts`
