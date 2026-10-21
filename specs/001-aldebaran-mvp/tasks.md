@@ -67,7 +67,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T016 [P] Test del ARCA mock en `server/tests/integration/adapters/arca-mock.test.ts`: numeración siguiente por punto de venta empezando en 1, CAE de 14 dígitos con vencimiento a 10 días, sin ninguna llamada de red (RF-185, RF-186, AC-196)
 - [X] T017 [P] Test de la casilla simulada en `server/tests/integration/adapters/mock-mailbox.test.ts`: el sender guarda destinatario, asunto, cuerpo, adjuntos y fecha; los recibidos cargados tienen Message-ID único y fecha de carga; `fetchSince` devuelve solo recibidos (RF-196, RF-201 a RF-203)
 - [X] T018 [P] Test del scheduler en `server/tests/unit/jobs/scheduler.test.ts`: con `SCHEDULER_ENABLED` distinto de `true` no se registra el tick; el tick no solapa un proceso consigo mismo (research R-04)
-- [ ] T019 [P] Test del tema en `web/tests/theme.test.tsx`: sigue la preferencia del sistema operativo sin elección guardada, permite elegir claro/oscuro/sistema desde el header y recuerda la elección en `localStorage` (RNF-15, AC-235)
+- [X] T019 [P] Test del tema en `web/tests/theme.test.tsx`: sigue la preferencia del sistema operativo sin elección guardada, permite elegir claro/oscuro/sistema desde el header y recuerda la elección en `localStorage` (RNF-15, AC-235)
 
 ### Implementation for Foundational
 
