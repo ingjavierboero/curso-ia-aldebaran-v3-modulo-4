@@ -2,12 +2,14 @@ import express, { type Router } from 'express';
 import type { AppContext } from './context.ts';
 import { apiNotFound, errorHandler } from './http/middleware/errors.ts';
 import { requireSession } from './http/middleware/session.ts';
+import { authRouter } from './http/routes/auth.ts';
+import { setupRouter } from './http/routes/setup.ts';
 
 /** Arma un router de la API a partir del contexto; cada historia agrega los suyos. */
 export type RouterFactory = (ctx: AppContext) => Router;
 
 /** Routers de la API, en el orden en que se montan bajo `/api`. Cada historia suma acá el suyo. */
-const apiRouters: RouterFactory[] = [];
+const apiRouters: RouterFactory[] = [setupRouter, authRouter];
 
 export interface AppOptions {
   routers?: RouterFactory[];

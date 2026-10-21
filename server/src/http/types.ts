@@ -8,6 +8,22 @@ export type Mode = 'mock' | 'homologacion';
 export type Role = 'admin' | 'editor' | 'consulta';
 export type EntityStatus = 'activo' | 'inactivo';
 
+/** `GET /api/setup`: estado inicial de la app (RF-04, RF-209, RF-220). */
+export interface SetupInfo {
+  needsFirstAdmin: boolean;
+  mode: Mode;
+  emailRedirectTo: string | null;
+}
+
+/** Datos de un usuario que expone la API: nunca incluye el hash de la contraseña (RF-07). */
+export interface UserDto {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
+  status: EntityStatus;
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {
