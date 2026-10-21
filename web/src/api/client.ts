@@ -16,6 +16,13 @@ export class ApiError extends Error {
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+let onUnauthorized: () => void = () => {};
+
+/** Registra qué hacer cuando la API responde 401: la sesión venció o se cerró (RNF-10). */
+export function setUnauthorizedHandler(handler: () => void): void {
+  onUnauthorized = handler;
+}
+
 /**
  * Llama a la API del server. Envía la cookie de sesión, manda y recibe JSON, y convierte cualquier
  * respuesta de error en un ApiError con el mensaje para mostrarle al usuario.
@@ -37,6 +44,7 @@ export async function apiRequest<T>(method: Method, path: string, body?: unknown
   const data: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
+    if (response.status === 401) onUnauthorized();
     const error = (data as ApiErrorBody | null)?.error;
     throw new ApiError(
       response.status,
