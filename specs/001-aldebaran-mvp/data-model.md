@@ -91,7 +91,7 @@ confirmar).
 | client_id, period | | UNIQUE(`client_id`, `period`) (RF-74) |
 | point_of_sale | integer | 1 a 99999 (RF-72, RF-73) |
 | voucher_type | integer | siempre 11 (Factura C, RF-71) |
-| number | integer \| null | asignado al pedir CAE; UNIQUE(`point_of_sale`, `number`) |
+| number | integer \| null | asignado al pedir CAE; UNIQUE(`point_of_sale`, `number`); vuelve a `null` si ARCA no lo autorizó (research R-05) |
 | issue_date, service_from, service_to, due_date | text `YYYY-MM-DD` | RF-79 a RF-81 |
 | total_cents | integer | suma de ítems |
 | cae, cae_due_date | text \| null | 14 dígitos |
@@ -102,6 +102,7 @@ confirmar).
 | status | text | ver máquina de estados |
 | manual_review_reason | text \| null | solo si `revision_manual` (RF-138, RF-140) |
 | arca_attempt_at | text \| null | último pedido de CAE, para la recuperación de R-05 |
+| arca_request | json \| null | datos exactos de la última solicitud de CAE, para registrar lo autorizado (RF-171) |
 
 ### invoice_items
 
@@ -207,7 +208,9 @@ Como máximo un `revision_casilla` `pendiente` a la vez (RF-103).
 
 ### reminder_runs (RF-149)
 
-`month` (`YYYY-MM`, UNIQUE), `started_at`, `finished_at`.
+`month` (`YYYY-MM`, UNIQUE), `started_at`, `finished_at` (null mientras no terminó). Los clientes que ya
+recibieron el recordatorio automático del mes se obtienen de `sent_emails` para retomar una corrida
+interrumpida el mismo día (RF-149, AC-246).
 
 ## Configuración e historial
 

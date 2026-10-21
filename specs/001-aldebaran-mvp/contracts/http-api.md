@@ -13,7 +13,7 @@ API JSON que consume `web/`. Autenticación por cookie de sesión (research R-10
 
 | Método y ruta | Perfiles | Descripción | Requisitos |
 |---------------|----------|-------------|------------|
-| GET `/api/setup` | — | `{ needsFirstAdmin: boolean, mode: 'mock'\|'homologacion' }` | RF-04, RF-209 |
+| GET `/api/setup` | — | `{ needsFirstAdmin: boolean, mode: 'mock'\|'homologacion', emailRedirectTo: string\|null }` | RF-04, RF-209, RF-220 |
 | POST `/api/setup/first-admin` | — | Registra el primer Admin; `403` si ya existe un usuario | RF-04, RF-05, AC-212 |
 | POST `/api/auth/login` | — | `{ email, password }`; solo usuarios Activos | RF-02, AC-01, AC-18 |
 | POST `/api/auth/logout` | A E C | Borra la sesión | RF-03, AC-02 |
@@ -67,7 +67,7 @@ API JSON que consume `web/`. Autenticación por cookie de sesión (research R-10
 | GET `/api/review/notices` | A E C | Avisos Pendientes | RF-142 |
 | POST `/api/review/notices/:id/reviewed` | A E | | RF-148 |
 | GET `/api/review/errors` | A E C | Errores de proceso Pendientes | RF-175 |
-| POST `/api/review/errors/:id/retry` | A E | Un único intento | RF-176 a RF-179, FR-046 |
+| POST `/api/review/errors/:id/retry` | A E | Un único intento; `422` si el cliente ya no corresponde | RF-176 a RF-179, FR-046 |
 | POST `/api/review/errors/:id/resolve` | A E | Marcar Resuelto | RF-180 |
 | GET `/api/dashboard` | A E C | Clientes con deuda y banners (errores, cotización, certificado) | RF-153, RF-69, RF-97, RF-98, RF-181, RF-208 |
 | POST `/api/dashboard/exchange-rate/confirm` | A E | Confirmar cotización de respaldo | RF-70 |

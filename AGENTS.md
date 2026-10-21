@@ -24,7 +24,8 @@ npm run test       # corre toda la suite (Vitest)
 ```
 Variables de entorno (`.env`, nunca commiteado; plantilla en `.env.example`):
 `ANTHROPIC_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `ARCA_CUIT`, `ARCA_CERT_PATH`, `ARCA_KEY_PATH`.
-Las rutas relativas se toman desde la raíz del repo. Opcionales: `PORT`, `DATABASE_PATH`,
+Las rutas relativas se toman desde la raíz del repo. Opcionales: `PORT`, `DATABASE_PATH`, `APP_URL` (dirección
+de la web para los links de los emails; por defecto `http://localhost:5173`),
 `SCHEDULER_ENABLED` (procesos automáticos de facturación y casilla; solo corren con `true`, así que en
 desarrollo se dejan apagados), `EMAIL_REDIRECT_TO` (solo desarrollo: manda todos los emails a esa casilla)
 y `MOCK_MODE` (con `true` simula ARCA, el LLM y el email; ver "Modo mock" en `PRD.md`). En modo mock no hace

@@ -42,7 +42,8 @@ productos en pesos.
 ## 3. Homologación (credenciales reales, fuera de la suite)
 
 Requiere `.env` con `ANTHROPIC_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `ARCA_CUIT`,
-`ARCA_CERT_PATH`, `ARCA_KEY_PATH` y, en desarrollo, `EMAIL_REDIRECT_TO`.
+`ARCA_CERT_PATH`, `ARCA_KEY_PATH` y, opcionalmente, `APP_URL` (si la web no corre en
+`http://localhost:5173`) y, en desarrollo, `EMAIL_REDIRECT_TO`.
 
 ```bash
 npm run dev

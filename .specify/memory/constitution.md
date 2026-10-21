@@ -1,20 +1,3 @@
-<!--
-Sync Impact Report
-- Cambio de versión: (plantilla sin completar) → 1.0.0
-- Principios definidos (adopción inicial):
-  - [PRINCIPLE_1_NAME] → I. Test-First (NO NEGOCIABLE)
-  - [PRINCIPLE_2_NAME] → II. El PRD es la única fuente de verdad
-  - [PRINCIPLE_3_NAME] → III. Ante la duda, decide un humano
-  - [PRINCIPLE_4_NAME] → IV. Secretos solo en variables de entorno
-  - [PRINCIPLE_5_NAME] → V. Modos de ejecución por fases: mock → homologación → producción
-- Secciones agregadas:
-  - [SECTION_2_NAME] → Restricciones adicionales
-  - [SECTION_3_NAME] → Flujo de desarrollo y quality gates
-  - Governance (completada)
-- Secciones eliminadas: ninguna
-- TODOs diferidos: ninguno
--->
-
 # Aldebaran Constitution
 
 ## Core Principles
