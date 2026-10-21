@@ -72,7 +72,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 ### Implementation for Foundational
 
 - [X] T020 Implementar `server/src/config/env.ts` (lectura y validación con zod) y `server/src/config/mode.ts` (resolución del modo y de la ruta de base) según research R-01
-- [ ] T021 Implementar `server/src/db/schema.ts` con todas las tablas, índices únicos y columnas de data-model.md, y generar la migración inicial en `server/drizzle/`
+- [X] T021 Implementar `server/src/db/schema.ts` con todas las tablas, índices únicos y columnas de data-model.md, y generar la migración inicial en `server/drizzle/`
 - [ ] T022 Implementar `server/src/db/client.ts` (abre la base resuelta por `mode.ts` y aplica migraciones al arrancar) y `server/tests/helpers/test-db.ts` (SQLite en memoria con migraciones y builders de datos de prueba)
 - [ ] T023 [P] Implementar `server/src/domain/money.ts`
 - [ ] T024 [P] Implementar `server/src/domain/cuit.ts`
