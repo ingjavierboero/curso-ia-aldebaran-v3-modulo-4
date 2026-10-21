@@ -24,6 +24,24 @@ export interface UserDto {
   status: EntityStatus;
 }
 
+/** `GET/PUT /api/settings` (RF-62, RF-73, RF-91, RF-100, RF-152, RF-172, RF-173). */
+export interface SettingsDto {
+  mailboxIntervalMinutes: number;
+  billingTime: string;
+  remindersTime: string;
+  retryCount: number;
+  retryWaitMinutes: number;
+  pointOfSale: number | null;
+  issuerBusinessName: string | null;
+  issuerAddress: string | null;
+  issuerIvaCondition: string | null;
+  issuerGrossIncomeNumber: string | null;
+  issuerActivityStartDate: string | null;
+  issuerTradeName: string | null;
+  /** CUIT del emisor, de ARCA_CUIT: solo lectura. */
+  issuerCuit: string;
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {
