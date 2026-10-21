@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createTestApp, loggedInAgent } from '../helpers/test-app.ts';
+import { agent, createTestApp, loggedInAgent } from '../helpers/test-app.ts';
 import { TEST_PASSWORD } from '../helpers/test-db.ts';
 
 const HOUR = 60 * 60 * 1000;
 
-describe('vencimiento de la sesión por inactividad (RNF-10)', () => {
+describe('vencimiento y cierre de sesiones (RNF-10, RF-18, RF-21)', () => {
   it('AC-223: con la última actividad hace 23 h, la acción se ejecuta sin pedir iniciar sesión', async () => {
     const t = createTestApp({ now: '2026-10-20T12:00:00Z' });
     const { agent } = await loggedInAgent(t);
@@ -41,6 +41,33 @@ describe('vencimiento de la sesión por inactividad (RNF-10)', () => {
     expect((await agent.get('/api/auth/me')).status).toBe(401);
     t.adapters.clock.set('2026-10-20T12:00:00Z');
     expect((await agent.get('/api/auth/me')).status).toBe(401);
+  });
+
+  it('AC-249, RF-21: al cambiar la contraseña, se cierran las demás sesiones del usuario y la actual sigue activa', async () => {
+    const t = createTestApp({ now: '2026-10-20T12:00:00Z' });
+    const { agent: current, user } = await loggedInAgent(t);
+    const other = agent(t);
+    await other.post('/api/auth/login').send({ email: user.email, password: TEST_PASSWORD });
+
+    const change = await current
+      .post('/api/auth/password')
+      .send({ currentPassword: TEST_PASSWORD, newPassword: 'clave-nueva-123' });
+    expect(change.status).toBe(204);
+    expect((await current.get('/api/auth/me')).status).toBe(200);
+    expect((await other.get('/api/auth/me')).status).toBe(401);
+  });
+
+  it('AC-249, RF-18: cuando un Admin da de baja a un usuario, todas sus sesiones quedan cerradas', async () => {
+    const t = createTestApp({ now: '2026-10-20T12:00:00Z' });
+    const { agent: admin } = await loggedInAgent(t, { role: 'admin' });
+    const { agent: first, user } = await loggedInAgent(t, { role: 'editor' });
+    const second = agent(t);
+    await second.post('/api/auth/login').send({ email: user.email, password: TEST_PASSWORD });
+
+    expect((await admin.post(`/api/users/${user.id}/deactivate`)).status).toBe(200);
+    expect((await first.get('/api/auth/me')).status).toBe(401);
+    expect((await second.get('/api/auth/me')).status).toBe(401);
+    expect((await admin.get('/api/auth/me')).status).toBe(200);
   });
 
   it('después del vencimiento se puede iniciar sesión de nuevo', async () => {
