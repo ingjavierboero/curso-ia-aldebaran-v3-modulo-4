@@ -110,7 +110,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T043 [P] [US1] Test de integración en `server/tests/integration/users/password-hash.test.ts`: la fila guardada tiene hash bcrypt con costo ≥ 12 y no contiene la contraseña (AC-224)
 - [X] T044 [P] [US1] Test del sender SMTP en `server/tests/unit/adapters/smtp-sender.test.ts` con nodemailer mockeado: usa `GMAIL_USER` y `GMAIL_APP_PASSWORD`, aplica `EMAIL_REDIRECT_TO`, falla a los 30 s (AC-227, AC-228)
 - [X] T045 [P] [US1] Test de componente en `web/tests/pages/reset-password.test.tsx`: token inválido muestra error y redirige al login a los 5 s (±1 s) con timers falsos; token válido muestra el formulario (AC-29, AC-30, AC-32)
-- [ ] T046 [P] [US1] Test de componente en `web/tests/components/app-layout.test.tsx`: con `emailRedirectTo` en `/api/setup`, el header muestra "Emails redirigidos a <dirección>" en todas las pantallas; sin la variable no se muestra (AC-250)
+- [X] T046 [P] [US1] Test de componente en `web/tests/components/app-layout.test.tsx`: con `emailRedirectTo` en `/api/setup`, el header muestra "Emails redirigidos a <dirección>" en todas las pantallas; sin la variable no se muestra (AC-250)
 
 ### Implementation for User Story 1
 
