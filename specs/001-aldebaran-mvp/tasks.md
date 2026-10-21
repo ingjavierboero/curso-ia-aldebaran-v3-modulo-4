@@ -122,7 +122,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T050 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
 - [X] T051 [P] [US1] Implementar `server/src/services/settings.ts` y `server/src/http/routes/settings.ts` con los rangos de data-model.md
 - [X] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
-- [ ] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
+- [X] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
 - [ ] T054 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`, y el indicador de redirección de emails en `web/src/components/AppLayout.tsx` (RF-220)
 - [ ] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta. La condición frente al IVA del emisor se elige de un selector con las cuatro condiciones de RF-91, no con texto libre
 - [ ] T145 [US1] Restringir en `server/src/http/routes/settings.ts` y `server/src/http/types.ts` la condición frente al IVA del emisor a la lista de RF-91 (AC-252, AC-253)

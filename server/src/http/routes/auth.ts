@@ -2,6 +2,12 @@ import { Router } from 'express';
 import { z } from 'zod';
 import type { AppContext } from '../../context.ts';
 import { authenticate, changeOwnPassword, toPublicUser, WrongPasswordError } from '../../services/auth.ts';
+import {
+  checkRecoveryToken,
+  InvalidRecoveryTokenError,
+  requestPasswordRecovery,
+  resetPasswordWithToken,
+} from '../../services/password-recovery.ts';
 import { createSession, deleteSession } from '../../services/sessions.ts';
 import { AppError, unauthorized } from '../errors.ts';
 import { currentSessionToken, currentUser, SESSION_COOKIE, sessionCookieOptions } from '../middleware/session.ts';
@@ -13,7 +19,21 @@ const loginSchema = z.object({ email: z.string().trim().min(1), password: z.stri
 // `strict`: un campo de más (por ejemplo, el id de otro usuario) se rechaza en lugar de ignorarse (AC-218).
 const changePasswordSchema = z.strictObject({ currentPassword: z.string().min(1), newPassword });
 
-/** Inicio y cierre de sesión, usuario actual y cambio de la propia contraseña (RF-02, RF-03, RF-21). */
+const recoveryRequestSchema = z.object({ email: z.string().trim().min(1, 'El email es obligatorio.') });
+const recoveryResetSchema = z.object({ newPassword });
+
+const RECOVERY_REQUESTED =
+  'Si el email corresponde a un usuario activo, te enviamos un link para restablecer la contraseña.';
+
+/** RF-30: token inexistente, vencido o ya usado. */
+function invalidToken(error: unknown): unknown {
+  return error instanceof InvalidRecoveryTokenError ? new AppError(400, 'token_invalido', error.message) : error;
+}
+
+/**
+ * Inicio y cierre de sesión, usuario actual, cambio de la propia contraseña y recuperación de la
+ * contraseña (RF-02, RF-03, RF-21, RF-23 a RF-33).
+ */
 export function authRouter(ctx: AppContext): Router {
   const router = Router();
 
@@ -53,6 +73,36 @@ export function authRouter(ctx: AppContext): Router {
     res.status(204).end();
   });
 
-  // Los endpoints de recuperación de contraseña se suman a este router en T053.
+  router.post('/auth/recovery', async (req, res) => {
+    const { email } = parse(recoveryRequestSchema, req.body);
+    try {
+      await requestPasswordRecovery(ctx.db, ctx, email);
+    } catch (error) {
+      // Si el envío falla, la respuesta es la misma: un error distinto revelaría que el email existe (RF-25).
+      const reason = error instanceof Error ? error.name : typeof error;
+      console.error(`No se pudo enviar el email de recuperación: ${reason}`);
+    }
+    res.json({ message: RECOVERY_REQUESTED });
+  });
+
+  router.get('/auth/recovery/:token', (req, res) => {
+    try {
+      checkRecoveryToken(ctx.db, req.params.token, ctx.adapters.clock.now());
+    } catch (error) {
+      throw invalidToken(error);
+    }
+    res.json({ valid: true });
+  });
+
+  router.post('/auth/recovery/:token', async (req, res) => {
+    const input = parse(recoveryResetSchema, req.body);
+    try {
+      await resetPasswordWithToken(ctx.db, req.params.token, input.newPassword, ctx.adapters.clock.now());
+    } catch (error) {
+      throw invalidToken(error);
+    }
+    res.status(204).end();
+  });
+
   return router;
 }
