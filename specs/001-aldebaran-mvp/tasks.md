@@ -56,38 +56,38 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for Foundational ⚠️ (escribirlos primero y verlos fallar)
 
-- [ ] T008 [P] Test de `server/src/config/mode.ts` en `server/tests/unit/config/mode.test.ts`: solo `MOCK_MODE === "true"` activa mock; en mock la base es siempre `data/aldebaran-mock.db` ignorando `DATABASE_PATH`; fuera de mock `DATABASE_PATH` o `data/aldebaran.db`, y error si resuelve a la base mock (RF-184, RF-211 a RF-213, AC-209, AC-210)
-- [ ] T009 [P] Test de `server/src/config/env.ts` en `server/tests/unit/config/env.test.ts`: en mock arranca solo con `MOCK_MODE`, `ARCA_CUIT` por defecto `20111111112` y `SCHEDULER_ENABLED` por defecto `true`; fuera de mock exige las credenciales y `SCHEDULER_ENABLED` solo vale con `"true"`; los mensajes de error no incluyen valores de secretos (RF-205 a RF-207, AC-205, AC-226, AC-227)
-- [ ] T010 [P] Test de `server/src/domain/money.ts` en `server/tests/unit/domain/money.test.ts`: parseo de montos decimales a centavos, rechazo de fracción de centavo y de montos ≤ 0, conversión USD→ARS con redondeo al centavo (RF-64, RNF-13, AC-64)
-- [ ] T011 [P] Test de `server/src/domain/cuit.ts` en `server/tests/unit/domain/cuit.test.ts`: dígito verificador (30711111118 inválido, 30711111111 válido), normalización solo dígitos, descarte si no tiene 11 dígitos (RF-39, RF-122, RF-125, AC-41, AC-132)
-- [ ] T012 [P] Test de `server/src/domain/billing-dates.ts` en `server/tests/unit/domain/billing-dates.test.ts`: fecha y hora civil de Argentina con reloj del servidor en UTC, período `YYYY-MM`, último día del mes, comparación de hora configurada (RNF-12, AC-229)
-- [ ] T013 [P] Test de `server/src/domain/invoice-status.ts` en `server/tests/unit/domain/invoice-status.test.ts`: transiciones permitidas por actor según data-model.md; el actor `agente` nunca puede pasar a `pagada`; salir de `revision_manual` limpia el motivo (FR-026, RF-140, Constitución III)
-- [ ] T014 [P] Test de `server/src/adapters/arca/endpoints.ts` en `server/tests/unit/adapters/arca-endpoints.test.ts`: todas las URLs contienen `homo` y ninguna es productiva (Constitución V, research R-06)
-- [ ] T015 [P] Test de `server/src/domain/mock-classifier.ts` en `server/tests/unit/domain/mock-classifier.test.ts`: tabla de contracts/adapters.md sin distinguir mayúsculas, incluidos `PAGO_x_15000.50.PDF` y `pago_30711111111_x.png` (RF-188 a RF-193)
-- [ ] T016 [P] Test del ARCA mock en `server/tests/integration/adapters/arca-mock.test.ts`: numeración siguiente por punto de venta empezando en 1, CAE de 14 dígitos con vencimiento a 10 días, sin ninguna llamada de red (RF-185, RF-186, AC-196)
-- [ ] T017 [P] Test de la casilla simulada en `server/tests/integration/adapters/mock-mailbox.test.ts`: el sender guarda destinatario, asunto, cuerpo, adjuntos y fecha; los recibidos cargados tienen Message-ID único y fecha de carga; `fetchSince` devuelve solo recibidos (RF-196, RF-201 a RF-203)
-- [ ] T018 [P] Test del scheduler en `server/tests/unit/jobs/scheduler.test.ts`: con `SCHEDULER_ENABLED` distinto de `true` no se registra el tick; el tick no solapa un proceso consigo mismo (research R-04)
-- [ ] T019 [P] Test del tema en `web/tests/theme.test.tsx`: sigue la preferencia del sistema operativo sin elección guardada, permite elegir claro/oscuro/sistema desde el header y recuerda la elección en `localStorage` (RNF-15, AC-235)
+- [X] T008 [P] Test de `server/src/config/mode.ts` en `server/tests/unit/config/mode.test.ts`: solo `MOCK_MODE === "true"` activa mock; en mock la base es siempre `data/aldebaran-mock.db` ignorando `DATABASE_PATH`; fuera de mock `DATABASE_PATH` o `data/aldebaran.db`, y error si resuelve a la base mock (RF-184, RF-211 a RF-213, AC-209, AC-210)
+- [X] T009 [P] Test de `server/src/config/env.ts` en `server/tests/unit/config/env.test.ts`: en mock arranca solo con `MOCK_MODE`, `ARCA_CUIT` por defecto `20111111112` y `SCHEDULER_ENABLED` por defecto `true`; fuera de mock exige las credenciales y `SCHEDULER_ENABLED` solo vale con `"true"`; los mensajes de error no incluyen valores de secretos (RF-205 a RF-207, AC-205, AC-226, AC-227)
+- [X] T010 [P] Test de `server/src/domain/money.ts` en `server/tests/unit/domain/money.test.ts`: parseo de montos decimales a centavos, rechazo de fracción de centavo y de montos ≤ 0, conversión USD→ARS con redondeo al centavo (RF-64, RNF-13, AC-64)
+- [X] T011 [P] Test de `server/src/domain/cuit.ts` en `server/tests/unit/domain/cuit.test.ts`: dígito verificador (30711111118 inválido, 30711111111 válido), normalización solo dígitos, descarte si no tiene 11 dígitos (RF-39, RF-122, RF-125, AC-41, AC-132)
+- [X] T012 [P] Test de `server/src/domain/billing-dates.ts` en `server/tests/unit/domain/billing-dates.test.ts`: fecha y hora civil de Argentina con reloj del servidor en UTC, período `YYYY-MM`, último día del mes, comparación de hora configurada (RNF-12, AC-229)
+- [X] T013 [P] Test de `server/src/domain/invoice-status.ts` en `server/tests/unit/domain/invoice-status.test.ts`: transiciones permitidas por actor según data-model.md; el actor `agente` nunca puede pasar a `pagada`; salir de `revision_manual` limpia el motivo (FR-026, RF-140, Constitución III)
+- [X] T014 [P] Test de `server/src/adapters/arca/endpoints.ts` en `server/tests/unit/adapters/arca-endpoints.test.ts`: todas las URLs contienen `homo` y ninguna es productiva (Constitución V, research R-06)
+- [X] T015 [P] Test de `server/src/domain/mock-classifier.ts` en `server/tests/unit/domain/mock-classifier.test.ts`: tabla de contracts/adapters.md sin distinguir mayúsculas, incluidos `PAGO_x_15000.50.PDF` y `pago_30711111111_x.png` (RF-188 a RF-193)
+- [X] T016 [P] Test del ARCA mock en `server/tests/integration/adapters/arca-mock.test.ts`: numeración siguiente por punto de venta empezando en 1, CAE de 14 dígitos con vencimiento a 10 días, sin ninguna llamada de red (RF-185, RF-186, AC-196)
+- [X] T017 [P] Test de la casilla simulada en `server/tests/integration/adapters/mock-mailbox.test.ts`: el sender guarda destinatario, asunto, cuerpo, adjuntos y fecha; los recibidos cargados tienen Message-ID único y fecha de carga; `fetchSince` devuelve solo recibidos (RF-196, RF-201 a RF-203)
+- [X] T018 [P] Test del scheduler en `server/tests/unit/jobs/scheduler.test.ts`: con `SCHEDULER_ENABLED` distinto de `true` no se registra el tick; el tick no solapa un proceso consigo mismo (research R-04)
+- [X] T019 [P] Test del tema en `web/tests/theme.test.tsx`: sigue la preferencia del sistema operativo sin elección guardada, permite elegir claro/oscuro/sistema desde el header y recuerda la elección en `localStorage` (RNF-15, AC-235)
 
 ### Implementation for Foundational
 
-- [ ] T020 Implementar `server/src/config/env.ts` (lectura y validación con zod) y `server/src/config/mode.ts` (resolución del modo y de la ruta de base) según research R-01
-- [ ] T021 Implementar `server/src/db/schema.ts` con todas las tablas, índices únicos y columnas de data-model.md, y generar la migración inicial en `server/drizzle/`
-- [ ] T022 Implementar `server/src/db/client.ts` (abre la base resuelta por `mode.ts` y aplica migraciones al arrancar) y `server/tests/helpers/test-db.ts` (SQLite en memoria con migraciones y builders de datos de prueba)
-- [ ] T023 [P] Implementar `server/src/domain/money.ts`
-- [ ] T024 [P] Implementar `server/src/domain/cuit.ts`
-- [ ] T025 [P] Implementar `server/src/domain/billing-dates.ts` con `Intl.DateTimeFormat` y zona `America/Argentina/Buenos_Aires`
-- [ ] T026 [P] Implementar `server/src/domain/invoice-status.ts`
-- [ ] T027 Implementar `server/src/adapters/types.ts` con las interfaces de contracts/adapters.md y `server/src/adapters/clock.ts`
-- [ ] T028 [P] Implementar `server/src/adapters/arca/endpoints.ts` (solo homologación) y `server/src/adapters/arca/mock.ts`
-- [ ] T029 [P] Implementar `server/src/domain/mock-classifier.ts` y `server/src/adapters/llm/mock.ts`
-- [ ] T030 [P] Implementar `server/src/adapters/mail/mock-mailbox.ts` (sender y mailbox sobre `simulated_emails` y `simulated_attachments`, dirección `aldebaran-mock@gmail.com`)
-- [ ] T031 Implementar `server/src/adapters/index.ts`: arma `Adapters` según el modo (las implementaciones reales se agregan en sus historias)
-- [ ] T032 [P] Implementar `server/tests/helpers/fakes.ts`: fakes programables de `ArcaClient`, `AttachmentClassifier`, `MailSender`, `Mailbox` y `ExchangeRateSource` que simulan éxito, error, timeout y códigos HTTP, y registran las llamadas
-- [ ] T033 Implementar `server/src/services/history.ts`: registra eventos en `client_events` dentro de la transacción del cambio (RF-163)
-- [ ] T034 Implementar `server/src/http/types.ts`, `server/src/http/middleware/errors.ts` (formato de error de contracts/http-api.md, sin filtrar secretos), `server/src/http/validate.ts` (zod) y `server/src/app.ts`
-- [ ] T035 Implementar `server/src/jobs/scheduler.ts` (tick por minuto con node-cron y candados por proceso) y `server/src/index.ts` (env → modo → db → adapters → app → scheduler)
-- [ ] T036 [P] Implementar `web/src/main.tsx`, `web/src/router.tsx`, `web/src/api/client.ts` (fetch con cookies y manejo de errores), `web/src/components/AppLayout.tsx` y `web/src/theme/` con el selector de tema del header
+- [X] T020 Implementar `server/src/config/env.ts` (lectura y validación con zod) y `server/src/config/mode.ts` (resolución del modo y de la ruta de base) según research R-01
+- [X] T021 Implementar `server/src/db/schema.ts` con todas las tablas, índices únicos y columnas de data-model.md, y generar la migración inicial en `server/drizzle/`
+- [X] T022 Implementar `server/src/db/client.ts` (abre la base resuelta por `mode.ts` y aplica migraciones al arrancar) y `server/tests/helpers/test-db.ts` (SQLite en memoria con migraciones y builders de datos de prueba)
+- [X] T023 [P] Implementar `server/src/domain/money.ts`
+- [X] T024 [P] Implementar `server/src/domain/cuit.ts`
+- [X] T025 [P] Implementar `server/src/domain/billing-dates.ts` con `Intl.DateTimeFormat` y zona `America/Argentina/Buenos_Aires`
+- [X] T026 [P] Implementar `server/src/domain/invoice-status.ts`
+- [X] T027 Implementar `server/src/adapters/types.ts` con las interfaces de contracts/adapters.md y `server/src/adapters/clock.ts`
+- [X] T028 [P] Implementar `server/src/adapters/arca/endpoints.ts` (solo homologación) y `server/src/adapters/arca/mock.ts`
+- [X] T029 [P] Implementar `server/src/domain/mock-classifier.ts` y `server/src/adapters/llm/mock.ts`
+- [X] T030 [P] Implementar `server/src/adapters/mail/mock-mailbox.ts` (sender y mailbox sobre `simulated_emails` y `simulated_attachments`, dirección `aldebaran-mock@gmail.com`)
+- [X] T031 Implementar `server/src/adapters/index.ts`: arma `Adapters` según el modo (las implementaciones reales se agregan en sus historias)
+- [X] T032 [P] Implementar `server/tests/helpers/fakes.ts`: fakes programables de `ArcaClient`, `AttachmentClassifier`, `MailSender`, `Mailbox` y `ExchangeRateSource` que simulan éxito, error, timeout y códigos HTTP, y registran las llamadas
+- [X] T033 Implementar `server/src/services/history.ts`: registra eventos en `client_events` dentro de la transacción del cambio (RF-163)
+- [X] T034 Implementar `server/src/http/types.ts`, `server/src/http/middleware/errors.ts` (formato de error de contracts/http-api.md, sin filtrar secretos), `server/src/http/validate.ts` (zod) y `server/src/app.ts`
+- [X] T035 Implementar `server/src/jobs/scheduler.ts` (tick por minuto con node-cron y candados por proceso) y `server/src/index.ts` (env → modo → db → adapters → app → scheduler)
+- [X] T036 [P] Implementar `web/src/main.tsx`, `web/src/router.tsx`, `web/src/api/client.ts` (fetch con cookies y manejo de errores), `web/src/components/AppLayout.tsx` y `web/src/theme/` con el selector de tema del header
 
 **Checkpoint**: `npm run test` en verde con los tests de esta fase; `npm run dev:mock` arranca con una página vacía
 

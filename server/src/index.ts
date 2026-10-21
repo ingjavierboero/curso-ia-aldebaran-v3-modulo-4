@@ -1,0 +1,45 @@
+import { createAdapters } from './adapters/index.ts';
+import { createApp } from './app.ts';
+import { loadEnv } from './config/env.ts';
+import type { AppContext } from './context.ts';
+import { openDatabase } from './db/client.ts';
+import { TIME_ZONE } from './domain/billing-dates.ts';
+import { createScheduler } from './jobs/scheduler.ts';
+
+// Todos los horarios del sistema se rigen por la hora de Argentina (RNF-12).
+process.env.TZ = TIME_ZONE;
+
+/** Arranque: env → modo y base → adapters → app → scheduler. */
+function main() {
+  const env = loadEnv();
+  const db = openDatabase(env.databasePath);
+  const adapters = createAdapters(env, db);
+  const ctx: AppContext = { db, env, adapters };
+
+  const app = createApp(ctx);
+  // Cada historia suma acá su proceso automático (facturación, recordatorios, casilla, reintentos).
+  const scheduler = createScheduler({ enabled: env.schedulerEnabled, clock: adapters.clock, processes: [] });
+
+  const server = app.listen(env.port, () => {
+    const mode = env.mode === 'mock' ? 'modo mock (ARCA, LLM y email simulados)' : 'modo homologación';
+    console.log(`Aldebaran escucha en el puerto ${env.port}, en ${mode}.`);
+    if (!env.schedulerEnabled) console.log('Los procesos automáticos están apagados (SCHEDULER_ENABLED distinto de "true").');
+  });
+  scheduler.start();
+
+  const shutdown = () => {
+    scheduler.stop();
+    server.close(() => process.exit(0));
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+}
+
+try {
+  main();
+} catch (error) {
+  // Configuración inválida: el sistema no arranca e informa el motivo (RF-213). Los mensajes de
+  // configuración nombran variables pero nunca muestran sus valores (Constitución IV).
+  console.error(`No se pudo arrancar Aldebaran: ${error instanceof Error ? error.message : 'error desconocido'}`);
+  process.exit(1);
+}
