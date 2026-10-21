@@ -76,7 +76,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T022 Implementar `server/src/db/client.ts` (abre la base resuelta por `mode.ts` y aplica migraciones al arrancar) y `server/tests/helpers/test-db.ts` (SQLite en memoria con migraciones y builders de datos de prueba)
 - [X] T023 [P] Implementar `server/src/domain/money.ts`
 - [X] T024 [P] Implementar `server/src/domain/cuit.ts`
-- [ ] T025 [P] Implementar `server/src/domain/billing-dates.ts` con `Intl.DateTimeFormat` y zona `America/Argentina/Buenos_Aires`
+- [X] T025 [P] Implementar `server/src/domain/billing-dates.ts` con `Intl.DateTimeFormat` y zona `America/Argentina/Buenos_Aires`
 - [ ] T026 [P] Implementar `server/src/domain/invoice-status.ts`
 - [ ] T027 Implementar `server/src/adapters/types.ts` con las interfaces de contracts/adapters.md y `server/src/adapters/clock.ts`
 - [ ] T028 [P] Implementar `server/src/adapters/arca/endpoints.ts` (solo homologación) y `server/src/adapters/arca/mock.ts`
