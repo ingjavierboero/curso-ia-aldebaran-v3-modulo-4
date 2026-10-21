@@ -81,7 +81,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T027 Implementar `server/src/adapters/types.ts` con las interfaces de contracts/adapters.md y `server/src/adapters/clock.ts`
 - [X] T028 [P] Implementar `server/src/adapters/arca/endpoints.ts` (solo homologación) y `server/src/adapters/arca/mock.ts`
 - [X] T029 [P] Implementar `server/src/domain/mock-classifier.ts` y `server/src/adapters/llm/mock.ts`
-- [ ] T030 [P] Implementar `server/src/adapters/mail/mock-mailbox.ts` (sender y mailbox sobre `simulated_emails` y `simulated_attachments`, dirección `aldebaran-mock@gmail.com`)
+- [X] T030 [P] Implementar `server/src/adapters/mail/mock-mailbox.ts` (sender y mailbox sobre `simulated_emails` y `simulated_attachments`, dirección `aldebaran-mock@gmail.com`)
 - [ ] T031 Implementar `server/src/adapters/index.ts`: arma `Adapters` según el modo (las implementaciones reales se agregan en sus historias)
 - [ ] T032 [P] Implementar `server/tests/helpers/fakes.ts`: fakes programables de `ArcaClient`, `AttachmentClassifier`, `MailSender`, `Mailbox` y `ExchangeRateSource` que simulan éxito, error, timeout y códigos HTTP, y registran las llamadas
 - [ ] T033 Implementar `server/src/services/history.ts`: registra eventos en `client_events` dentro de la transacción del cambio (RF-163)
