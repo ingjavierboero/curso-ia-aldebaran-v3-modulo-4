@@ -67,8 +67,11 @@ describe('tick', () => {
     // Cuando termina, el siguiente tick lo vuelve a ejecutar.
     finishSlow();
     await firstTick;
-    await scheduler.tick();
+    const thirdTick = scheduler.tick();
+    await settle();
     expect(slow.run).toHaveBeenCalledTimes(2);
+    finishSlow();
+    await thirdTick;
   });
 
   it('un proceso que falla no impide que corran los demás y se informa el error', async () => {
