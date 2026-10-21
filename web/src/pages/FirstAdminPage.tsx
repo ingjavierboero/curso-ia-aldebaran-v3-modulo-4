@@ -10,6 +10,7 @@ interface FirstAdminForm {
   name: string;
   email: string;
   password: string;
+  passwordRepeat: string;
 }
 
 /** Registro del primer Admin, solo mientras no exista ningún usuario (RF-04, RF-05). */
@@ -26,7 +27,7 @@ export function FirstAdminPage() {
     setSending(true);
     setError(null);
     try {
-      await api.post('/setup/first-admin', values);
+      await api.post('/setup/first-admin', { name: values.name, email: values.email, password: values.password });
       // Se relee el estado inicial para que las rutas protegidas ya no lleven a esta pantalla.
       await loadSetup();
       const state: LoginNotice = { notice: 'El Admin quedó registrado. Ya podés iniciar sesión.' };
@@ -56,6 +57,22 @@ export function FirstAdminPage() {
           <Input type="email" autoComplete="username" />
         </Form.Item>
         <Form.Item label="Contraseña" name="password" rules={newPasswordRules}>
+          <Input.Password autoComplete="new-password" />
+        </Form.Item>
+        <Form.Item
+          label="Repetir contraseña"
+          name="passwordRepeat"
+          dependencies={['password']}
+          rules={[
+            { required: true, message: 'Repetí la contraseña.' },
+            ({ getFieldValue }) => ({
+              validator: (_, value) =>
+                !value || value === getFieldValue('password')
+                  ? Promise.resolve()
+                  : Promise.reject(new Error('Las contraseñas no coinciden.')),
+            }),
+          ]}
+        >
           <Input.Password autoComplete="new-password" />
         </Form.Item>
         <Button type="primary" htmlType="submit" block loading={sending}>
