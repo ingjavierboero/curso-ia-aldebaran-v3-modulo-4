@@ -4,12 +4,13 @@ import { apiNotFound, errorHandler } from './http/middleware/errors.ts';
 import { requireSession } from './http/middleware/session.ts';
 import { authRouter } from './http/routes/auth.ts';
 import { setupRouter } from './http/routes/setup.ts';
+import { usersRouter } from './http/routes/users.ts';
 
 /** Arma un router de la API a partir del contexto; cada historia agrega los suyos. */
 export type RouterFactory = (ctx: AppContext) => Router;
 
 /** Routers de la API, en el orden en que se montan bajo `/api`. Cada historia suma acá el suyo. */
-const apiRouters: RouterFactory[] = [setupRouter, authRouter];
+const apiRouters: RouterFactory[] = [setupRouter, authRouter, usersRouter];
 
 export interface AppOptions {
   routers?: RouterFactory[];

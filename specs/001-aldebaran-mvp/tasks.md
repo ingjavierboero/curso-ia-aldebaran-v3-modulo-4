@@ -117,7 +117,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T047 [US1] Implementar `server/src/services/auth.ts` y `server/src/services/sessions.ts` (bcrypt costo 12, tokens hasheados, vencimiento deslizante) según research R-10. La baja de un usuario y el cambio de contraseña cierran sus sesiones (RF-18, RF-21)
 - [X] T048 [US1] Implementar `server/src/http/middleware/session.ts` y `server/src/http/middleware/require-role.ts` (perfil leído de la base en cada request, RF-06 a RF-13)
 - [X] T049 [US1] Implementar `server/src/http/routes/setup.ts` (con `emailRedirectTo`, RF-220) y `server/src/http/routes/auth.ts` según contracts/http-api.md
-- [ ] T050 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
+- [X] T050 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
 - [ ] T051 [P] [US1] Implementar `server/src/services/settings.ts` y `server/src/http/routes/settings.ts` con los rangos de data-model.md
 - [ ] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
 - [ ] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
