@@ -126,7 +126,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T054 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`, y el indicador de redirección de emails en `web/src/components/AppLayout.tsx` (RF-220)
 - [X] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta. La condición frente al IVA del emisor se elige de un selector con las cuatro condiciones de RF-91, no con texto libre
 - [X] T145 [US1] Restringir en `server/src/http/routes/settings.ts` y `server/src/http/types.ts` la condición frente al IVA del emisor a la lista de RF-91 (AC-252, AC-253)
-- [ ] T146 [US1] Implementar `server/src/http/middleware/security-headers.ts`, montarlo en `server/src/app.ts` y agregar la CSP de la web en `web/vite.config.ts` (research R-16, AC-256). Además: implementar `server/src/http/static-web.ts`, montarlo en `server/src/app.ts` cuando existe `web/dist`, y sumar los scripts `build` y `start` al `package.json` raíz
+- [X] T146 [US1] Implementar `server/src/http/middleware/security-headers.ts`, montarlo en `server/src/app.ts` y agregar la CSP de la web en `web/vite.config.ts` (research R-16, AC-256). Además: implementar `server/src/http/static-web.ts`, montarlo en `server/src/app.ts` cuando existe `web/dist`, y sumar los scripts `build` y `start` al `package.json` raíz
 
 **Checkpoint**: acceso y perfiles funcionando de forma independiente
 

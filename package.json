@@ -12,6 +12,8 @@
   "scripts": {
     "dev": "TZ=America/Argentina/Buenos_Aires npm run dev -w server & TZ=America/Argentina/Buenos_Aires npm run dev -w web & wait",
     "dev:mock": "MOCK_MODE=true npm run dev",
+    "build": "npm run build -w web",
+    "start": "TZ=America/Argentina/Buenos_Aires npm run start -w server",
     "test": "TZ=America/Argentina/Buenos_Aires npm run test --workspaces",
     "db:reset:mock": "TZ=America/Argentina/Buenos_Aires node -e \"for (const s of ['', '-wal', '-shm']) require('fs').rmSync('data/aldebaran-mock.db' + s, { force: true }); console.log('Base del modo mock borrada: data/aldebaran-mock.db')\"",
     "test:coverage-ac": "TZ=America/Argentina/Buenos_Aires node scripts/check-ac-coverage.ts"

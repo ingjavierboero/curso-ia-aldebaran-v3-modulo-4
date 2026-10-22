@@ -1,6 +1,7 @@
+import { join } from 'node:path';
 import { createAdapters } from './adapters/index.ts';
 import { createApp } from './app.ts';
-import { loadEnv } from './config/env.ts';
+import { loadEnv, REPO_ROOT } from './config/env.ts';
 import type { AppContext } from './context.ts';
 import { openDatabase } from './db/client.ts';
 import { TIME_ZONE } from './domain/billing-dates.ts';
@@ -16,7 +17,8 @@ function main() {
   const adapters = createAdapters(env, db);
   const ctx: AppContext = { db, env, adapters };
 
-  const app = createApp(ctx);
+  // Con la web compilada (`npm run build`), el server también la sirve (`npm start`, research R-16).
+  const app = createApp(ctx, { webDir: join(REPO_ROOT, 'web', 'dist') });
   // Cada historia suma acá su proceso automático (facturación, recordatorios, casilla, reintentos).
   const scheduler = createScheduler({ enabled: env.schedulerEnabled, clock: adapters.clock, processes: [] });
 

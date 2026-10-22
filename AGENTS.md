@@ -21,7 +21,11 @@ npm run dev        # levanta server + web
 npm run dev:mock   # levanta server + web en modo mock, sin credenciales (http://localhost:5173)
 npm run db:reset:mock  # borra la base del modo mock (data/aldebaran-mock.db) para empezar de cero
 npm run test       # corre toda la suite (Vitest)
+npm run build      # compila la web en web/dist
+npm start          # levanta la API y sirve la web compilada con la CSP estricta (http://localhost:3000)
 ```
+Con `npm start` la web se abre en el puerto del server, así que `APP_URL` tiene que apuntar ahí (por ejemplo
+`http://localhost:3000`) para que los links de los emails funcionen.
 Variables de entorno (`.env`, nunca commiteado; plantilla en `.env.example`):
 `ANTHROPIC_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `ARCA_CUIT`, `ARCA_CERT_PATH`, `ARCA_KEY_PATH`.
 Las rutas relativas se toman desde la raíz del repo. Opcionales: `PORT`, `DATABASE_PATH`, `APP_URL` (dirección
