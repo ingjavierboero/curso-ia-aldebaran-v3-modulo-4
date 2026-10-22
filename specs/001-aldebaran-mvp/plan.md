@@ -57,7 +57,7 @@ clientes en ≤ 20 min sin contar reintentos (RNF-03 a RNF-06).
 código; modo mock sin ninguna otra variable de entorno.
 
 **Scale/Scope**: volumen de referencia de 50 clientes, 2 productos por cliente, 10 productos; un
-puñado de usuarios; ~15 pantallas; 220 RF y 251 AC.
+puñado de usuarios; ~15 pantallas; 220 RF, 16 RNF y 256 AC.
 
 ## Constitution Check
 
@@ -71,6 +71,7 @@ puñado de usuarios; ~15 pantallas; 220 RF y 251 AC.
 | IV. Secretos en variables de entorno | Toda credencial se lee en `server/src/config/env.ts`; `.env.example` y `.gitignore` en Setup; gitleaks en el gate de calidad (AC-225); logs sin secretos. | ✅ |
 | V. Modos por fases | `server/src/config/mode.ts` resuelve `mock` u `homologacion`; `adapters/index.ts` arma las implementaciones por modo. No hay valor `produccion` ni URLs productivas de ARCA en el código. | ✅ |
 | Restricciones adicionales | Stack de AGENTS.md sin cambios estructurales; migraciones nuevas por cambio de schema; validación de pagos solo por email. | ✅ |
+| Flujo de desarrollo (v1.1.0) | Trabajo en la rama `001-aldebaran-mvp`; al cerrar cada fase, su rama `fase-N-*` y su PR contra `main` con revisión humana, sin encadenar PRs (T142 y notas de `tasks.md`). | ✅ |
 
 **Re-check post-diseño (Phase 1)**: ✅ sin violaciones. El modelo de datos, los contratos y el
 quickstart respetan los cinco principios; no hace falta Complexity Tracking.
@@ -96,7 +97,8 @@ specs/001-aldebaran-mvp/
 ### Source Code (repository root)
 
 ```text
-package.json                 # workspaces: server, web; scripts dev, dev:mock, test, db:reset:mock
+package.json                 # workspaces: server, web; scripts dev, dev:mock, test, db:reset:mock,
+                             # build (compila la web) y start (API y web compilada con CSP)
 .env.example
 .gitignore                   # .env, data/, certs/, *.crt, *.key, *.pem
 data/                        # bases SQLite (no versionadas)
@@ -121,7 +123,8 @@ server/
 │   │   ├── amount-matching.ts       # coincidencias y combinación más antigua (Definiciones)
 │   │   ├── payment-rules.ts         # RF-126 a RF-137 → decisión
 │   │   ├── invoice-status.ts        # transiciones permitidas; agente nunca → pagada
-│   │   └── mock-classifier.ts       # reglas de nombre de archivo (RF-188 a RF-193)
+│   │   ├── mock-classifier.ts       # reglas de nombre de archivo (RF-188 a RF-193)
+│   │   └── file-signature.ts        # formato real de un adjunto por su firma (RF-117, R-16)
 │   ├── adapters/
 │   │   ├── index.ts         # arma los adapters según el modo
 │   │   ├── clock.ts
@@ -141,7 +144,9 @@ server/
 │   │   ├── invoice-pdf.ts   # RF-93, RF-90, RF-210
 │   │   └── email-templates.ts
 │   └── http/
-│       ├── middleware/      # sesión, perfiles, errores
+│       ├── attachment-response.ts  # servir adjuntos con nosniff y CSP sandbox (RNF-16)
+│       ├── static-web.ts    # web compilada (web/dist) con la CSP estricta, en npm start (AC-256)
+│       ├── middleware/      # sesión, perfiles, errores, headers de seguridad
 │       └── routes/          # un router por recurso (ver contracts/http-api.md)
 ├── scripts/
 │   └── eval/                # AC-109 a AC-111 y AC-232 a AC-234 (fuera de la suite)

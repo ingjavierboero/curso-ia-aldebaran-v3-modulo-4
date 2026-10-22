@@ -101,28 +101,32 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T037 [P] [US1] Test de API en `server/tests/api/auth.test.ts`: registro del primer Admin y bloqueo posterior, login de Activos, rechazo de contraseña incorrecta y de Inactivos, logout, rechazo sin sesión en todo endpoint salvo los públicos (AC-01, AC-02, AC-03, AC-18, AC-19, AC-211, AC-212)
-- [ ] T038 [P] [US1] Test de API en `server/tests/api/session.test.ts`: sesión vencida a las 24 h de inactividad y vigente a las 23 h con reloj falso (AC-222, AC-223). Además: la baja de un usuario cierra todas sus sesiones y el cambio de contraseña cierra las demás (AC-249)
-- [ ] T039 [P] [US1] Test de API en `server/tests/api/users.test.ts`: alta, modificación, cambio de perfil aplicado en la siguiente acción, baja y reactivación, email único sin distinguir mayúsculas, protección del último Admin Activo, listado sin hash y acceso solo Admin (AC-05, AC-14 a AC-20, AC-168, AC-213, AC-214)
-- [ ] T040 [P] [US1] Test de API en `server/tests/api/settings.test.ts`: Admin guarda el intervalo de revisión y los demás valores; rechaza fuera de rango conservando el anterior (horas 24:00 y 23:60 rechazadas, 23:59 aceptada; punto de venta 0 y 100000; intervalo 4 y 61; reintentos 11; espera 0 y 61); Editor y Consulta no pueden modificar (AC-06, AC-62, AC-71, AC-94, AC-160, AC-183, AC-185, AC-215)
-- [ ] T041 [P] [US1] Test de API en `server/tests/api/password.test.ts`: cambio de la propia contraseña con la actual correcta, rechazo con la actual incorrecta, mínimo de 8 caracteres en todas las vías, imposibilidad de cambiar la de otro usuario (AC-21 a AC-25, AC-218)
-- [ ] T042 [P] [US1] Test de API en `server/tests/api/recovery.test.ts`: email con token a usuarios Activos, mismo mensaje para emails desconocidos, vencimiento a 10 min, invalidación al usarse y al emitir otro, validación al confirmar (AC-26 a AC-28, AC-31 a AC-33). Además: la URL usa `APP_URL` (o `http://localhost:5173`) aunque el header Host sea otro (AC-251)
-- [ ] T043 [P] [US1] Test de integración en `server/tests/integration/users/password-hash.test.ts`: la fila guardada tiene hash bcrypt con costo ≥ 12 y no contiene la contraseña (AC-224)
-- [ ] T044 [P] [US1] Test del sender SMTP en `server/tests/unit/adapters/smtp-sender.test.ts` con nodemailer mockeado: usa `GMAIL_USER` y `GMAIL_APP_PASSWORD`, aplica `EMAIL_REDIRECT_TO`, falla a los 30 s (AC-227, AC-228)
-- [ ] T045 [P] [US1] Test de componente en `web/tests/pages/reset-password.test.tsx`: token inválido muestra error y redirige al login a los 5 s (±1 s) con timers falsos; token válido muestra el formulario (AC-29, AC-30, AC-32)
-- [ ] T046 [P] [US1] Test de componente en `web/tests/components/app-layout.test.tsx`: con `emailRedirectTo` en `/api/setup`, el header muestra "Emails redirigidos a <dirección>" en todas las pantallas; sin la variable no se muestra (AC-250)
+- [X] T037 [P] [US1] Test de API en `server/tests/api/auth.test.ts`: registro del primer Admin y bloqueo posterior, login de Activos, rechazo de contraseña incorrecta y de Inactivos, logout, rechazo sin sesión en todo endpoint salvo los públicos (AC-01, AC-02, AC-03, AC-18, AC-19, AC-211, AC-212)
+- [X] T038 [P] [US1] Test de API en `server/tests/api/session.test.ts`: sesión vencida a las 24 h de inactividad y vigente a las 23 h con reloj falso (AC-222, AC-223). Además: la baja de un usuario cierra todas sus sesiones y el cambio de contraseña cierra las demás (AC-249)
+- [X] T039 [P] [US1] Test de API en `server/tests/api/users.test.ts`: alta, modificación, cambio de perfil aplicado en la siguiente acción, baja y reactivación, email único sin distinguir mayúsculas, protección del último Admin Activo, listado sin hash y acceso solo Admin (AC-05, AC-14 a AC-20, AC-168, AC-213, AC-214)
+- [X] T040 [P] [US1] Test de API en `server/tests/api/settings.test.ts`: Admin guarda el intervalo de revisión y los demás valores; rechaza fuera de rango conservando el anterior (horas 24:00 y 23:60 rechazadas, 23:59 aceptada; punto de venta 0 y 100000; intervalo 4 y 61; reintentos 11; espera 0 y 61); Editor y Consulta no pueden modificar (AC-06, AC-62, AC-71, AC-94, AC-160, AC-183, AC-185, AC-215)
+- [X] T041 [P] [US1] Test de API en `server/tests/api/password.test.ts`: cambio de la propia contraseña con la actual correcta, rechazo con la actual incorrecta, mínimo de 8 caracteres en todas las vías, imposibilidad de cambiar la de otro usuario (AC-21 a AC-25, AC-218)
+- [X] T042 [P] [US1] Test de API en `server/tests/api/recovery.test.ts`: email con token a usuarios Activos, mismo mensaje para emails desconocidos, vencimiento a 10 min, invalidación al usarse y al emitir otro, validación al confirmar (AC-26 a AC-28, AC-31 a AC-33). Además: la URL usa `APP_URL` (o `http://localhost:5173`) aunque el header Host sea otro (AC-251)
+- [X] T043 [P] [US1] Test de integración en `server/tests/integration/users/password-hash.test.ts`: la fila guardada tiene hash bcrypt con costo ≥ 12 y no contiene la contraseña (AC-224)
+- [X] T044 [P] [US1] Test del sender SMTP en `server/tests/unit/adapters/smtp-sender.test.ts` con nodemailer mockeado: usa `GMAIL_USER` y `GMAIL_APP_PASSWORD`, aplica `EMAIL_REDIRECT_TO`, falla a los 30 s (AC-227, AC-228)
+- [X] T045 [P] [US1] Test de componente en `web/tests/pages/reset-password.test.tsx`: token inválido muestra error y redirige al login a los 5 s (±1 s) con timers falsos; token válido muestra el formulario (AC-29, AC-30, AC-32)
+- [X] T046 [P] [US1] Test de componente en `web/tests/components/app-layout.test.tsx`: con `emailRedirectTo` en `/api/setup`, el header muestra "Emails redirigidos a <dirección>" en todas las pantallas; sin la variable no se muestra (AC-250)
+- [X] T143 [P] [US1] Ampliar `server/tests/api/settings.test.ts`: la condición frente al IVA del emisor solo admite Responsable Monotributo, Monotributista Social, Monotributo Trabajador Independiente Promovido o IVA Sujeto Exento (IVA Responsable Inscripto se rechaza y se conserva el anterior), y la fecha de inicio de actividades 31/02/2020 se rechaza y 29/02/2024 se acepta (AC-252, AC-253)
+- [X] T144 [P] [US1] Test de API en `server/tests/api/security-headers.test.ts`: toda respuesta de la API, con o sin sesión, lleva `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy` y una CSP restrictiva; y test en `web/tests/security-headers.test.ts` de que la configuración de Vite sirve la web con una CSP que solo permite scripts propios (AC-256). Además: la web compilada servida por Express (con un `index.html` de prueba en un directorio temporal) responde con la CSP estricta, y la configuración de Vite en desarrollo solo agrega `'unsafe-inline'` en `script-src`
 
 ### Implementation for User Story 1
 
-- [ ] T047 [US1] Implementar `server/src/services/auth.ts` y `server/src/services/sessions.ts` (bcrypt costo 12, tokens hasheados, vencimiento deslizante) según research R-10. La baja de un usuario y el cambio de contraseña cierran sus sesiones (RF-18, RF-21)
-- [ ] T048 [US1] Implementar `server/src/http/middleware/session.ts` y `server/src/http/middleware/require-role.ts` (perfil leído de la base en cada request, RF-06 a RF-13)
-- [ ] T049 [US1] Implementar `server/src/http/routes/setup.ts` (con `emailRedirectTo`, RF-220) y `server/src/http/routes/auth.ts` según contracts/http-api.md
-- [ ] T050 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
-- [ ] T051 [P] [US1] Implementar `server/src/services/settings.ts` y `server/src/http/routes/settings.ts` con los rangos de data-model.md
-- [ ] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
-- [ ] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
-- [ ] T054 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`, y el indicador de redirección de emails en `web/src/components/AppLayout.tsx` (RF-220)
-- [ ] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta
+- [X] T047 [US1] Implementar `server/src/services/auth.ts` y `server/src/services/sessions.ts` (bcrypt costo 12, tokens hasheados, vencimiento deslizante) según research R-10. La baja de un usuario y el cambio de contraseña cierran sus sesiones (RF-18, RF-21)
+- [X] T048 [US1] Implementar `server/src/http/middleware/session.ts` y `server/src/http/middleware/require-role.ts` (perfil leído de la base en cada request, RF-06 a RF-13)
+- [X] T049 [US1] Implementar `server/src/http/routes/setup.ts` (con `emailRedirectTo`, RF-220) y `server/src/http/routes/auth.ts` según contracts/http-api.md
+- [X] T050 [P] [US1] Implementar `server/src/services/users.ts` y `server/src/http/routes/users.ts` (RF-14 a RF-20, RF-161)
+- [X] T051 [P] [US1] Implementar `server/src/services/settings.ts` y `server/src/http/routes/settings.ts` con los rangos de data-model.md
+- [X] T052 [US1] Implementar `server/src/adapters/mail/smtp-sender.ts` y registrarlo en `server/src/adapters/index.ts` para el modo homologación
+- [X] T053 [US1] Implementar `server/src/services/password-recovery.ts` y la plantilla de recuperación en `server/src/documents/email-templates.ts` (RF-23 a RF-33)
+- [X] T054 [P] [US1] Implementar en web las páginas `LoginPage`, `FirstAdminPage`, `RecoveryRequestPage`, `ResetPasswordPage` y `ProfilePage` en `web/src/pages/` y el store de sesión `web/src/stores/session.ts`, y el indicador de redirección de emails en `web/src/components/AppLayout.tsx` (RF-220)
+- [X] T055 [P] [US1] Implementar en web `UsersPage` y `SettingsPage` (todos los campos de configuración y datos de la empresa emisora, RF-91) en `web/src/pages/`, con navegación filtrada por perfil. `SettingsPage` es de solo lectura para Editor y Consulta. La condición frente al IVA del emisor se elige de un selector con las cuatro condiciones de RF-91, no con texto libre
+- [X] T145 [US1] Restringir en `server/src/http/routes/settings.ts` y `server/src/http/types.ts` la condición frente al IVA del emisor a la lista de RF-91 (AC-252, AC-253)
+- [X] T146 [US1] Implementar `server/src/http/middleware/security-headers.ts`, montarlo en `server/src/app.ts` y agregar la CSP de la web en `web/vite.config.ts` (research R-16, AC-256). Además: implementar `server/src/http/static-web.ts`, montarlo en `server/src/app.ts` cuando existe `web/dist`, y sumar los scripts `build` y `start` al `package.json` raíz
 
 **Checkpoint**: acceso y perfiles funcionando de forma independiente
 
@@ -206,7 +210,8 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [ ] T091 [P] [US4] Test de `server/src/adapters/llm/anthropic.ts` en `server/tests/unit/adapters/anthropic.test.ts` con el SDK mockeado: usa `ANTHROPIC_API_KEY` y el modelo de AGENTS.md, envía el cuerpo del email y el adjunto como bloque image o document, toma el CUIT del ordenante y descarta CUIT de menos de 11 dígitos (RF-119 a RF-122, AC-114, AC-226). Además: un pago en otra moneda se clasifica "dudoso" y los adjuntos de un mismo email se clasifican en paralelo (AC-244, RNF-01)
 - [ ] T092 [P] [US4] Test de `server/src/adapters/mail/imap-mailbox.ts` en `server/tests/unit/adapters/imap-mailbox.test.ts` con imapflow mockeado: búsqueda desde la fecha de corte, imágenes embebidas ignoradas, solo JPEG, PNG, GIF, WebP y PDF, timeout de 30 s (RF-116, RF-117, AC-106, AC-107, AC-228)
 - [ ] T093 [P] [US4] Test de integración en `server/tests/integration/payments/mailbox-check.test.ts` con reloj falso: revisión cada 15 min desde el inicio de la anterior, sin solaparse, nuevo intervalo aplicado, falla → un único error Pendiente con un intento por intervalo, recuperación que procesa los atrasados y resuelve el error, primera revisión desde la primera factura, sin facturas no se procesa nada, siguientes solo los nuevos (AC-92, AC-93, AC-95 a AC-99, RF-107 aclarado)
-- [ ] T094 [P] [US4] Test de integración en `server/tests/integration/payments/email-processing.test.ts`: Message-ID repetido, remitente propio ignorado, aviso para desconocidos, remitente sin distinguir mayúsculas, registro en el historial, sin adjunto sin efecto, cliente Inactivo procesado, registro de clasificación, CUIT, monto y marca de error, asociación a la revisión pendiente, cambio de email y de CUIT del cliente, factura devuelta a Pendiente que vuelve a validarse (AC-35, AC-37, AC-100 a AC-105, AC-108, AC-112, AC-115, AC-120, AC-121, AC-124, AC-152). Además: emails de una misma revisión en orden de recepción y email asociado a cada factura cuyo estado cambió (AC-243, AC-245)
+- [ ] T094 [P] [US4] Test de integración en `server/tests/integration/payments/email-processing.test.ts`: Message-ID repetido, remitente propio ignorado, aviso para desconocidos, remitente sin distinguir mayúsculas, registro en el historial, sin adjunto sin efecto, cliente Inactivo procesado, registro de clasificación, CUIT, monto y marca de error, asociación a la revisión pendiente, cambio de email y de CUIT del cliente, factura devuelta a Pendiente que vuelve a validarse (AC-35, AC-37, AC-100 a AC-105, AC-108, AC-112, AC-115, AC-120, AC-121, AC-124, AC-152). Además: emails de una misma revisión en orden de recepción y email asociado a cada factura cuyo estado cambió (AC-243, AC-245). Además: un `comprobante.pdf` que declara `application/pdf` pero contiene HTML se trata como email sin adjunto, no se envía al LLM y no se guarda (AC-254)
+- [ ] T147 [P] [US4] Test de `server/src/domain/file-signature.ts` en `server/tests/unit/domain/file-signature.test.ts`: detecta PDF, PNG, JPEG, GIF y WebP por su firma; un HTML, un SVG o un texto que declaran ser PDF o imagen dan `null` (RF-117, AC-254)
 
 ### Implementation for User Story 4
 
@@ -215,7 +220,8 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [ ] T097 [US4] Implementar `server/src/domain/payment-rules.ts` usando `amount-matching.ts`, `cuit.ts` y `money.ts`
 - [ ] T098 [P] [US4] Implementar `server/src/adapters/llm/retry-policy.ts` y `server/src/adapters/llm/anthropic.ts` (herramienta con esquema de salida, `maxRetries: 0`, `timeout: 10_000`) y registrarlo en `server/src/adapters/index.ts` (research R-07)
 - [ ] T099 [P] [US4] Implementar `server/src/adapters/mail/imap-mailbox.ts` y registrarlo en `server/src/adapters/index.ts` (research R-08)
-- [ ] T100 [US4] Implementar `server/src/services/payment-processing.ts`: identificación del cliente, avisos, clasificación por adjunto, decisión de `payment-rules.ts`, transiciones con `invoice-status.ts`, motivos, `invoice_emails` e historial en una transacción
+- [ ] T148 [P] [US4] Implementar `server/src/domain/file-signature.ts` (research R-16)
+- [ ] T100 [US4] Implementar `server/src/services/payment-processing.ts`: identificación del cliente, avisos, clasificación por adjunto, decisión de `payment-rules.ts`, transiciones con `invoice-status.ts`, motivos, `invoice_emails` e historial en una transacción. El tipo de cada adjunto sale de `file-signature.ts`, nunca del declarado (RF-117)
 - [ ] T101 [US4] Implementar `server/src/services/mailbox-check.ts` y `server/src/jobs/mailbox-job.ts` con su condición en el tick (RF-99 a RF-109)
 
 **Checkpoint**: el circuito facturar → recibir comprobante → Pago recibido o Revisión manual funciona con fakes
@@ -233,11 +239,13 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [ ] T102 [P] [US5] Test de API en `server/tests/api/review.test.ts`: listado de pagos con evidencia y motivo y sin otros estados, avisos Pendientes, pasar a Pagada o devolver a Pendiente desde Pago recibido y Revisión manual, motivo eliminado, pasar a Pagada desde el listado, aviso Revisado con usuario, resueltos con decisión, usuario, fecha, estado y motivo previos y comprobantes, filtros por cliente y fechas (AC-10, AC-144 a AC-151, AC-153, AC-238)
 - [ ] T103 [P] [US5] Test de API en `server/tests/api/review-conflict.test.ts`: cambio de estado con `expectedStatus` desactualizado → `409` con el estado vigente y sin cambios (AC-240)
 - [ ] T104 [P] [US5] Test de componente en `web/tests/pages/review.test.tsx`: ante `409` se muestra el mensaje y se recarga la vista (AC-240)
+- [ ] T149 [P] [US5] Test de API en `server/tests/api/attachments.test.ts`: `GET /api/attachments/:id` exige sesión y sirve PDF e imágenes verificados `inline` y cualquier otro archivo como descarga, siempre con `nosniff`, CSP `sandbox` y el nombre de archivo saneado (RNF-16, AC-255)
 
 ### Implementation for User Story 5
 
 - [ ] T105 [US5] Implementar `server/src/services/review.ts` (pagos, avisos, resueltos y transiciones de usuario con `UPDATE ... WHERE status = ?`, research R-14)
 - [ ] T106 [US5] Implementar `server/src/http/routes/review.ts` y `POST /api/invoices/:id/status` en `server/src/http/routes/invoices.ts`
+- [ ] T150 [US5] Implementar `server/src/http/attachment-response.ts` y `server/src/http/routes/attachments.ts` (research R-16)
 - [ ] T107 [P] [US5] Implementar en web `ReviewPage` con las pestañas Pagos, Avisos, Errores (vacía hasta US7) y Resueltos en `web/src/pages/review/`, y el botón "Pasar a Pagada" en `InvoicesPage` para facturas Pendiente de pago, con `expectedStatus` (RF-147)
 
 **Checkpoint**: el circuito de cobranza se cierra con la decisión humana
@@ -255,12 +263,12 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [ ] T108 [P] [US9] Test de integración en `server/tests/integration/mock/end-to-end.test.ts` con el modo mock real: arranque solo con `MOCK_MODE`, facturación del día 15, sin llamadas a ARCA, al LLM ni a Gmail, clasificación por nombre de archivo y cambios de estado con sus motivos, procesamiento en la siguiente revisión (AC-196 a AC-199, AC-203, AC-204)
 - [ ] T109 [P] [US9] Test de integración en `server/tests/integration/mock/mock-markings.test.ts`: PDF y emails marcados como simulados, CUIT emisor `20111111112` o `ARCA_CUIT`, sin banner de certificado (AC-205 a AC-207). Además: el PDF y el email de cada factura llevan también la leyenda de homologación (AC-207)
 - [ ] T110 [P] [US9] Test de integración en `server/tests/integration/mock/db-separation.test.ts`: datos creados en un modo no aparecen en el otro; error de arranque con `DATABASE_PATH` apuntando a la base mock fuera de mock (AC-208 a AC-210)
-- [ ] T111 [P] [US9] Test de API en `server/tests/api/mock-mailbox.test.ts`: Admin ve enviados y recibidos, Editor y Consulta solo recibidos de clientes, Consulta no puede cargar, email con remitente propio ignorado, recuperación de contraseña rechazada en mock, casilla inaccesible fuera de mock (AC-200 a AC-202, AC-219 a AC-221)
+- [ ] T111 [P] [US9] Test de API en `server/tests/api/mock-mailbox.test.ts`: Admin ve enviados y recibidos, Editor y Consulta solo recibidos de clientes, Consulta no puede cargar, email con remitente propio ignorado, recuperación de contraseña rechazada en mock, casilla inaccesible fuera de mock (AC-200 a AC-202, AC-219 a AC-221). Además: un adjunto cargado con contenido HTML se guarda como `application/octet-stream` y solo se puede descargar, con `nosniff` y CSP `sandbox`, y un PDF verificado se muestra (AC-255)
 - [ ] T112 [P] [US9] Test de componente en `web/tests/components/header.test.tsx`: indicador "Modo mock: ARCA, LLM y email simulados" solo en mock y sin opción de recuperar contraseña en el login (AC-195, AC-202)
 
 ### Implementation for User Story 9
 
-- [ ] T113 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (multipart, `403` fuera de mock, visibilidad por perfil)
+- [ ] T113 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (multipart, `403` fuera de mock, visibilidad por perfil). Guarda el tipo verificado con `file-signature.ts` y sirve los adjuntos con `attachment-response.ts` (RNF-16)
 - [ ] T114 [US9] Agregar las marcas de modo mock (RF-210), conservando la leyenda de homologación, a `server/src/documents/invoice-pdf.ts` y `server/src/documents/email-templates.ts`, y ocultar el banner de certificado en mock en `server/src/services/banners.ts` (RF-208)
 - [ ] T115 [P] [US9] Implementar en web `MockMailboxPage` (listado, detalle con adjuntos y formulario de carga) en `web/src/pages/mock-mailbox/`, el indicador en `web/src/components/AppLayout.tsx` y el ocultamiento de la recuperación en `LoginPage`
 
@@ -346,7 +354,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [ ] T139 Ejecutar `npm run test:coverage-ac` y agregar los tests que falten hasta que no quede ningún AC sin cubrir (SC-010)
 - [ ] T140 Recorrer `specs/001-aldebaran-mvp/quickstart.md` §1 y §2 y registrar el resultado
 - [ ] T141 [P] Verificar que los comandos y variables documentados en `AGENTS.md` coinciden con los scripts y con `.env.example`, y actualizar la documentación si cambió algo
-- [ ] T142 Abrir el PR de la rama `001-aldebaran-mvp` a `main` con el resumen de historias completadas y gates cumplidos (`npm run test`, `npm run test:coverage-ac`, gitleaks, quickstart), para la revisión humana que exige la Constitución
+- [ ] T142 Abrir el PR de la última fase (Phase 12) contra `main` con el resumen de la fase y de los gates cumplidos (`npm run test`, `npm run test:coverage-ac`, gitleaks, quickstart), para la revisión humana que exige la Constitución
 
 ---
 
@@ -365,7 +373,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - **US6 (Phase 9)**: depende de US3; puede ir en paralelo con US4, US5 y US9
 - **US7 (Phase 10)**: depende de US3 y US6 (reintenta generación, envío de factura y recordatorios)
 - **US8 (Phase 11)**: depende de US3; puede ir en paralelo con US4 en adelante
-- **Polish (Phase 12)**: depende de todas las historias; T142 (PR a `main`) es la última tarea
+- **Polish (Phase 12)**: depende de todas las historias; T142 (PR de la última fase) es la última tarea
 
 ### Within Each User Story
 
@@ -421,6 +429,7 @@ Task: "Implementar adapters/mail/imap-mailbox.ts"
 
 - [P] = archivos distintos, sin dependencias pendientes
 - Cada test cita sus AC; `npm run test:coverage-ac` debe terminar sin faltantes
-- Todo el trabajo se hace en la rama `001-aldebaran-mvp`; se integra a `main` con un único PR revisado por un humano al terminar (T142, Constitución, Flujo de desarrollo)
+- Todo el trabajo se hace en la rama `001-aldebaran-mvp`. Al cerrar cada fase se crea la rama `fase-N-<nombre>` en su último commit y se abre su PR contra `main`, revisado por un humano; los PRs de fase nunca se encadenan (Constitución v1.1.0, Flujo de desarrollo)
+- T143 a T150 se agregaron el 2026-10-21 por la revisión del módulo anterior (RF-91, RF-117, RNF-16): están en la fase donde se ejecutan, aunque su ID no siga el orden
 - Commit después de cada tarea o grupo lógico, con Conventional Commits en español
 - Ningún paso apunta a ARCA productivo; no existe modo producción en el MVP

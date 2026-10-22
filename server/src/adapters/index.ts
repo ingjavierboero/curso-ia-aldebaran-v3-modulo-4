@@ -4,6 +4,7 @@ import { createMockArcaClient } from './arca/mock.ts';
 import { systemClock } from './clock.ts';
 import { mockClassifier } from './llm/mock.ts';
 import { createMockMail } from './mail/mock-mailbox.ts';
+import { createSmtpSender } from './mail/smtp-sender.ts';
 import type { Adapters, Clock } from './types.ts';
 
 /** Error de una implementación real que todavía no se construyó. */
@@ -47,7 +48,7 @@ export function createAdapters(env: Env, db: Db, clock: Clock = systemClock): Ad
     clock,
     arca: pending<Adapters['arca']>('El cliente de ARCA homologación'), // US3
     classifier: pending<Adapters['classifier']>('El clasificador con Claude'), // US4
-    mailSender: pending<Adapters['mailSender']>('El envío de email por SMTP'), // US1
+    mailSender: createSmtpSender(env),
     mailbox: pending<Adapters['mailbox']>('La lectura de la casilla por IMAP'), // US4
     fx,
   };

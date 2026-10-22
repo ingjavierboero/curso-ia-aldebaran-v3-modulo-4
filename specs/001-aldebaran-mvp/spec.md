@@ -54,6 +54,13 @@
 - Q: ¿De dónde sale la dirección de la URL de recuperación? → A: De la variable `APP_URL` (por
   defecto `http://localhost:5173`), nunca del header Host (RF-24, AC-251).
 
+### Session 2026-10-21
+
+- Q: Devolución de la revisión del módulo anterior → A: se incorporaron al PRD la verificación del
+  formato de los adjuntos por contenido (RF-117, AC-254), el servicio seguro de adjuntos con nosniff
+  y CSP (RNF-16, AC-255, AC-256), la lista cerrada de condiciones de IVA del emisor y la fecha de
+  inicio de actividades válida (RF-91, AC-252, AC-253), y la sección "Alcance del MVP".
+
 ## User Scenarios & Testing *(mandatory)*
 
 Personas (PRD, "Personas"): **Admin** (hoy el único usuario), **Editor** y **Consulta** (perfiles
@@ -72,7 +79,7 @@ pantalla (RF-01); es la base de todas las demás historias.
 **Independent Test**: con el sistema vacío, registrar el primer Admin, crear un Editor y un
 Consulta, y verificar con cada uno qué pantallas y acciones quedan permitidas o rechazadas.
 
-**Acceptance Scenarios** (completos: AC-01 a AC-33, AC-211 a AC-218, AC-222 a AC-224 y AC-249 a AC-251):
+**Acceptance Scenarios** (completos: AC-01 a AC-33, AC-211 a AC-218, AC-222 a AC-224, AC-249 a AC-253 y AC-256):
 
 1. **Given** el sistema sin usuarios, **When** se registra el primer usuario con una contraseña de
    7 caracteres, **Then** se rechaza; con 8 caracteres queda Activo con perfil Admin (AC-03).
@@ -164,7 +171,7 @@ controlados por el sistema) y el que más reduce el trabajo manual.
 **Independent Test**: con facturas adeudadas cargadas, inyectar emails con distintos adjuntos (con
 el LLM y la casilla simulados) y verificar el estado final y el motivo de cada factura.
 
-**Acceptance Scenarios** (completos: AC-92 a AC-108, AC-112 a AC-143, AC-230, AC-231 y AC-243 a AC-245; AC-109 a
+**Acceptance Scenarios** (completos: AC-92 a AC-108, AC-112 a AC-143, AC-230, AC-231, AC-243 a AC-245 y AC-254; AC-109 a
 AC-111 se verifican fuera de la suite automática):
 
 1. **Given** un cliente con una sola factura adeudada, **When** llega un comprobante "si" con su
@@ -200,7 +207,7 @@ Principio III); sin esta historia el circuito de cobranza no se cierra.
 **Independent Test**: con facturas en Pago recibido y Revisión manual y avisos Pendientes, tomar
 cada decisión posible y verificar estados, motivos, registro del usuario y listado de resueltos.
 
-**Acceptance Scenarios** (completos: AC-144 a AC-153, AC-238 y AC-240):
+**Acceptance Scenarios** (completos: AC-144 a AC-153, AC-238, AC-240 y AC-255):
 
 1. **Given** facturas en Pago recibido y Revisión manual, **When** un usuario abre la interfaz de
    revisión, **Then** las ve con su evidencia y motivo, y no ve facturas en otros estados (AC-144).
@@ -300,7 +307,7 @@ Constitución (Principio V); habilita probar el resto de las historias sin servi
 con `pago_<CUIT>_<monto>.pdf` y verificar que la factura pasa a Pago recibido sin ninguna conexión
 externa salvo la cotización.
 
-**Acceptance Scenarios** (completos: AC-195 a AC-210 y AC-219 a AC-221):
+**Acceptance Scenarios** (completos: AC-195 a AC-210, AC-219 a AC-221 y AC-255):
 
 1. **Given** MOCK_MODE=true como única variable, **When** arranca el sistema, **Then** funciona, el
    agente factura el día 15 y procesa los emails de la casilla simulada (AC-204).
@@ -334,6 +341,9 @@ externa salvo la cotización.
   adjunto (RF-116, RF-117, AC-106, AC-107).
 - Casilla con emails antes de que exista cualquier factura: no se procesa ninguno; al emitirse la
   primera factura, la primera revisión procesa solo los recibidos desde ese día (RF-107).
+- Adjunto que declara ser PDF o imagen pero cuyo contenido es otro (por ejemplo, una página HTML
+  con un script): se ignora como adjunto (RF-117, AC-254) y, si se carga en la casilla simulada,
+  solo se puede descargar, nunca ejecutar (RNF-16, AC-255).
 - Mismo email leído dos veces (mismo Message-ID): se procesa una sola vez (RF-109, AC-100).
 - Email enviado desde la propia casilla del sistema: se ignora (RF-110, AC-101).
 - Varias coincidencias de monto sin combinación más antigua única: Revisión manual con "no se pudo
@@ -418,7 +428,10 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   hora de facturación y la de recordatorios (00:00 a 23:59), el punto de venta (1 a 99999), el
   intervalo de revisión de la casilla (5 a 60 min), la cantidad de reintentos (0 a 10), la espera
   entre reintentos (1 a 60 min) y los datos de la empresa emisora; los valores fuera de rango MUST
-  rechazarse conservando el anterior.
+  rechazarse conservando el anterior. La condición frente al IVA del emisor MUST ser una de las que
+  emiten Factura C (Responsable Monotributo, Monotributista Social, Monotributo Trabajador
+  Independiente Promovido o IVA Sujeto Exento) y la fecha de inicio de actividades MUST existir en el
+  calendario (RF-91).
 - **FR-016** (RF-63 a RF-70, RNF-13): El agente MUST convertir a pesos los productos en dólares con
   la cotización del dólar blue venta de dolarhoy.com al facturar, redondeando cada cuota al
   centavo; registrar cada cotización leída; usar la última registrada si el sitio no responde
@@ -459,6 +472,8 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   registrar en el historial del cliente cada email suyo y considerar posible comprobante solo los
   emails con al menos un adjunto de imagen (JPEG, PNG, GIF, WebP) o PDF no embebido, procesando
   igual a clientes Activos e Inactivos. Los emails de cada revisión MUST procesarse en orden de fecha de recepción, del más antiguo al más reciente.
+  El formato de cada adjunto MUST determinarse por su contenido (firma del archivo) y no por el tipo
+  declarado: un archivo que no es realmente una imagen o un PDF se ignora aunque declare serlo (RF-117).
 - **FR-023** (RF-119 a RF-125, RNF-02): El agente MUST clasificar cada adjunto con un LLM como "si",
   "no" o "dudoso", extraer de cada comprobante el CUIT del ordenante (11 dígitos, comparado solo por
   sus dígitos) y el monto, reintentar las fallas del LLM según RNF-02, asignar la clasificación del
@@ -560,6 +575,11 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   operativo y recordar en el navegador la elección hecha desde el header.
 - **FR-049** (RF-220): Mientras la redirección de emails esté activa, el header MUST mostrar
   "Emails redirigidos a <dirección>".
+- **FR-050** (RNF-16): Los adjuntos (de emails recibidos y de la casilla simulada) MUST servirse
+  con su formato verificado: solo PDF e imágenes se muestran en el navegador y el resto solo se
+  descarga; toda respuesta con un adjunto MUST incluir `X-Content-Type-Options: nosniff` y una
+  `Content-Security-Policy` con `sandbox`, y toda la aplicación MUST responder con una CSP que solo
+  permita scripts propios.
 
 Los criterios de aceptación transversales de FR-041 a FR-045 son AC-225 a AC-229 y AC-235 del PRD.
 
