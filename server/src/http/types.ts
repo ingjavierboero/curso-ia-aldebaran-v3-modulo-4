@@ -95,6 +95,25 @@ export interface ClientInput {
   ivaCondition: ClientIvaCondition;
 }
 
+/** Moneda del precio de un producto: pesos o dólares (RF-43). */
+export type Currency = 'ARS' | 'USD';
+
+/** Producto con el precio de su cuota mensual en centavos (RF-42, RF-159). */
+export interface ProductDto {
+  id: number;
+  name: string;
+  priceCents: number;
+  currency: Currency;
+  status: EntityStatus;
+}
+
+/** Alta y modificación de un producto (`POST /api/products`, `PATCH /api/products/:id`). */
+export interface ProductInput {
+  name: string;
+  priceCents: number;
+  currency: Currency;
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {

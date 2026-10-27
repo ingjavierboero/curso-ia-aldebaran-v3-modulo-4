@@ -6,6 +6,7 @@ import { securityHeaders } from './http/middleware/security-headers.ts';
 import { requireSession } from './http/middleware/session.ts';
 import { authRouter } from './http/routes/auth.ts';
 import { clientsRouter } from './http/routes/clients.ts';
+import { productsRouter } from './http/routes/products.ts';
 import { settingsRouter } from './http/routes/settings.ts';
 import { setupRouter } from './http/routes/setup.ts';
 import { usersRouter } from './http/routes/users.ts';
@@ -15,7 +16,7 @@ import { serveWeb } from './http/static-web.ts';
 export type RouterFactory = (ctx: AppContext) => Router;
 
 /** Routers de la API, en el orden en que se montan bajo `/api`. Cada historia suma acá el suyo. */
-const apiRouters: RouterFactory[] = [setupRouter, authRouter, usersRouter, settingsRouter, clientsRouter];
+const apiRouters: RouterFactory[] = [setupRouter, authRouter, usersRouter, settingsRouter, clientsRouter, productsRouter];
 
 export interface AppOptions {
   routers?: RouterFactory[];
