@@ -73,3 +73,24 @@ export function isAtOrAfterTime(date: Date, time: string): boolean {
   const [configuredHour, configuredMinute] = time.split(':').map(Number) as [number, number];
   return hour * 60 + minute >= configuredHour * 60 + configuredMinute;
 }
+
+/** Fechas de una factura, como fechas civiles `YYYY-MM-DD` (RF-79 a RF-81). */
+export interface InvoiceDates {
+  issueDate: string;
+  serviceFrom: string;
+  serviceTo: string;
+  dueDate: string;
+}
+
+/**
+ * Fechas de la factura del período `YYYY-MM` generada en `generatedAt`: se emite ese día en Argentina
+ * (RF-79), cubre el mes completo del período (RF-80) y vence el último día del período o, si se genera
+ * después (un reintento o una corrida retomada), el mismo día de emisión (RF-81).
+ */
+export function invoiceDates(period: string, generatedAt: Date): InvoiceDates {
+  const [year, month] = period.split('-').map(Number) as [number, number];
+  const issueDate = civilDate(generatedAt);
+  const serviceTo = lastDayOfMonth(year, month);
+  // Las fechas `YYYY-MM-DD` se comparan bien como texto.
+  return { issueDate, serviceFrom: `${period}-01`, serviceTo, dueDate: issueDate > serviceTo ? issueDate : serviceTo };
+}
