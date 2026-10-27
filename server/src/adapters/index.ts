@@ -2,6 +2,7 @@ import type { Env } from '../config/env.ts';
 import type { Db } from '../db/client.ts';
 import { createMockArcaClient } from './arca/mock.ts';
 import { systemClock } from './clock.ts';
+import { createDolarhoySource } from './fx/dolarhoy.ts';
 import { mockClassifier } from './llm/mock.ts';
 import { createMockMail } from './mail/mock-mailbox.ts';
 import { createSmtpSender } from './mail/smtp-sender.ts';
@@ -29,8 +30,8 @@ function pending<T extends object>(name: string): T {
  * En modo mock no se conecta a ARCA, Claude ni Gmail (RF-185, RF-187, RF-194).
  */
 export function createAdapters(env: Env, db: Db, clock: Clock = systemClock): Adapters {
-  // La cotización se lee de dolarhoy.com en ambos modos (PRD, Fuera de Alcance); llega en US3.
-  const fx = pending<Adapters['fx']>('La lectura de la cotización');
+  // La cotización se lee de dolarhoy.com en ambos modos (PRD, Fuera de Alcance; research R-13).
+  const fx = createDolarhoySource();
 
   if (env.mode === 'mock') {
     const mail = createMockMail(db, clock);

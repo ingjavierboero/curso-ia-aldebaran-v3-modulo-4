@@ -193,7 +193,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 ### Implementation for User Story 3
 
 - [X] T075 [P] [US3] Agregar a `server/src/domain/billing-dates.ts` las fechas de emisión, servicio y vencimiento de la factura
-- [ ] T076 [P] [US3] Implementar `server/src/adapters/fx/dolarhoy.ts` con cheerio y timeout de 10 s (research R-13)
+- [X] T076 [P] [US3] Implementar `server/src/adapters/fx/dolarhoy.ts` con cheerio y timeout de 10 s (research R-13)
 - [ ] T077 [P] [US3] Implementar `server/src/adapters/arca/wsaa.ts` (TRA, firma CMS con node-forge, cache en `arca_tokens`), `server/src/adapters/arca/wsfev1.ts` (fast-xml-parser) y `server/src/adapters/arca/certificate.ts`, y registrarlos en `server/src/adapters/index.ts` (research R-06)
 - [ ] T078 [US3] Implementar `server/src/services/exchange-rates.ts` (lectura al generar cada factura, también en reintentos, registro, respaldo y banner, RF-63 a RF-70)
 - [ ] T079 [US3] Implementar `server/src/services/process-errors.ts` con el alta de errores Pendientes (RF-174); los reintentos se agregan en US7
