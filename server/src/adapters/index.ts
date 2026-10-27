@@ -1,6 +1,7 @@
 import type { Env } from '../config/env.ts';
 import type { Db } from '../db/client.ts';
 import { createMockArcaClient } from './arca/mock.ts';
+import { createArcaHomologationClient } from './arca/wsfev1.ts';
 import { systemClock } from './clock.ts';
 import { createDolarhoySource } from './fx/dolarhoy.ts';
 import { mockClassifier } from './llm/mock.ts';
@@ -47,7 +48,14 @@ export function createAdapters(env: Env, db: Db, clock: Clock = systemClock): Ad
 
   return {
     clock,
-    arca: pending<Adapters['arca']>('El cliente de ARCA homologación'), // US3
+    // Solo homologación (Constitución V); env.ts exige el certificado y la clave en este modo.
+    arca: createArcaHomologationClient({
+      cuit: env.arcaCuit,
+      certPath: env.arcaCertPath ?? '',
+      keyPath: env.arcaKeyPath ?? '',
+      db,
+      clock,
+    }),
     classifier: pending<Adapters['classifier']>('El clasificador con Claude'), // US4
     mailSender: createSmtpSender(env),
     mailbox: pending<Adapters['mailbox']>('La lectura de la casilla por IMAP'), // US4
