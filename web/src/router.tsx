@@ -7,6 +7,7 @@ import { ClientsPage } from './pages/clients/ClientsPage.tsx';
 import { FirstAdminPage } from './pages/FirstAdminPage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
+import { ProductsPage } from './pages/products/ProductsPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { RecoveryRequestPage } from './pages/RecoveryRequestPage.tsx';
 import { ResetPasswordPage } from './pages/ResetPasswordPage.tsx';
@@ -32,6 +33,7 @@ export const routes: RouteObject[] = [
           { index: true, element: <HomePage /> },
           { path: 'clientes', element: <ClientsPage /> },
           { path: 'clientes/:id', element: <ClientDetailPage /> },
+          { path: 'productos', element: <ProductsPage /> },
           { path: 'perfil', element: <ProfilePage /> },
           { path: 'configuracion', element: <SettingsPage /> },
           {

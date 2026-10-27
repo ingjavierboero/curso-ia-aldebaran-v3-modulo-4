@@ -164,7 +164,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T060 [P] [US2] Implementar `server/src/services/products.ts` y `server/src/http/routes/products.ts`
 - [X] T061 [US2] Implementar la asignación `PUT /api/clients/:id/products` en `server/src/services/clients.ts` y su ruta
 - [X] T062 [P] [US2] Implementar en web `ClientsPage`, `ClientDetailPage` y `ClientForm` en `web/src/pages/clients/`. `ClientDetailPage` incluye asignar y desasignar productos Activos (RF-49, RF-50)
-- [ ] T063 [P] [US2] Implementar en web `ProductsPage` y `ProductForm` en `web/src/pages/products/`
+- [X] T063 [P] [US2] Implementar en web `ProductsPage` y `ProductForm` en `web/src/pages/products/`
 
 **Checkpoint**: clientes y productos listos para facturar
 
