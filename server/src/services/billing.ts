@@ -289,6 +289,17 @@ async function requestCae(ctx: AppContext, invoice: Invoice, receiverCuit: strin
 
 // ------------------------------------------------------------------ Corrida del período
 
+/**
+ * Períodos con una corrida en marcha en este proceso. "Facturar ahora" corre fuera del scheduler: así el
+ * tick no lanza una segunda corrida del mismo período en paralelo creyéndola interrumpida.
+ */
+const runningPeriods = new WeakMap<Db, Set<string>>();
+
+/** ¿Hay una corrida de ese período en marcha en este proceso? */
+export function isBillingRunning(db: Db, period: string): boolean {
+  return runningPeriods.get(db)?.has(period) ?? false;
+}
+
 export interface BillingRunSummary {
   generated: number[];
   failed: number[];
@@ -305,10 +316,29 @@ export async function runBilling(
   ctx: AppContext,
   input: { period: string; triggeredBy: BillingTrigger },
 ): Promise<BillingRunSummary> {
-  const { db, adapters } = ctx;
+  const { db } = ctx;
   const summary: BillingRunSummary = { generated: [], failed: [] };
   const period = db.select().from(billingPeriods).where(eq(billingPeriods.period, input.period)).get();
   if (period?.status === 'cancelado' || period?.status === 'completado') return summary;
+  if (isBillingRunning(db, input.period)) return summary;
+
+  const running = runningPeriods.get(db) ?? new Set<string>();
+  runningPeriods.set(db, running);
+  running.add(input.period);
+  try {
+    return await bill(ctx, input, period, summary);
+  } finally {
+    running.delete(input.period);
+  }
+}
+
+async function bill(
+  ctx: AppContext,
+  input: { period: string; triggeredBy: BillingTrigger },
+  period: typeof billingPeriods.$inferSelect | undefined,
+  summary: BillingRunSummary,
+): Promise<BillingRunSummary> {
+  const { db, adapters } = ctx;
 
   const startedAt = adapters.clock.now().toISOString();
   if (!period) {

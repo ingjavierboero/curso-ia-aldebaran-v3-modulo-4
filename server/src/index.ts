@@ -5,6 +5,7 @@ import { loadEnv, REPO_ROOT } from './config/env.ts';
 import type { AppContext } from './context.ts';
 import { openDatabase } from './db/client.ts';
 import { TIME_ZONE } from './domain/billing-dates.ts';
+import { createBillingJob } from './jobs/billing-job.ts';
 import { createScheduler } from './jobs/scheduler.ts';
 
 // Todos los horarios del sistema se rigen por la hora de Argentina (RNF-12).
@@ -19,8 +20,13 @@ function main() {
 
   // Con la web compilada (`npm run build`), el server también la sirve (`npm start`, research R-16).
   const app = createApp(ctx, { webDir: join(REPO_ROOT, 'web', 'dist') });
-  // Cada historia suma acá su proceso automático (facturación, recordatorios, casilla, reintentos).
-  const scheduler = createScheduler({ enabled: env.schedulerEnabled, clock: adapters.clock, processes: [] });
+  // Cada historia suma acá su proceso automático (recordatorios, casilla y reintentos llegan después).
+  // Un período que quedó en curso por un reinicio se retoma en el primer tick (research R-04).
+  const scheduler = createScheduler({
+    enabled: env.schedulerEnabled,
+    clock: adapters.clock,
+    processes: [createBillingJob(ctx)],
+  });
 
   const server = app.listen(env.port, () => {
     const mode = env.mode === 'mock' ? 'modo mock (ARCA, LLM y email simulados)' : 'modo homologación';

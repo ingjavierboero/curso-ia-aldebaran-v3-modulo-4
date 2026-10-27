@@ -201,7 +201,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T081 [US3] Implementar `server/src/services/billing-periods.ts` (cancelar, reactivar, "Facturar ahora", estados del botón, RF-54 a RF-61)
 - [X] T082 [P] [US3] Implementar `server/src/documents/invoice-pdf.ts` con pdfkit (RF-90, RF-92, RF-93)
 - [X] T083 [US3] Implementar la plantilla de factura en `server/src/documents/email-templates.ts` y `server/src/services/invoice-email.ts` (deuda vigente calculada en cada intento, RF-84 a RF-90, RF-96, RF-215)
-- [ ] T084 [US3] Implementar `server/src/jobs/billing-job.ts` y su condición en el tick de `server/src/jobs/scheduler.ts`, retomando períodos `en_curso` al arrancar (research R-04)
+- [X] T084 [US3] Implementar `server/src/jobs/billing-job.ts` y su condición en el tick de `server/src/jobs/scheduler.ts`, retomando períodos `en_curso` al arrancar (research R-04)
 - [ ] T085 [US3] Implementar `server/src/services/banners.ts` (certificado y cotización), `server/src/http/routes/billing.ts`, `GET /api/invoices` básico en `server/src/http/routes/invoices.ts` y la parte de banners de `GET /api/dashboard` en `server/src/http/routes/dashboard.ts`
 - [ ] T086 [P] [US3] Implementar en web `BillingPage` (estado del período, "Facturar ahora", cancelar y reactivar), `InvoicesPage` básica y `web/src/components/Banners.tsx`. El banner de cotización incluye el botón para confirmarla (RF-70)
 

@@ -6,6 +6,7 @@ import { createScheduler } from '../../../src/jobs/scheduler.ts';
 import { BillingPeriodError, billNow, cancelBilling, reactivateBilling } from '../../../src/services/billing-periods.ts';
 import { createTestApp, type TestApp } from '../../helpers/test-app.ts';
 import { assignProduct, configureIssuer, insertClient, insertProduct, insertUser } from '../../helpers/test-db.ts';
+import type { CaeRequest, CaeResult } from '../../../src/adapters/types.ts';
 
 /** Argentina es UTC-3 todo el año: las 11:00 de Argentina son las 14:00 UTC. */
 const utc = (iso: string) => `${iso}:00.000Z`;
@@ -163,5 +164,28 @@ describe('"Facturar ahora" (RF-58, RF-59)', () => {
     await tickAt(utc('2026-10-17T12:00'));
     expect(invoicesOf(t, '2026-10')).toHaveLength(1);
     expect(t.db.select().from(invoices).where(eq(invoices.clientId, late.id)).all()).toHaveLength(0);
+  });
+
+  it('R-04: un tick que llega mientras "Facturar ahora" sigue corriendo no lanza una segunda corrida', async () => {
+    const { t, admin, tickAt } = setup();
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    // ARCA tarda en autorizar: la corrida de "Facturar ahora" queda en curso mientras llega el tick.
+    t.adapters.arca.caeSteps.push(async (_req: CaeRequest, authorize: () => CaeResult) => {
+      await gate;
+      return authorize();
+    });
+
+    t.adapters.clock.set(utc('2026-10-17T13:00'));
+    const run = billNow(t.ctx, admin.id);
+    await tickAt(utc('2026-10-17T13:00'));
+    release();
+    await run;
+
+    expect(invoicesOf(t, '2026-10')).toHaveLength(1);
+    expect(t.adapters.arca.requests).toHaveLength(1);
+    expect(periodRow(t, '2026-10')).toMatchObject({ status: 'completado', triggeredBy: 'facturar_ahora' });
   });
 });
