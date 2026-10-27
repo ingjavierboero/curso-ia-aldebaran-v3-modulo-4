@@ -154,7 +154,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T056 [P] [US2] Test de API en `server/tests/api/clients.test.ts`: alta con todos los obligatorios, rechazo sin cada uno, condición frente al IVA fuera de la lista de RF-38, CUIT con dígito inválido, CUIT y email duplicados (sin distinguir mayúsculas), baja y reactivación, Editor puede dar de alta (AC-08, AC-34, AC-38, AC-40 a AC-42)
+- [X] T056 [P] [US2] Test de API en `server/tests/api/clients.test.ts`: alta con todos los obligatorios, rechazo sin cada uno, condición frente al IVA fuera de la lista de RF-38, CUIT con dígito inválido, CUIT y email duplicados (sin distinguir mayúsculas), baja y reactivación, Editor puede dar de alta (AC-08, AC-34, AC-38, AC-40 a AC-42)
 - [ ] T057 [P] [US2] Test de API en `server/tests/api/products.test.ts`: alta con moneda ARS o USD, precio 0 y -100 rechazados y 0,01 aceptado, desactivación y reactivación (AC-43, AC-44, AC-47, AC-48)
 - [ ] T058 [P] [US2] Test de API en `server/tests/api/assignments.test.ts`: Editor asigna productos Activos, no se asignan Inactivos, desasignación, eventos en el historial (AC-09, AC-49, AC-50)
 
