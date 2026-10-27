@@ -154,17 +154,17 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T056 [P] [US2] Test de API en `server/tests/api/clients.test.ts`: alta con todos los obligatorios, rechazo sin cada uno, condición frente al IVA fuera de la lista de RF-38, CUIT con dígito inválido, CUIT y email duplicados (sin distinguir mayúsculas), baja y reactivación, Editor puede dar de alta (AC-08, AC-34, AC-38, AC-40 a AC-42)
-- [ ] T057 [P] [US2] Test de API en `server/tests/api/products.test.ts`: alta con moneda ARS o USD, precio 0 y -100 rechazados y 0,01 aceptado, desactivación y reactivación (AC-43, AC-44, AC-47, AC-48)
-- [ ] T058 [P] [US2] Test de API en `server/tests/api/assignments.test.ts`: Editor asigna productos Activos, no se asignan Inactivos, desasignación, eventos en el historial (AC-09, AC-49, AC-50)
+- [X] T056 [P] [US2] Test de API en `server/tests/api/clients.test.ts`: alta con todos los obligatorios, rechazo sin cada uno, condición frente al IVA fuera de la lista de RF-38, CUIT con dígito inválido, CUIT y email duplicados (sin distinguir mayúsculas), baja y reactivación, Editor puede dar de alta (AC-08, AC-34, AC-38, AC-40 a AC-42)
+- [X] T057 [P] [US2] Test de API en `server/tests/api/products.test.ts`: alta con moneda ARS o USD, precio 0 y -100 rechazados y 0,01 aceptado, desactivación y reactivación (AC-43, AC-44, AC-47, AC-48)
+- [X] T058 [P] [US2] Test de API en `server/tests/api/assignments.test.ts`: Editor asigna productos Activos, no se asignan Inactivos, desasignación, eventos en el historial (AC-09, AC-49, AC-50)
 
 ### Implementation for User Story 2
 
-- [ ] T059 [P] [US2] Implementar `server/src/services/clients.ts` y `server/src/http/routes/clients.ts` (alta, modificación, baja, reactivación, detalle) con eventos de historial
-- [ ] T060 [P] [US2] Implementar `server/src/services/products.ts` y `server/src/http/routes/products.ts`
-- [ ] T061 [US2] Implementar la asignación `PUT /api/clients/:id/products` en `server/src/services/clients.ts` y su ruta
-- [ ] T062 [P] [US2] Implementar en web `ClientsPage`, `ClientDetailPage` y `ClientForm` en `web/src/pages/clients/`. `ClientDetailPage` incluye asignar y desasignar productos Activos (RF-49, RF-50)
-- [ ] T063 [P] [US2] Implementar en web `ProductsPage` y `ProductForm` en `web/src/pages/products/`
+- [X] T059 [P] [US2] Implementar `server/src/services/clients.ts` y `server/src/http/routes/clients.ts` (alta, modificación, baja, reactivación, detalle) con eventos de historial
+- [X] T060 [P] [US2] Implementar `server/src/services/products.ts` y `server/src/http/routes/products.ts`
+- [X] T061 [US2] Implementar la asignación `PUT /api/clients/:id/products` en `server/src/services/clients.ts` y su ruta
+- [X] T062 [P] [US2] Implementar en web `ClientsPage`, `ClientDetailPage` y `ClientForm` en `web/src/pages/clients/`. `ClientDetailPage` incluye asignar y desasignar productos Activos (RF-49, RF-50)
+- [X] T063 [P] [US2] Implementar en web `ProductsPage` y `ProductForm` en `web/src/pages/products/`
 
 **Checkpoint**: clientes y productos listos para facturar
 

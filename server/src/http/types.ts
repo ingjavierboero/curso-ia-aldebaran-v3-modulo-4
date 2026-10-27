@@ -52,6 +52,68 @@ export interface SettingsDto {
   issuerCuit: string;
 }
 
+/**
+ * Condiciones frente al IVA que ARCA admite para el receptor de una Factura C, con su código (RF-38).
+ */
+export const CLIENT_IVA_CONDITIONS = {
+  1: 'IVA Responsable Inscripto',
+  4: 'IVA Sujeto Exento',
+  5: 'Consumidor Final',
+  6: 'Responsable Monotributo',
+  7: 'Sujeto No Categorizado',
+  8: 'Proveedor del Exterior',
+  9: 'Cliente del Exterior',
+  10: 'IVA Liberado – Ley N° 19.640',
+  13: 'Monotributista Social',
+  15: 'IVA No Alcanzado',
+  16: 'Monotributo Trabajador Independiente Promovido',
+} as const;
+
+export type ClientIvaCondition = keyof typeof CLIENT_IVA_CONDITIONS;
+
+export const CLIENT_IVA_CODES = Object.keys(CLIENT_IVA_CONDITIONS).map(Number) as ClientIvaCondition[];
+
+/** Cliente (RF-34, RF-158, RF-214). `ivaCondition` es null solo en clientes heredados (RF-82). */
+export interface ClientDto {
+  id: number;
+  businessName: string;
+  cuit: string;
+  address: string;
+  billingEmail: string;
+  ivaCondition: ClientIvaCondition | null;
+  status: EntityStatus;
+  /** Fecha y hora de alta (RF-214). */
+  createdAt: string;
+}
+
+/** Alta y modificación de un cliente (`POST /api/clients`, `PATCH /api/clients/:id`). */
+export interface ClientInput {
+  businessName: string;
+  cuit: string;
+  address: string;
+  billingEmail: string;
+  ivaCondition: ClientIvaCondition;
+}
+
+/** Moneda del precio de un producto: pesos o dólares (RF-43). */
+export type Currency = 'ARS' | 'USD';
+
+/** Producto con el precio de su cuota mensual en centavos (RF-42, RF-159). */
+export interface ProductDto {
+  id: number;
+  name: string;
+  priceCents: number;
+  currency: Currency;
+  status: EntityStatus;
+}
+
+/** Alta y modificación de un producto (`POST /api/products`, `PATCH /api/products/:id`). */
+export interface ProductInput {
+  name: string;
+  priceCents: number;
+  currency: Currency;
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {

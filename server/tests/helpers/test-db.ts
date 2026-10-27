@@ -1,7 +1,7 @@
 /**
  * Base SQLite en memoria con las migraciones aplicadas y builders de datos de prueba.
  * Los builders insertan directo en la base, sin las validaciones de los servicios: así se pueden
- * armar datos heredados o casos que el alta rechazaría (por ejemplo, AC-42, AC-132, AC-141).
+ * armar datos heredados o casos que el flujo normal no produce (por ejemplo, AC-141).
  */
 import bcrypt from 'bcrypt';
 import { type Db, openDatabase } from '../../src/db/client.ts';

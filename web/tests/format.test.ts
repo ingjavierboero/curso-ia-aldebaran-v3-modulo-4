@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCuit } from '../src/format.ts';
+import { formatCuit, formatDate, formatMoney } from '../src/format.ts';
 
 describe('formato de datos en pantalla (plan.md, Diseño de la interfaz)', () => {
   it('el CUIT se muestra con guiones', () => {
@@ -10,5 +10,20 @@ describe('formato de datos en pantalla (plan.md, Diseño de la interfaz)', () =>
   it('un valor que no tiene 11 dígitos se muestra tal cual', () => {
     expect(formatCuit('2011111111')).toBe('2011111111');
     expect(formatCuit('')).toBe('');
+  });
+});
+
+describe('montos y fechas', () => {
+  it('los montos se muestran con el símbolo de la moneda y separadores de Argentina', () => {
+    expect(formatMoney(1_500_000, 'ARS').replace(/\s/g, ' ')).toBe('$ 15.000,00');
+    expect(formatMoney(12_050, 'USD').replace(/\s/g, ' ')).toBe('US$ 120,50');
+    expect(formatMoney(1, 'ARS').replace(/\s/g, ' ')).toBe('$ 0,01');
+  });
+
+  it('las fechas se muestran como DD/MM/AAAA, en la hora de Argentina', () => {
+    expect(formatDate('2026-10-20T12:00:00Z')).toBe('20/10/2026');
+    // 01:00 UTC del 21 todavía es el 20 en Argentina (UTC-3).
+    expect(formatDate('2026-10-21T01:00:00Z')).toBe('20/10/2026');
+    expect(formatDate('2024-02-29')).toBe('29/02/2024');
   });
 });

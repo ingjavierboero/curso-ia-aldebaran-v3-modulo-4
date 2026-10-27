@@ -49,6 +49,11 @@ export const useSessionStore = create<SessionState>((set) => ({
 // lleva al inicio de sesión.
 setUnauthorizedHandler(() => useSessionStore.setState({ user: null, userChecked: true }));
 
+/** Admin y Editor modifican registros; Consulta solo los ve (RF-10, RF-13). */
+export function useCanEdit(): boolean {
+  return useSessionStore((state) => state.user?.role === 'admin' || state.user?.role === 'editor');
+}
+
 export const ROLE_LABELS: Record<UserDto['role'], string> = {
   admin: 'Admin',
   editor: 'Editor',

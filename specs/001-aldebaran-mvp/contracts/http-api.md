@@ -44,7 +44,8 @@ API JSON que consume `web/`. Autenticación por cookie de sesión (research R-10
 | POST `/api/clients` · PATCH `/api/clients/:id` | A E | Alta y modificación | RF-34 a RF-41 |
 | POST `/api/clients/:id/deactivate` · `/reactivate` | A E | | RF-36, RF-37 |
 | GET `/api/clients/:id/history` | A E C | Eventos en orden cronológico | RF-163 |
-| PUT `/api/clients/:id/products` | A E | `{ productIds }` (solo Activos) | RF-49, RF-50 |
+| GET `/api/clients/:id/products` | A E C | Productos asignados al cliente | RF-49, RF-214 |
+| PUT `/api/clients/:id/products` | A E | `{ productIds }`: la lista completa; los nuevos, solo Activos | RF-49, RF-50 |
 | GET `/api/products` | A E C | Listado | RF-159 |
 | POST `/api/products` · PATCH `/api/products/:id` | A E | `{ name, priceCents, currency }` | RF-42 a RF-46 |
 | POST `/api/products/:id/deactivate` · `/reactivate` | A E | | RF-47, RF-48 |
