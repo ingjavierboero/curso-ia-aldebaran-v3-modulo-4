@@ -83,14 +83,15 @@ const OPTIONS: Array<{ label: string; value: ThemePreference }> = [
   { label: 'Sistema', value: 'system' },
 ];
 
-/** Selector del header: claro, oscuro o el del sistema operativo (RNF-15). */
-export function ThemeSelector() {
+/** Selector de tema: claro, oscuro o el del sistema operativo (RNF-15). `block` ocupa todo el ancho. */
+export function ThemeSelector({ block = false }: { block?: boolean }) {
   const preference = useThemeStore((state) => state.preference);
   const setPreference = useThemeStore((state) => state.setPreference);
   return (
     <Segmented<ThemePreference>
       aria-label="Tema"
       size="small"
+      block={block}
       options={OPTIONS}
       value={preference}
       onChange={setPreference}

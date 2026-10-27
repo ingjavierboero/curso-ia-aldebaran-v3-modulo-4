@@ -1,7 +1,9 @@
+import { CheckCircleOutlined, EditOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons';
 import type { Role, UserDto } from '@api-types';
-import { Alert, Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Form, Input, Modal, Select, Space, Table, Tag, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/client.ts';
+import { TableAction } from '../components/TableAction.tsx';
 import { emailRules, errorMessage, newPasswordRules } from '../forms.ts';
 import { ROLE_LABELS } from '../stores/session.ts';
 
@@ -53,7 +55,7 @@ export function UsersPage() {
         <Typography.Title level={3} style={{ margin: 0 }}>
           Usuarios
         </Typography.Title>
-        <Button type="primary" onClick={() => setEditing(null)}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
           Nuevo usuario
         </Button>
       </Space>
@@ -76,22 +78,28 @@ export function UsersPage() {
           {
             title: 'Acciones',
             key: 'acciones',
+            align: 'center',
+            width: 110,
             render: (_, user) => (
-              <Space>
-                <Button size="small" onClick={() => setEditing(user)}>
-                  Modificar
-                </Button>
-                <Popconfirm
-                  title={user.status === 'activo' ? '¿Dar de baja al usuario?' : '¿Reactivar al usuario?'}
-                  description={user.status === 'activo' ? 'Se cierran todas sus sesiones abiertas.' : undefined}
-                  okText="Sí"
-                  cancelText="No"
-                  onConfirm={() => changeStatus(user)}
-                >
-                  <Button size="small" danger={user.status === 'activo'}>
-                    {user.status === 'activo' ? 'Dar de baja' : 'Reactivar'}
-                  </Button>
-                </Popconfirm>
+              <Space size={4}>
+                <TableAction label="Modificar" icon={<EditOutlined />} onClick={() => setEditing(user)} />
+                {user.status === 'activo' ? (
+                  <TableAction
+                    label="Dar de baja"
+                    icon={<StopOutlined />}
+                    danger
+                    confirm="¿Dar de baja al usuario?"
+                    confirmDescription="Se cierran todas sus sesiones abiertas."
+                    onClick={() => changeStatus(user)}
+                  />
+                ) : (
+                  <TableAction
+                    label="Reactivar"
+                    icon={<CheckCircleOutlined />}
+                    confirm="¿Reactivar al usuario?"
+                    onClick={() => changeStatus(user)}
+                  />
+                )}
               </Space>
             ),
           },

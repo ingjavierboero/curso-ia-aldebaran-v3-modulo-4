@@ -19,3 +19,12 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList;
 }
+
+// jsdom tampoco implementa ResizeObserver, que usan los dropdowns y tooltips de antd.
+if (typeof window !== 'undefined' && !window.ResizeObserver) {
+  window.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
