@@ -33,12 +33,12 @@ describe('normalizeCuit y cuitsMatch (RF-125)', () => {
     expect(normalizeCuit('30 71111111 8')).toBe('30711111118');
   });
 
-  it('AC-132: el CUIT 30-71111111-8 del comprobante coincide con el 30711111118 del cliente', () => {
-    expect(cuitsMatch('30-71111111-8', '30711111118')).toBe(true);
+  it('AC-132: el CUIT 30-71111111-1 del comprobante coincide con el 30711111111 del cliente', () => {
+    expect(cuitsMatch('30-71111111-1', '30711111111')).toBe(true);
   });
 
   it('AC-130: un CUIT distinto no coincide', () => {
-    expect(cuitsMatch('30-71111111-1', '30711111118')).toBe(false);
+    expect(cuitsMatch('30-71111111-8', '30711111111')).toBe(false);
   });
 });
 
