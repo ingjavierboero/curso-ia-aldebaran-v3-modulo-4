@@ -6,6 +6,7 @@ import { ClientDetailPage } from './pages/clients/ClientDetailPage.tsx';
 import { ClientsPage } from './pages/clients/ClientsPage.tsx';
 import { FirstAdminPage } from './pages/FirstAdminPage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
+import { InvoicesPage } from './pages/invoices/InvoicesPage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { ProductsPage } from './pages/products/ProductsPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
@@ -34,6 +35,7 @@ export const routes: RouteObject[] = [
           { path: 'clientes', element: <ClientsPage /> },
           { path: 'clientes/:id', element: <ClientDetailPage /> },
           { path: 'productos', element: <ProductsPage /> },
+          { path: 'facturas', element: <InvoicesPage /> },
           { path: 'perfil', element: <ProfilePage /> },
           { path: 'configuracion', element: <SettingsPage /> },
           {
