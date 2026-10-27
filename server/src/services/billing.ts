@@ -6,6 +6,7 @@ import { billingPeriods, clientProducts, clients, invoiceItems, invoices, produc
 import { invoiceDates } from '../domain/billing-dates.ts';
 import { usdToArsCents } from '../domain/money.ts';
 import { NoExchangeRateError, readRateForInvoice } from './exchange-rates.ts';
+import { sendInvoiceEmail } from './invoice-email.ts';
 import { recordProcessError } from './process-errors.ts';
 import { getSettings, type Settings } from './settings.ts';
 
@@ -297,7 +298,8 @@ export interface BillingRunSummary {
  * Proceso de facturación del período (RF-51 a RF-53): factura a cada cliente facturable que todavía no
  * tiene la factura del período, de a uno, y deja el período `completado`. Retoma una corrida
  * interrumpida sin duplicar facturas (RF-53, RF-74). Una generación fallida queda como error de proceso
- * Pendiente (RF-174); los reintentos automáticos (RF-171) se suman en US7. No factura un período cancelado.
+ * Pendiente (RF-174); los reintentos automáticos (RF-171) se suman en US7. Cada factura generada se envía
+ * por email enseguida (RF-85). No factura un período cancelado.
  */
 export async function runBilling(
   ctx: AppContext,
@@ -338,6 +340,20 @@ export async function runBilling(
     const result = await generateInvoice(ctx, { clientId, period: input.period });
     if (result.status === 'generada') {
       summary.generated.push(clientId);
+      // RF-85: el email sale apenas se genera la factura, sin esperar a las de los demás clientes.
+      const sent = await sendInvoiceEmail(ctx, result.invoiceId, 'automatico');
+      if (sent.status === 'fallido') {
+        // RF-86: el envío se reintenta sin volver a generar la factura (la cola llega en US7).
+        recordProcessError(db, {
+          operation: 'envio_factura',
+          clientId,
+          period: input.period,
+          invoiceId: result.invoiceId,
+          attempts: 1,
+          message: sent.message,
+          now: adapters.clock.now(),
+        });
+      }
       continue;
     }
     summary.failed.push(clientId);
