@@ -114,6 +114,16 @@ export interface ProductInput {
   currency: Currency;
 }
 
+/** Estado de la facturación de un período (RF-54 a RF-61). */
+export type BillingPeriodStatus = 'pendiente' | 'en_curso' | 'completado' | 'cancelado';
+
+/** `GET /api/billing/current`: período del mes en curso y estado del botón "Facturar ahora". */
+export interface BillingStatusDto {
+  period: string;
+  status: BillingPeriodStatus;
+  billNow: { enabled: boolean; reason: string | null };
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {
