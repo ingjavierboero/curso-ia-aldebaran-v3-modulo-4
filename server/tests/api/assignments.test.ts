@@ -121,6 +121,31 @@ describe('asignación de productos a un cliente (RF-49)', () => {
   });
 });
 
+describe('productos asignados a un cliente', () => {
+  it('cualquier perfil ve los productos asignados a un cliente, con su precio, moneda y estado', async () => {
+    const t = createTestApp();
+    const { agent } = await loggedInAgent(t, { role: 'consulta' });
+    const client = insertClient(t.db);
+    const product = insertProduct(t.db, { name: 'Abono', priceCents: 100, currency: 'USD', status: 'inactivo' });
+    insertProduct(t.db, { name: 'Sin asignar' });
+    assignProduct(t.db, client.id, product.id);
+
+    const res = await agent.get(`/api/clients/${client.id}/products`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([
+      expect.objectContaining({ id: product.id, name: 'Abono', priceCents: 100, currency: 'USD', status: 'inactivo' }),
+    ]);
+  });
+
+  it('los productos de un cliente inexistente responden 404', async () => {
+    const t = createTestApp();
+    const { agent } = await loggedInAgent(t, { role: 'admin' });
+    const res = await agent.get('/api/clients/999/products');
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('no_encontrado');
+  });
+});
+
 describe('desasignación de productos (RF-50)', () => {
   it('AC-50: un Editor desasigna uno de dos productos asignados y el cliente queda solo con el otro', async () => {
     const t = createTestApp();

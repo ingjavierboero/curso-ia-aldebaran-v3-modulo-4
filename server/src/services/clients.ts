@@ -1,9 +1,10 @@
-import { and, asc, eq, ne } from 'drizzle-orm';
+import { and, asc, eq, inArray, ne } from 'drizzle-orm';
 import type { Conn, Db } from '../db/client.ts';
-import { clients } from '../db/schema.ts';
+import { clientProducts, clients, products } from '../db/schema.ts';
 import type { ClientInput } from '../http/types.ts';
 import { normalizeEmail } from './auth.ts';
 import { type ActorRef, recordClientEvent } from './history.ts';
+import { type Product, ProductNotFoundError } from './products.ts';
 
 export type Client = typeof clients.$inferSelect;
 
@@ -12,6 +13,8 @@ export class DuplicateCuitError extends Error {}
 /** El email de facturación ya lo tiene otro cliente, sin distinguir mayúsculas (RF-41). */
 export class DuplicateBillingEmailError extends Error {}
 export class ClientNotFoundError extends Error {}
+/** Solo se asignan productos Activos (RF-49, AC-47). */
+export class InactiveProductError extends Error {}
 
 export function listClients(conn: Conn): Client[] {
   return conn.select().from(clients).orderBy(asc(clients.businessName), asc(clients.id)).all();
@@ -105,5 +108,63 @@ export function setClientStatus(db: Db, id: number, status: Client['status'], ac
       .get() as Client;
     recordClientEvent(tx, { clientId: id, type: status === 'inactivo' ? 'baja' : 'reactivacion', actor, at: now });
     return updated;
+  });
+}
+
+/** Productos asignados al cliente, ordenados por nombre. */
+export function listClientProducts(conn: Conn, clientId: number): Product[] {
+  getClient(conn, clientId);
+  return conn
+    .select({ product: products })
+    .from(clientProducts)
+    .innerJoin(products, eq(clientProducts.productId, products.id))
+    .where(eq(clientProducts.clientId, clientId))
+    .orderBy(asc(products.name), asc(products.id))
+    .all()
+    .map((row) => row.product);
+}
+
+/**
+ * RF-49 y RF-50: deja asignados al cliente exactamente los productos indicados. Los nuevos tienen que
+ * estar Activos; uno Inactivo que ya estaba asignado se conserva. Cada asignación y desasignación
+ * queda en el historial del cliente, en la misma transacción.
+ */
+export function setClientProducts(
+  db: Db,
+  clientId: number,
+  productIds: number[],
+  actor: ActorRef,
+  now: Date,
+): Product[] {
+  return db.transaction((tx) => {
+    getClient(tx, clientId);
+    const ids = [...new Set(productIds)];
+    const requested = ids.length === 0 ? [] : tx.select().from(products).where(inArray(products.id, ids)).all();
+    if (requested.length !== ids.length) throw new ProductNotFoundError('Alguno de los productos no existe.');
+
+    const current = new Map(listClientProducts(tx, clientId).map((product) => [product.id, product]));
+    const added = requested.filter((product) => !current.has(product.id));
+    const removed = [...current.values()].filter((product) => !ids.includes(product.id));
+
+    const inactive = added.filter((product) => product.status !== 'activo');
+    if (inactive.length > 0) {
+      const names = inactive.map((product) => product.name).join(', ');
+      throw new InactiveProductError(`Solo se pueden asignar productos Activos. Inactivos: ${names}.`);
+    }
+
+    const at = now.toISOString();
+    for (const product of added) {
+      tx.insert(clientProducts).values({ clientId, productId: product.id, assignedAt: at }).run();
+      const payload = { productId: product.id, productName: product.name };
+      recordClientEvent(tx, { clientId, type: 'producto_asignado', payload, actor, at: now });
+    }
+    for (const product of removed) {
+      tx.delete(clientProducts)
+        .where(and(eq(clientProducts.clientId, clientId), eq(clientProducts.productId, product.id)))
+        .run();
+      const payload = { productId: product.id, productName: product.name };
+      recordClientEvent(tx, { clientId, type: 'producto_desasignado', payload, actor, at: now });
+    }
+    return listClientProducts(tx, clientId);
   });
 }

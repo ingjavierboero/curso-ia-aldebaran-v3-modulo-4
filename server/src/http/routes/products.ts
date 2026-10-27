@@ -27,7 +27,7 @@ const productSchema = z.object({
   currency: z.enum(['ARS', 'USD'], { error: 'La moneda debe ser pesos (ARS) o dólares (USD).' }), // RF-43
 });
 
-const toDto = (product: Product): ProductDto => ({
+export const toProductDto = (product: Product): ProductDto => ({
   id: product.id,
   name: product.name,
   priceCents: product.priceCents,
@@ -53,28 +53,28 @@ export function productsRouter(ctx: AppContext): Router {
   const now = () => ctx.adapters.clock.now();
 
   router.get('/products', (_req, res) => {
-    res.json(listProducts(ctx.db).map(toDto));
+    res.json(listProducts(ctx.db).map(toProductDto));
   });
 
   router.post('/products', canEdit(), (req, res) => {
     const input = parse(productSchema, req.body);
-    res.status(201).json(toDto(createProduct(ctx.db, input, now())));
+    res.status(201).json(toProductDto(createProduct(ctx.db, input, now())));
   });
 
   router.patch('/products/:id', canEdit(), (req: WithId, res) => {
     const id = idParam(req.params.id);
     const changes = parse(productSchema.partial(), req.body);
-    res.json(toDto(run(() => updateProduct(ctx.db, id, changes, now()))));
+    res.json(toProductDto(run(() => updateProduct(ctx.db, id, changes, now()))));
   });
 
   router.post('/products/:id/deactivate', canEdit(), (req: WithId, res) => {
     const id = idParam(req.params.id);
-    res.json(toDto(run(() => setProductStatus(ctx.db, id, 'inactivo', now()))));
+    res.json(toProductDto(run(() => setProductStatus(ctx.db, id, 'inactivo', now()))));
   });
 
   router.post('/products/:id/reactivate', canEdit(), (req: WithId, res) => {
     const id = idParam(req.params.id);
-    res.json(toDto(run(() => setProductStatus(ctx.db, id, 'activo', now()))));
+    res.json(toProductDto(run(() => setProductStatus(ctx.db, id, 'activo', now()))));
   });
 
   return router;

@@ -9,16 +9,26 @@ import {
   DuplicateBillingEmailError,
   DuplicateCuitError,
   getClient,
+  InactiveProductError,
+  listClientProducts,
   listClients,
+  setClientProducts,
   setClientStatus,
   updateClient,
 } from '../../services/clients.ts';
-import { conflict, notFound } from '../errors.ts';
+import { ProductNotFoundError } from '../../services/products.ts';
+import { conflict, notFound, unprocessable } from '../errors.ts';
 import { canEdit } from '../middleware/require-role.ts';
 import { currentUser } from '../middleware/session.ts';
 import { email, requiredText } from '../schemas.ts';
-import { CLIENT_IVA_CODES, CLIENT_IVA_CONDITIONS, type ClientDto, type ClientIvaCondition } from '../types.ts';
+import {
+  CLIENT_IVA_CODES,
+  CLIENT_IVA_CONDITIONS,
+  type ClientDto,
+  type ClientIvaCondition,
+} from '../types.ts';
 import { idParam, parse } from '../validate.ts';
+import { toProductDto } from './products.ts';
 
 /** RF-39: 11 dígitos con dígito verificador válido; se aceptan guiones, puntos y espacios. */
 const cuit = z
@@ -40,6 +50,10 @@ const clientSchema = z.object({
   ivaCondition,
 });
 
+const productsSchema = z.object({
+  productIds: z.array(z.number().int().positive(), { error: 'La lista de productos (productIds) es obligatoria.' }),
+});
+
 const toDto = (client: Client): ClientDto => ({
   id: client.id,
   businessName: client.businessName,
@@ -59,12 +73,15 @@ function toHttpError(error: unknown): unknown {
   if (error instanceof DuplicateCuitError) return conflict('cuit_duplicado', error.message);
   if (error instanceof DuplicateBillingEmailError) return conflict('email_duplicado', error.message);
   if (error instanceof ClientNotFoundError) return notFound(error.message);
+  if (error instanceof ProductNotFoundError) return notFound(error.message);
+  if (error instanceof InactiveProductError) return unprocessable('producto_inactivo', error.message);
   return error;
 }
 
 /**
  * Clientes: todos los perfiles los ven; Admin y Editor los dan de alta, modifican, dan de baja y
- * reactivan (RF-34 a RF-41, RF-214). Los filtros, la búsqueda y el historial se suman en T132.
+ * reactivan, y les asignan productos (RF-34 a RF-41, RF-49, RF-50, RF-214). Los filtros, la búsqueda
+ * y el historial se suman en T132.
  */
 export function clientsRouter(ctx: AppContext): Router {
   const router = Router();
@@ -108,6 +125,17 @@ export function clientsRouter(ctx: AppContext): Router {
   router.post('/clients/:id/reactivate', canEdit(), (req: WithId, res) => {
     const id = idParam(req.params.id);
     res.json(toDto(run(() => setClientStatus(ctx.db, id, 'activo', actor(res), now()))));
+  });
+
+  router.get('/clients/:id/products', (req, res) => {
+    const id = idParam(req.params.id);
+    res.json(run(() => listClientProducts(ctx.db, id)).map(toProductDto));
+  });
+
+  router.put('/clients/:id/products', canEdit(), (req: WithId, res) => {
+    const id = idParam(req.params.id);
+    const { productIds } = parse(productsSchema, req.body);
+    res.json(run(() => setClientProducts(ctx.db, id, productIds, actor(res), now())).map(toProductDto));
   });
 
   return router;
