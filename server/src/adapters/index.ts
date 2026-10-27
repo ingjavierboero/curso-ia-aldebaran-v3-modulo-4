@@ -1,7 +1,9 @@
 import type { Env } from '../config/env.ts';
 import type { Db } from '../db/client.ts';
 import { createMockArcaClient } from './arca/mock.ts';
+import { createArcaHomologationClient } from './arca/wsfev1.ts';
 import { systemClock } from './clock.ts';
+import { createDolarhoySource } from './fx/dolarhoy.ts';
 import { mockClassifier } from './llm/mock.ts';
 import { createMockMail } from './mail/mock-mailbox.ts';
 import { createSmtpSender } from './mail/smtp-sender.ts';
@@ -29,8 +31,8 @@ function pending<T extends object>(name: string): T {
  * En modo mock no se conecta a ARCA, Claude ni Gmail (RF-185, RF-187, RF-194).
  */
 export function createAdapters(env: Env, db: Db, clock: Clock = systemClock): Adapters {
-  // La cotización se lee de dolarhoy.com en ambos modos (PRD, Fuera de Alcance); llega en US3.
-  const fx = pending<Adapters['fx']>('La lectura de la cotización');
+  // La cotización se lee de dolarhoy.com en ambos modos (PRD, Fuera de Alcance; research R-13).
+  const fx = createDolarhoySource();
 
   if (env.mode === 'mock') {
     const mail = createMockMail(db, clock);
@@ -46,7 +48,14 @@ export function createAdapters(env: Env, db: Db, clock: Clock = systemClock): Ad
 
   return {
     clock,
-    arca: pending<Adapters['arca']>('El cliente de ARCA homologación'), // US3
+    // Solo homologación (Constitución V); env.ts exige el certificado y la clave en este modo.
+    arca: createArcaHomologationClient({
+      cuit: env.arcaCuit,
+      certPath: env.arcaCertPath ?? '',
+      keyPath: env.arcaKeyPath ?? '',
+      db,
+      clock,
+    }),
     classifier: pending<Adapters['classifier']>('El clasificador con Claude'), // US4
     mailSender: createSmtpSender(env),
     mailbox: pending<Adapters['mailbox']>('La lectura de la casilla por IMAP'), // US4

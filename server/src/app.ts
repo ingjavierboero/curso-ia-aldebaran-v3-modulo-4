@@ -5,7 +5,10 @@ import { apiNotFound, errorHandler } from './http/middleware/errors.ts';
 import { securityHeaders } from './http/middleware/security-headers.ts';
 import { requireSession } from './http/middleware/session.ts';
 import { authRouter } from './http/routes/auth.ts';
+import { billingRouter } from './http/routes/billing.ts';
 import { clientsRouter } from './http/routes/clients.ts';
+import { dashboardRouter } from './http/routes/dashboard.ts';
+import { invoicesRouter } from './http/routes/invoices.ts';
 import { productsRouter } from './http/routes/products.ts';
 import { settingsRouter } from './http/routes/settings.ts';
 import { setupRouter } from './http/routes/setup.ts';
@@ -16,7 +19,17 @@ import { serveWeb } from './http/static-web.ts';
 export type RouterFactory = (ctx: AppContext) => Router;
 
 /** Routers de la API, en el orden en que se montan bajo `/api`. Cada historia suma acá el suyo. */
-const apiRouters: RouterFactory[] = [setupRouter, authRouter, usersRouter, settingsRouter, clientsRouter, productsRouter];
+const apiRouters: RouterFactory[] = [
+  setupRouter,
+  authRouter,
+  usersRouter,
+  settingsRouter,
+  clientsRouter,
+  productsRouter,
+  billingRouter,
+  invoicesRouter,
+  dashboardRouter,
+];
 
 export interface AppOptions {
   routers?: RouterFactory[];

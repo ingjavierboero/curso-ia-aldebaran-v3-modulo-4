@@ -114,6 +114,57 @@ export interface ProductInput {
   currency: Currency;
 }
 
+/** Estado de la facturación de un período (RF-54 a RF-61). */
+export type BillingPeriodStatus = 'pendiente' | 'en_curso' | 'completado' | 'cancelado';
+
+/** `GET /api/billing/current`: período del mes en curso y estado del botón "Facturar ahora". */
+export interface BillingStatusDto {
+  period: string;
+  status: BillingPeriodStatus;
+  billNow: { enabled: boolean; reason: string | null };
+}
+
+/** Banner de certificado de ARCA (RF-97, RF-98); `expiresAt` es la fecha de vencimiento en Argentina. */
+export interface CertificateBannerDto {
+  status: 'vencido' | 'ilegible' | 'por_vencer';
+  expiresAt: string | null;
+  message: string;
+}
+
+/** Banner de cotización: se facturó con la cotización de respaldo (RF-69). */
+export interface ExchangeRateBannerDto {
+  rateCents: number;
+  readAt: string;
+  usedAt: string;
+  message: string;
+}
+
+/** `GET /api/dashboard`: banners del dashboard (los clientes con deuda se suman en US6). */
+export interface DashboardDto {
+  banners: {
+    certificate: CertificateBannerDto | null;
+    exchangeRate: ExchangeRateBannerDto | null;
+  };
+}
+
+export type InvoiceStatus = 'pendiente_de_pago' | 'pago_recibido' | 'revision_manual' | 'pagada';
+
+/** Factura emitida en el listado (RF-160). */
+export interface InvoiceDto {
+  id: number;
+  clientId: number;
+  clientName: string;
+  period: string;
+  pointOfSale: number;
+  number: number | null;
+  voucherNumber: string | null;
+  issueDate: string;
+  dueDate: string;
+  totalCents: number;
+  status: InvoiceStatus;
+  cae: string | null;
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {

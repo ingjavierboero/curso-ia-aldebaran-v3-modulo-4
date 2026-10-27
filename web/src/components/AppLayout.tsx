@@ -1,4 +1,11 @@
-import { AppstoreOutlined, HomeOutlined, SettingOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  AppstoreOutlined,
+  FileTextOutlined,
+  HomeOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import type { Role } from '@api-types';
 import { Button, Layout, Menu, Result, Space, Tag, Typography, theme } from 'antd';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
@@ -16,6 +23,7 @@ const SECTIONS: Array<{ path: string; label: string; icon: ReactNode; roles: Rol
   { path: '/', label: 'Inicio', icon: <HomeOutlined />, roles: ALL_ROLES },
   { path: '/clientes', label: 'Clientes', icon: <TeamOutlined />, roles: ALL_ROLES },
   { path: '/productos', label: 'Productos', icon: <AppstoreOutlined />, roles: ALL_ROLES },
+  { path: '/facturas', label: 'Facturas', icon: <FileTextOutlined />, roles: ALL_ROLES },
   { path: '/usuarios', label: 'Usuarios', icon: <UserOutlined />, roles: ['admin'] },
   { path: '/configuracion', label: 'Configuración', icon: <SettingOutlined />, roles: ALL_ROLES },
 ];
