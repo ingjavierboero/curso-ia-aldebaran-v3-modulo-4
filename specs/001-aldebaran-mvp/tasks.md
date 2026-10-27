@@ -195,7 +195,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T075 [P] [US3] Agregar a `server/src/domain/billing-dates.ts` las fechas de emisión, servicio y vencimiento de la factura
 - [X] T076 [P] [US3] Implementar `server/src/adapters/fx/dolarhoy.ts` con cheerio y timeout de 10 s (research R-13)
 - [X] T077 [P] [US3] Implementar `server/src/adapters/arca/wsaa.ts` (TRA, firma CMS con node-forge, cache en `arca_tokens`), `server/src/adapters/arca/wsfev1.ts` (fast-xml-parser) y `server/src/adapters/arca/certificate.ts`, y registrarlos en `server/src/adapters/index.ts` (research R-06)
-- [ ] T078 [US3] Implementar `server/src/services/exchange-rates.ts` (lectura al generar cada factura, también en reintentos, registro, respaldo y banner, RF-63 a RF-70)
+- [X] T078 [US3] Implementar `server/src/services/exchange-rates.ts` (lectura al generar cada factura, también en reintentos, registro, respaldo y banner, RF-63 a RF-70)
 - [ ] T079 [US3] Implementar `server/src/services/process-errors.ts` con el alta de errores Pendientes (RF-174); los reintentos se agregan en US7
 - [ ] T080 [US3] Implementar `server/src/services/billing.ts`: armado de ítems, snapshots, generación idempotente con estado `generando` y recuperación por `findVoucher` (research R-05, RF-71 a RF-83, RF-94, RF-95). Incluye el candado por punto de venta, la liberación del número, los rechazos sin encolar, los datos vigentes en reintentos y el control de datos del emisor (research R-05, RF-171, RF-219)
 - [ ] T081 [US3] Implementar `server/src/services/billing-periods.ts` (cancelar, reactivar, "Facturar ahora", estados del botón, RF-54 a RF-61)
