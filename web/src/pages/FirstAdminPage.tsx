@@ -1,3 +1,4 @@
+import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input, Typography } from 'antd';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router';
@@ -44,20 +45,20 @@ export function FirstAdminPage() {
       <Typography.Paragraph type="secondary">
         Todavía no hay usuarios. El primero que se registra queda con perfil Admin.
       </Typography.Paragraph>
-      {error && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
+      {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
       <Form<FirstAdminForm> layout="vertical" onFinish={submit} requiredMark={false}>
         <Form.Item
           label="Nombre"
           name="name"
           rules={[{ required: true, whitespace: true, message: 'El nombre es obligatorio.' }]}
         >
-          <Input autoComplete="name" autoFocus />
+          <Input prefix={<UserOutlined />} autoComplete="name" autoFocus />
         </Form.Item>
         <Form.Item label="Email" name="email" rules={emailRules}>
-          <Input type="email" autoComplete="username" />
+          <Input type="email" prefix={<MailOutlined />} autoComplete="username" />
         </Form.Item>
         <Form.Item label="Contraseña" name="password" rules={newPasswordRules}>
-          <Input.Password autoComplete="new-password" />
+          <Input.Password prefix={<LockOutlined />} autoComplete="new-password" />
         </Form.Item>
         <Form.Item
           label="Repetir contraseña"
@@ -73,7 +74,7 @@ export function FirstAdminPage() {
             }),
           ]}
         >
-          <Input.Password autoComplete="new-password" />
+          <Input.Password prefix={<LockOutlined />} autoComplete="new-password" />
         </Form.Item>
         <Button type="primary" htmlType="submit" block loading={sending}>
           Registrar

@@ -1,7 +1,7 @@
 import { HomeOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import type { Role } from '@api-types';
-import { Layout, Menu, Space, Tag, Typography, theme } from 'antd';
-import { type ReactNode, useEffect } from 'react';
+import { Button, Layout, Menu, Result, Space, Tag, Typography, theme } from 'antd';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { useSessionStore } from '../stores/session.ts';
 import { ThemeSelector } from '../theme/theme.tsx';
@@ -34,11 +34,14 @@ export function AppLayout() {
   // /usuarios/12 marca "Usuarios" en el menú.
   const currentSection = `/${pathname.split('/')[1] ?? ''}`;
 
-  useEffect(() => {
-    loadSetup().catch(() => {
-      // Sin conexión con el server: las pantallas muestran su propio error al usar la API.
-    });
+  // Si el estado inicial no se puede cargar (server caído), se muestra el error con "Reintentar".
+  const [setupFailed, setSetupFailed] = useState(false);
+  const load = useCallback(() => {
+    setSetupFailed(false);
+    loadSetup().catch(() => setSetupFailed(true));
   }, [loadSetup]);
+
+  useEffect(load, [load]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -83,7 +86,16 @@ export function AppLayout() {
           </Sider>
         )}
         <Content style={{ padding: 24 }}>
-          <Outlet />
+          {setupFailed ? (
+            <Result
+              status="error"
+              title="No se pudo cargar Aldebaran"
+              subTitle="No se pudo conectar con el servidor."
+              extra={<Button onClick={load}>Reintentar</Button>}
+            />
+          ) : (
+            <Outlet />
+          )}
         </Content>
       </Layout>
     </Layout>

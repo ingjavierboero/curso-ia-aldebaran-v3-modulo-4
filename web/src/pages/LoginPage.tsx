@@ -1,3 +1,4 @@
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input } from 'antd';
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router';
@@ -36,18 +37,18 @@ export function LoginPage() {
 
   return (
     <AuthCard title="Iniciar sesión">
-      {state.notice && <Alert type="success" title={state.notice} style={{ marginBottom: 16 }} />}
-      {error && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
+      {state.notice && <Alert type="success" showIcon title={state.notice} style={{ marginBottom: 16 }} />}
+      {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
       <Form<LoginForm> layout="vertical" onFinish={submit} requiredMark={false}>
         <Form.Item label="Email" name="email" rules={[{ required: true, message: 'El email es obligatorio.' }]}>
-          <Input type="email" autoComplete="username" autoFocus />
+          <Input type="email" prefix={<MailOutlined />} autoComplete="username" autoFocus />
         </Form.Item>
         <Form.Item
           label="Contraseña"
           name="password"
           rules={[{ required: true, message: 'La contraseña es obligatoria.' }]}
         >
-          <Input.Password autoComplete="current-password" />
+          <Input.Password prefix={<LockOutlined />} autoComplete="current-password" />
         </Form.Item>
         <Button type="primary" htmlType="submit" block loading={sending}>
           Ingresar
