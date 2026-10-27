@@ -2,6 +2,8 @@ import { Navigate, type RouteObject } from 'react-router';
 import { AppLayout } from './components/AppLayout.tsx';
 import { RequireRole } from './components/RequireRole.tsx';
 import { RequireSession } from './components/RequireSession.tsx';
+import { ClientDetailPage } from './pages/clients/ClientDetailPage.tsx';
+import { ClientsPage } from './pages/clients/ClientsPage.tsx';
 import { FirstAdminPage } from './pages/FirstAdminPage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
@@ -28,6 +30,8 @@ export const routes: RouteObject[] = [
         element: <RequireSession />,
         children: [
           { index: true, element: <HomePage /> },
+          { path: 'clientes', element: <ClientsPage /> },
+          { path: 'clientes/:id', element: <ClientDetailPage /> },
           { path: 'perfil', element: <ProfilePage /> },
           { path: 'configuracion', element: <SettingsPage /> },
           {
