@@ -1,3 +1,4 @@
+import { MailOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input, Result } from 'antd';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -34,10 +35,10 @@ export function RecoveryRequestPage() {
 
   return (
     <AuthCard title="Recuperar contraseña">
-      {error && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
+      {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
       <Form<{ email: string }> layout="vertical" onFinish={submit} requiredMark={false}>
         <Form.Item label="Email" name="email" rules={emailRules}>
-          <Input type="email" autoComplete="username" autoFocus />
+          <Input type="email" prefix={<MailOutlined />} autoComplete="username" autoFocus />
         </Form.Item>
         <Button type="primary" htmlType="submit" block loading={sending}>
           Enviar link de recuperación

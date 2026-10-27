@@ -132,6 +132,20 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ---
 
+## Phase 3.1: Diseño de la interfaz
+
+**Goal**: las pantallas de US1 con el diseño de la versión anterior del curso (plan.md, "Diseño de la interfaz"), antes de sumar más pantallas
+
+**Independent Test**: con `npm run dev:mock`, recorrer login, primer Admin, Inicio, Usuarios, Configuración y perfil en tema claro y oscuro, y verificar layout, menús, idioma, avisos y formatos
+
+- [X] T151 [US1] Layout sin márgenes, header claro, menú lateral con íconos según el perfil, menú del usuario con el selector de tema y acciones de tabla con ícono y tooltip (`web/src/components/AppLayout.tsx`, `UserMenu.tsx`, `TableAction.tsx`), con sus tests en `web/tests/components/user-menu.test.tsx` y `table-action.test.tsx`
+- [X] T152 [P] [US1] Tests en `web/tests/`: formato del CUIT con guiones (`format.test.ts`); pantalla de error con "Reintentar" cuando el server no responde y ruta inexistente que lleva a Inicio (`components/app-layout.test.tsx`); saludo "Hola, <nombre>" en Inicio (`pages/home.test.tsx`); filtro Todos / Activos / Inactivos y mensaje flotante al dar de baja en Usuarios (`pages/users.test.tsx`)
+- [X] T153 [US1] Aplicar a las pantallas de US1 el resto de las convenciones de diseño: antd y dayjs en español, `App` de antd para los mensajes flotantes, fondo y `color-scheme` según el tema, íconos en los campos de las pantallas sin sesión, `Alert` con ícono, configuración en tarjetas con grilla, tooltips y CUIT formateado (`web/src/format.ts`), spinner y error de arranque, ruta inexistente a Inicio, saludo en Inicio (`web/src/pages/HomePage.tsx`) y barra con filtro en Usuarios
+
+**Checkpoint**: las pantallas existentes siguen las convenciones de diseño; las historias siguientes las aplican al construir las suyas
+
+---
+
 ## Phase 4: User Story 2 - Gestión de clientes, productos y asignaciones (Priority: P1)
 
 **Goal**: ABM de clientes y productos con sus validaciones, y asignación de productos
@@ -430,6 +444,7 @@ Task: "Implementar adapters/mail/imap-mailbox.ts"
 - [P] = archivos distintos, sin dependencias pendientes
 - Cada test cita sus AC; `npm run test:coverage-ac` debe terminar sin faltantes
 - Todo el trabajo se hace en la rama `001-aldebaran-mvp`. Al cerrar cada fase se crea la rama `fase-N-<nombre>` en su último commit y se abre su PR contra `main`, revisado por un humano; los PRs de fase nunca se encadenan (Constitución v1.1.0, Flujo de desarrollo)
+- La Phase 3.1 (T151 a T153) se agregó el 2026-10-27 para igualar el diseño de la versión anterior del curso; tiene su propio PR contra `main`
 - T143 a T150 se agregaron el 2026-10-21 por la revisión del módulo anterior (RF-91, RF-117, RNF-16): están en la fase donde se ejecutan, aunque su ID no siga el orden
 - Commit después de cada tarea o grupo lógico, con Conventional Commits en español
 - Ningún paso apunta a ARCA productivo; no existe modo producción en el MVP

@@ -204,10 +204,11 @@ reemplaza una pieza del stack:
 | `@testing-library/react`, `jsdom` | web (dev) | tests de componentes |
 | `gitleaks` (binario) | repo | escaneo de secretos (AC-225), fuera de npm |
 | `dayjs` | web | valores de los selectores de fecha y hora de antd; es la misma versión que ya trae antd |
+| `@ant-design/icons` | web | íconos del menú lateral; es la misma versión que ya trae antd |
 
 **Estado**: aprobadas por el responsable del proyecto el 2026-10-20 (Constitución, Restricciones
 adicionales). `dayjs` se aprobó el 2026-10-21, al pedir los selectores de fecha y hora de antd en la
-configuración.
+configuración; `@ant-design/icons`, el 2026-10-27, al pedir el menú lateral de la versión anterior.
 
 ## R-13 · Cotización del dólar
 

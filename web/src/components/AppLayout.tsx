@@ -1,53 +1,62 @@
+import { HomeOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import type { Role } from '@api-types';
-import { Button, Dropdown, Layout, Menu, Space, Tag, Typography } from 'antd';
-import { useEffect } from 'react';
+import { Button, Layout, Menu, Result, Space, Tag, Typography, theme } from 'antd';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
-import { ROLE_LABELS, useSessionStore } from '../stores/session.ts';
+import { useSessionStore } from '../stores/session.ts';
 import { ThemeSelector } from '../theme/theme.tsx';
+import { UserMenu } from './UserMenu.tsx';
 
-const { Header, Content } = Layout;
+const { Header, Sider, Content } = Layout;
 
-/** Secciones del menú y los perfiles que las ven (RF-06 a RF-11); cada historia agrega las suyas. */
-const SECTIONS: Array<{ path: string; label: string; roles: Role[] }> = [
-  { path: '/usuarios', label: 'Usuarios', roles: ['admin'] },
-  { path: '/configuracion', label: 'Configuración', roles: ['admin', 'editor', 'consulta'] },
+const ALL_ROLES: Role[] = ['admin', 'editor', 'consulta'];
+
+/** Secciones del menú lateral y los perfiles que las ven (RF-06 a RF-11); cada historia agrega las suyas. */
+const SECTIONS: Array<{ path: string; label: string; icon: ReactNode; roles: Role[] }> = [
+  { path: '/', label: 'Inicio', icon: <HomeOutlined />, roles: ALL_ROLES },
+  { path: '/usuarios', label: 'Usuarios', icon: <UserOutlined />, roles: ['admin'] },
+  { path: '/configuracion', label: 'Configuración', icon: <SettingOutlined />, roles: ALL_ROLES },
 ];
 
 /**
  * Estructura común de todas las pantallas: header con el nombre del sistema, el indicador de
- * redirección de emails (RF-220), la navegación según el perfil, el menú del usuario con sesión y
- * el selector de tema (RNF-15).
+ * redirección de emails (RF-220) y el selector de tema (RNF-15): con sesión va dentro del menú del
+ * usuario, junto con el menú lateral de las secciones de su perfil.
  */
 export function AppLayout() {
   const setup = useSessionStore((state) => state.setup);
   const user = useSessionStore((state) => state.user);
   const loadSetup = useSessionStore((state) => state.loadSetup);
-  const logout = useSessionStore((state) => state.logout);
   const navigate = useNavigate();
+  const { token } = theme.useToken();
   const { pathname } = useLocation();
   const sections = user ? SECTIONS.filter((section) => section.roles.includes(user.role)) : [];
+  // /usuarios/12 marca "Usuarios" en el menú.
+  const currentSection = `/${pathname.split('/')[1] ?? ''}`;
 
-  useEffect(() => {
-    loadSetup().catch(() => {
-      // Sin conexión con el server: las pantallas muestran su propio error al usar la API.
-    });
+  // Si el estado inicial no se puede cargar (server caído), se muestra el error con "Reintentar".
+  const [setupFailed, setSetupFailed] = useState(false);
+  const load = useCallback(() => {
+    setSetupFailed(false);
+    loadSetup().catch(() => setSetupFailed(true));
   }, [loadSetup]);
 
-  const userMenu = {
-    items: [
-      { key: 'perfil', label: <Link to="/perfil">Mi perfil</Link> },
-      { key: 'salir', label: 'Cerrar sesión' },
-    ],
-    onClick: async ({ key }: { key: string }) => {
-      if (key !== 'salir') return;
-      await logout().catch(() => {});
-      navigate('/login');
-    },
-  };
+  useEffect(load, [load]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+      {/* Header claro, como el menú lateral; los colores salen del tema para el modo oscuro. */}
+      <Header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+          padding: '0 24px',
+          background: token.colorBgContainer,
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        }}
+      >
         <Space size="middle">
           <Typography.Title level={4} style={{ margin: 0, color: 'inherit' }}>
             <Link to="/" style={{ color: 'inherit' }}>
@@ -56,29 +65,39 @@ export function AppLayout() {
           </Typography.Title>
           {setup?.emailRedirectTo && <Tag color="warning">Emails redirigidos a {setup.emailRedirectTo}</Tag>}
         </Space>
-        {sections.length > 0 && (
-          <Menu
-            mode="horizontal"
-            theme="dark"
-            style={{ flex: 1, minWidth: 0, background: 'transparent' }}
-            selectedKeys={sections.filter(({ path }) => pathname.startsWith(path)).map(({ path }) => path)}
-            items={sections.map(({ path, label }) => ({ key: path, label: <Link to={path}>{label}</Link> }))}
-          />
-        )}
-        <Space size="middle">
-          {user && (
-            <Dropdown menu={userMenu} trigger={['click']}>
-              <Button type="text" style={{ color: 'inherit' }}>
-                {user.name} · {ROLE_LABELS[user.role]}
-              </Button>
-            </Dropdown>
-          )}
-          <ThemeSelector />
-        </Space>
+        {user ? <UserMenu user={user} /> : <ThemeSelector />}
       </Header>
-      <Content style={{ padding: 24 }}>
-        <Outlet />
-      </Content>
+      <Layout>
+        {sections.length > 0 && (
+          <Sider
+            breakpoint="lg"
+            collapsedWidth={0}
+            theme="light"
+            width={220}
+            style={{ borderRight: `1px solid ${token.colorBorderSecondary}` }}
+          >
+            <Menu
+              mode="inline"
+              selectedKeys={[currentSection]}
+              items={sections.map(({ path, label, icon }) => ({ key: path, icon, label }))}
+              onClick={({ key }) => navigate(key)}
+              style={{ height: '100%', borderInlineEnd: 0 }}
+            />
+          </Sider>
+        )}
+        <Content style={{ padding: 24 }}>
+          {setupFailed ? (
+            <Result
+              status="error"
+              title="No se pudo cargar Aldebaran"
+              subTitle="No se pudo conectar con el servidor."
+              extra={<Button onClick={load}>Reintentar</Button>}
+            />
+          ) : (
+            <Outlet />
+          )}
+        </Content>
+      </Layout>
     </Layout>
   );
 }

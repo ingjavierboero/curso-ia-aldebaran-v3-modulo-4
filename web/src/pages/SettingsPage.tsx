@@ -1,9 +1,24 @@
 import { ISSUER_IVA_CONDITIONS, type SettingsDto } from '@api-types';
-import { Alert, Button, Card, DatePicker, Form, Input, InputNumber, Select, Spin, TimePicker, Typography } from 'antd';
+import {
+  Alert,
+  App,
+  Button,
+  Card,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Spin,
+  TimePicker,
+  Typography,
+} from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { api } from '../api/client.ts';
 import { errorMessage } from '../forms.ts';
+import { formatCuit } from '../format.ts';
 import { useSessionStore } from '../stores/session.ts';
 
 /** Valores del formulario: las horas y la fecha van como Dayjs para los selectores de antd. */
@@ -16,6 +31,20 @@ type SettingsForm = Omit<SettingsDto, 'issuerCuit' | 'billingTime' | 'remindersT
 type SettingsUpdate = Partial<Omit<SettingsDto, 'issuerCuit'>>;
 
 const TIME_FORMAT = 'HH:mm';
+
+/** Campos en columnas que se adaptan al ancho de la pantalla. */
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 24px;
+`;
+
+const Sections = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 960px;
+`;
 const DATE_FORMAT = 'YYYY-MM-DD';
 
 const TIME_RULES = [{ required: true, message: 'La hora es obligatoria.' }];
@@ -34,6 +63,10 @@ function toForm(settings: SettingsDto): SettingsForm {
     issuerActivityStartDate: settings.issuerActivityStartDate ? dayjs(settings.issuerActivityStartDate) : null,
   };
 }
+
+const ISSUER_HINT = 'Se muestra en el PDF de cada factura y en los emails';
+const TRADE_NAME_HINT =
+  'Remitente y firma de los emails a los clientes (RF-215). No va en el PDF. Si está vacío, se usa la razón social.';
 
 const IVA_OPTIONS = ISSUER_IVA_CONDITIONS.map((value) => ({ value, label: value }));
 
@@ -70,46 +103,51 @@ function toUpdate(values: SettingsForm, current: SettingsDto): SettingsUpdate {
 export function SettingsPage() {
   const user = useSessionStore((state) => state.user);
   const canEdit = user?.role === 'admin';
+  const { message } = App.useApp();
   const [form] = Form.useForm<SettingsForm>();
   const [settings, setSettings] = useState<SettingsDto | null>(null);
-  const [result, setResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     api
       .get<SettingsDto>('/settings')
       .then(setSettings)
-      .catch((e) => setResult({ type: 'error', text: errorMessage(e) }));
+      .catch((e) => setError(errorMessage(e)));
   }, []);
 
   async function submit(values: SettingsForm) {
     if (!settings) return;
     setSaving(true);
-    setResult(null);
+    setError(null);
     try {
       const saved = await api.put<SettingsDto>('/settings', toUpdate(values, settings));
       setSettings(saved);
       form.setFieldsValue(toForm(saved));
-      setResult({ type: 'success', text: 'La configuración se guardó.' });
+      message.success('Configuración guardada.');
     } catch (e) {
-      setResult({ type: 'error', text: errorMessage(e) });
+      setError(errorMessage(e));
     } finally {
       setSaving(false);
     }
   }
 
   if (!settings) {
-    if (result) return <Alert type="error" title={result.text} />;
+    if (error) return <Alert type="error" showIcon title={error} />;
     return <Spin style={{ display: 'block', margin: '48px auto' }} />;
   }
 
   return (
-    <div style={{ display: 'grid', gap: 16, maxWidth: 720 }}>
-      <Typography.Title level={3} style={{ margin: 0 }}>
-        Configuración
-      </Typography.Title>
-      {!canEdit && <Alert type="info" title="Solo un Admin puede modificar la configuración." />}
-      {result && <Alert type={result.type} title={result.text} closable onClose={() => setResult(null)} />}
+    <>
+      <Typography.Title level={3}>Configuración</Typography.Title>
+      {!canEdit && (
+        <Alert
+          type="info"
+          showIcon
+          title="Solo un Admin puede modificar la configuración."
+          style={{ marginBottom: 16, maxWidth: 960 }}
+        />
+      )}
       <Form<SettingsForm>
         form={form}
         layout="vertical"
@@ -118,55 +156,78 @@ export function SettingsPage() {
         initialValues={toForm(settings)}
         onFinish={submit}
       >
-        <Card title="Procesos automáticos" style={{ marginBottom: 16 }}>
-          <Form.Item label="Intervalo de revisión de la casilla (minutos)" name="mailboxIntervalMinutes">
-            <InputNumber min={5} max={60} precision={0} />
-          </Form.Item>
-          <Form.Item label="Hora de facturación" name="billingTime" rules={TIME_RULES}>
-            <TimePicker format={TIME_FORMAT} needConfirm={false} placeholder="HH:MM" />
-          </Form.Item>
-          <Form.Item label="Hora de recordatorios" name="remindersTime" rules={TIME_RULES}>
-            <TimePicker format={TIME_FORMAT} needConfirm={false} placeholder="HH:MM" />
-          </Form.Item>
-          <Form.Item label="Cantidad de reintentos" name="retryCount">
-            <InputNumber min={0} max={10} precision={0} />
-          </Form.Item>
-          <Form.Item label="Espera entre reintentos (minutos)" name="retryWaitMinutes">
-            <InputNumber min={1} max={60} precision={0} />
-          </Form.Item>
-        </Card>
-        <Card title="Empresa emisora y ARCA" style={{ marginBottom: 16 }}>
-          <Form.Item label="CUIT" extra="Sale de la variable de entorno ARCA_CUIT.">
-            <Input value={settings.issuerCuit} disabled />
-          </Form.Item>
-          <Form.Item label="Punto de venta" name="pointOfSale">
-            <InputNumber min={1} max={99999} precision={0} />
-          </Form.Item>
-          <Form.Item label="Razón social" name="issuerBusinessName">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Nombre de fantasía (opcional)" name="issuerTradeName">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Domicilio comercial" name="issuerAddress">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Condición frente al IVA" name="issuerIvaCondition">
-            <Select options={IVA_OPTIONS} placeholder="Elegí la condición" />
-          </Form.Item>
-          <Form.Item label="Número de ingresos brutos" name="issuerGrossIncomeNumber">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Fecha de inicio de actividades" name="issuerActivityStartDate">
-            <DatePicker format="DD/MM/YYYY" placeholder="DD/MM/AAAA" />
-          </Form.Item>
-        </Card>
-        {canEdit && (
-          <Button type="primary" htmlType="submit" loading={saving}>
-            Guardar
-          </Button>
-        )}
+        <Sections>
+          <Card
+            title="Empresa emisora"
+            extra={<Typography.Text type="secondary">{ISSUER_HINT}</Typography.Text>}
+          >
+            <Grid>
+              <Form.Item label="CUIT" htmlFor="issuerCuit" tooltip="Sale de la variable de entorno ARCA_CUIT.">
+                <Input id="issuerCuit" value={formatCuit(settings.issuerCuit)} disabled />
+              </Form.Item>
+              <Form.Item label="Razón social" name="issuerBusinessName">
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Nombre de fantasía"
+                name="issuerTradeName"
+                tooltip={TRADE_NAME_HINT}
+              >
+                <Input placeholder="Opcional" />
+              </Form.Item>
+              <Form.Item label="Domicilio comercial" name="issuerAddress">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Condición frente al IVA" name="issuerIvaCondition">
+                <Select options={IVA_OPTIONS} placeholder="Elegí una condición" />
+              </Form.Item>
+              <Form.Item label="Número de ingresos brutos" name="issuerGrossIncomeNumber">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Fecha de inicio de actividades" name="issuerActivityStartDate">
+                <DatePicker format="DD/MM/YYYY" placeholder="DD/MM/AAAA" style={{ width: '100%' }} />
+              </Form.Item>
+            </Grid>
+          </Card>
+
+          <Card title="Facturación">
+            <Grid>
+              <Form.Item label="Punto de venta de ARCA" name="pointOfSale">
+                <InputNumber min={1} max={99999} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item label="Hora de facturación (día 15)" name="billingTime" rules={TIME_RULES}>
+                <TimePicker format={TIME_FORMAT} needConfirm={false} allowClear={false} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item label="Hora de recordatorios (último día del mes)" name="remindersTime" rules={TIME_RULES}>
+                <TimePicker format={TIME_FORMAT} needConfirm={false} allowClear={false} style={{ width: '100%' }} />
+              </Form.Item>
+            </Grid>
+          </Card>
+
+          <Card title="Procesos automáticos">
+            <Grid>
+              <Form.Item label="Revisión de la casilla cada (minutos)" name="mailboxIntervalMinutes">
+                <InputNumber min={5} max={60} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item label="Reintentos ante una falla" name="retryCount">
+                <InputNumber min={0} max={10} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item label="Espera entre reintentos (minutos)" name="retryWaitMinutes">
+                <InputNumber min={1} max={60} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+            </Grid>
+          </Card>
+
+          {error && <Alert type="error" showIcon title={error} />}
+          {canEdit && (
+            <div>
+              <Button type="primary" htmlType="submit" loading={saving}>
+                Guardar
+              </Button>
+            </div>
+          )}
+        </Sections>
       </Form>
-    </div>
+    </>
   );
 }

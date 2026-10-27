@@ -1,3 +1,4 @@
+import { LockOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -59,15 +60,16 @@ export function ResetPasswordPage() {
       {status === 'invalid' ? (
         <Alert
           type="error"
+          showIcon
           title="El link de recuperación no es válido o venció."
           description="En unos segundos te llevamos al inicio de sesión para que pidas uno nuevo."
         />
       ) : (
         <>
-          {error && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
+          {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
           <Form<{ newPassword: string }> layout="vertical" onFinish={submit} requiredMark={false}>
             <Form.Item label="Nueva contraseña" name="newPassword" rules={newPasswordRules}>
-              <Input.Password autoComplete="new-password" autoFocus />
+              <Input.Password prefix={<LockOutlined />} autoComplete="new-password" autoFocus />
             </Form.Item>
             <Button type="primary" htmlType="submit" block loading={sending}>
               Cambiar contraseña

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AppLayout } from '../../src/components/AppLayout.tsx';
@@ -34,6 +34,24 @@ function renderLayout(initialPath = '/') {
 }
 
 afterEach(() => vi.unstubAllGlobals());
+
+describe('arranque sin conexión con el server (plan.md, Diseño de la interfaz)', () => {
+  it('si el server no responde muestra un error con "Reintentar", que vuelve a intentar', async () => {
+    const fetchMock = vi.fn(async (): Promise<Response> => {
+      throw new TypeError('Failed to fetch');
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    renderLayout();
+    expect(await screen.findByText('No se pudo cargar Aldebaran')).toBeTruthy();
+
+    mockSetup('dev@empresa.com');
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /reintentar/i }));
+    });
+    expect(await screen.findByText('Emails redirigidos a dev@empresa.com')).toBeTruthy();
+    expect(screen.queryByText('No se pudo cargar Aldebaran')).toBeNull();
+  });
+});
 
 describe('indicador de redirección de emails en el header (RF-220)', () => {
   it('AC-250: con EMAIL_REDIRECT_TO definida, el header muestra "Emails redirigidos a <dirección>"', async () => {

@@ -18,7 +18,7 @@ export function RequireSession() {
     if (!userChecked) void loadUser();
   }, [userChecked, loadUser]);
 
-  if (!setup || !userChecked) return <Spin style={{ display: 'block', margin: '48px auto' }} />;
+  if (!setup || !userChecked) return <Spin fullscreen />;
   if (setup.needsFirstAdmin) return <Navigate to="/primer-admin" replace />;
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   return <Outlet />;
