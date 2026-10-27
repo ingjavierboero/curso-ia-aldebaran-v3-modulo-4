@@ -188,7 +188,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T071 [P] [US3] Test de integración en `server/tests/integration/billing/invoice-email.test.ts`: email al email de facturación con el PDF, número, período, importe, vencimiento, deuda vigente calculada al enviar e indicación de facturas anteriores, pedido de comprobante, leyenda de homologación, remitente y firma con nombre de fantasía o razón social, registro en el historial (AC-78, AC-81, AC-82, AC-237, RF-88 aclarado). Además: el email sale dentro del minuto siguiente a la generación (RF-85)
 - [X] T072 [P] [US3] Test de `server/src/documents/invoice-pdf.ts` en `server/tests/unit/documents/invoice-pdf.test.ts`: el texto del PDF contiene todos los campos de RF-93, los datos del emisor y su CUIT, la cotización si hubo USD y la leyenda de homologación (AC-83, AC-84)
 - [X] T073 [P] [US3] Test de los adapters reales de ARCA en `server/tests/unit/adapters/arca-soap.test.ts` con `fetch` mockeado: TRA firmado con el certificado y la clave de las variables de entorno, cacheo del token, XML de `FECAESolicitar` con Concepto 2, fechas de servicio y `CondicionIVAReceptorId`, timeout a los 30 s (AC-70, AC-227, AC-228)
-- [ ] T074 [P] [US3] Test de integración en `server/tests/integration/billing/certificate-banner.test.ts`: banner si el certificado venció o no se puede leer, con fecha si vence en 30 días y sin banner a 31 días (AC-90, AC-91)
+- [X] T074 [P] [US3] Test de integración en `server/tests/integration/billing/certificate-banner.test.ts`: banner si el certificado venció o no se puede leer, con fecha si vence en 30 días y sin banner a 31 días (AC-90, AC-91)
 
 ### Implementation for User Story 3
 
