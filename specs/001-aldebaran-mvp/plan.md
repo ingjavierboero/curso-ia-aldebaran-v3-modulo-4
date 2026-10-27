@@ -163,7 +163,7 @@ web/
 │   ├── api/                 # cliente HTTP tipado
 │   ├── stores/              # zustand: sesión, tema, modo
 │   ├── theme/               # tema claro/oscuro (RNF-15)
-│   ├── components/          # layout, header (indicador mock, tema), banners
+│   ├── components/          # layout (header y menú lateral), indicadores, banners
 │   └── pages/               # login, registro inicial, recuperación, dashboard, clientes,
 │                            # productos, facturas, revisión, reportes, usuarios,
 │                            # configuración, casilla simulada, perfil
@@ -173,6 +173,68 @@ web/
 **Structure Decision**: aplicación web con los dos workspaces que fija `AGENTS.md` (`server/` y
 `web/`). Los tipos de la API se definen en `server/src/http/types.ts` y `web/` los importa con un
 alias de path de TypeScript, para no agregar un tercer workspace.
+
+### Diseño de la interfaz
+
+Mismo diseño que la versión anterior del curso (`curso-ia-aldebaran-v2-modulo-3`), con antd y sus
+íconos. Cada historia aplica estas convenciones a sus pantallas.
+
+**Layout y navegación**
+- Un layout de antd que ocupa toda la ventana, sin márgenes alrededor. El fondo del documento y los
+  controles nativos (scrollbars, `color-scheme`) acompañan al tema claro u oscuro.
+- Header claro de ancho completo: nombre del sistema e indicadores (modo mock con ícono, RF-209;
+  redirección de emails, RF-220). Con sesión, a la derecha, el menú del usuario: avatar con sus
+  iniciales, nombre y perfil; al abrirse muestra su email, el selector de tema (RNF-15), "Mi perfil" y
+  "Cerrar sesión". Sin sesión, el selector de tema va suelto en el header.
+- Menú lateral claro de 220 px, solo con sesión y con las secciones del perfil del usuario; se oculta
+  en pantallas angostas y marca la sección actual también en los detalles (`/clientes/12` marca
+  Clientes). Secciones e íconos: Inicio (`HomeOutlined`), Clientes (`TeamOutlined`), Productos
+  (`AppstoreOutlined`), Facturas (`FileTextOutlined`), Revisión (`AuditOutlined`), Reportes
+  (`BarChartOutlined`), Casilla simulada (`MailOutlined`, solo en mock, RF-204), Usuarios
+  (`UserOutlined`, solo Admin) y Configuración (`SettingOutlined`).
+- Pantallas sin sesión (login, primer Admin y recuperación): formulario en una tarjeta centrada, con
+  íconos en los campos (`MailOutlined` en el email, `LockOutlined` en la contraseña).
+- Mientras se carga el estado inicial se muestra un spinner de pantalla completa; si el server no
+  responde, una pantalla de error con "Reintentar". Una ruta inexistente lleva a Inicio.
+- Inicio saluda al usuario ("Hola, <nombre>") sobre el dashboard.
+
+**Idioma y formatos**
+- antd en español (`es_ES`) y dayjs en español: calendarios, paginación, confirmaciones y textos
+  vacíos en castellano.
+- Fechas `DD/MM/AAAA`, fecha y hora `DD/MM/AAAA HH:mm`, períodos con el nombre del mes ("Octubre
+  2026"), montos con `$` y separadores de Argentina, alineados a la derecha y sin cortar la línea, y
+  CUIT con guiones (`20-11111111-2`). Los helpers de formato viven en `web/src/format.ts`.
+
+**Avisos**
+- El resultado de una acción (guardar, dar de alta, dar de baja, marcar como pagada) se avisa con un
+  mensaje flotante de antd (`App.useApp().message`), no con un bloque dentro de la pantalla.
+- Los errores de validación de un formulario se muestran en el formulario, con `Alert` con ícono.
+- Los datos que faltan y bloquean un proceso se marcan en texto de advertencia ("Sin cargar").
+
+**Listados**
+- Título de la pantalla y, debajo, una barra con la búsqueda (`Input.Search`), los filtros (por
+  ejemplo `Segmented` Todos / Activos / Inactivos) y el botón principal con ícono alineado a la
+  derecha ("+ Nuevo cliente").
+- Tablas con paginación de 20 filas que se oculta si hay una sola página, scroll horizontal en
+  pantallas angostas y un texto vacío que distingue "Todavía no hay …" de "Ningún … coincide con el
+  filtro".
+- Click o Enter en una fila abre su detalle. Los estados van como etiquetas de color (Activo verde,
+  Inactivo gris; un color fijo por estado de factura).
+- Las acciones de cada fila son botones de ícono con tooltip (`components/TableAction.tsx`); las que
+  no se pueden deshacer fácilmente (dar de baja, marcar como pagada) piden confirmación.
+
+**Formularios y detalles**
+- Altas y modificaciones en modales. La configuración, en tarjetas por tema (Empresa emisora,
+  Facturación, Procesos automáticos) con los campos en una grilla que se adapta al ancho, ayudas con
+  tooltip en los campos que lo necesitan (por ejemplo, de dónde sale el CUIT o para qué se usa el
+  nombre de fantasía) y el CUIT formateado.
+- Detalle de un registro: encabezado con volver, título, estado y acciones a la derecha; datos en
+  `Descriptions`; tarjetas por bloque (productos asignados, facturas).
+- Historial como línea de tiempo con fecha y hora y quién lo originó (ícono de usuario o de robot para
+  el agente, RF-163).
+- Emails recibidos en tarjetas con asunto, remitente, fecha, la clasificación como etiqueta y la tabla
+  de adjuntos con el resultado de cada uno; la revisión, en pestañas con la cantidad pendiente de cada
+  una.
 
 ## Complexity Tracking
 
