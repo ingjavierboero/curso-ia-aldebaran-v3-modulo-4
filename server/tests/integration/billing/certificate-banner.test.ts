@@ -7,8 +7,11 @@ const DAY = 24 * 60 * 60 * 1000;
 const inDays = (days: number) => new Date(NOW.getTime() + days * DAY);
 
 /** Banner de certificado que ve un usuario autenticado al abrir el dashboard. */
-async function certificateBanner(certificate: { readable: boolean; notAfter: Date | null }) {
-  const t = createTestApp({ now: NOW });
+async function certificateBanner(
+  certificate: { readable: boolean; notAfter: Date | null },
+  mode: 'homologacion' | 'mock' = 'homologacion',
+) {
+  const t = createTestApp({ now: NOW, env: { mode } });
   t.adapters.arca.certificate = certificate;
   const { agent } = await loggedInAgent(t, { role: 'consulta' });
   const res = await agent.get('/api/dashboard');
@@ -46,5 +49,11 @@ describe('banner de certificado de ARCA (RF-97, RF-98)', () => {
 
   it('AC-90: con un certificado legible al que le faltan más de 30 días, no hay banner', async () => {
     expect(await certificateBanner({ readable: true, notAfter: new Date('2028-01-01T00:00:00Z') })).toBeNull();
+  });
+
+  it('RF-208: en modo mock no hay banner de certificado, aunque no haya ningún certificado', async () => {
+    expect(await certificateBanner({ readable: true, notAfter: null }, 'mock')).toBeNull();
+    expect(await certificateBanner({ readable: false, notAfter: null }, 'mock')).toBeNull();
+    expect(await certificateBanner({ readable: true, notAfter: inDays(-1) }, 'mock')).toBeNull();
   });
 });

@@ -10,17 +10,20 @@ const WARNING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
  * Banner de certificado de ARCA (RF-97, RF-98): vencido o ilegible, no se puede facturar; si vence
- * dentro de 30 días, avisa la fecha para renovarlo. Sin nada que avisar, null.
+ * dentro de 30 días, avisa la fecha para renovarlo. Sin nada que avisar, o en modo mock, null.
  */
 export async function certificateBanner(ctx: AppContext): Promise<CertificateBannerDto | null> {
+  // RF-208: en modo mock no hay certificado ni banner de certificado.
+  if (ctx.env.mode === 'mock') return null;
   const { readable, notAfter } = await ctx.adapters.arca.certificateStatus();
-  if (!readable || !notAfter) {
+  if (!readable) {
     return {
       status: 'ilegible',
       expiresAt: null,
       message: 'No se puede leer el certificado de ARCA (ARCA_CERT_PATH): no se puede realizar la facturación.',
     };
   }
+  if (!notAfter) return null;
   const expiresAt = civilDate(notAfter);
   const remaining = notAfter.getTime() - ctx.adapters.clock.now().getTime();
   if (remaining <= 0) {
