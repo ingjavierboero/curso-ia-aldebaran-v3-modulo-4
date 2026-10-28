@@ -238,7 +238,8 @@ export const receivedAttachments = sqliteTable(
     filename: text('filename').notNull(),
     mimeType: text('mime_type').notNull(),
     content: blob('content', { mode: 'buffer' }).notNull(),
-    classification: text('classification', { enum: CLASSIFICATIONS }).notNull(),
+    // Null en los adjuntos de un aviso: no se clasifican porque el remitente no es un cliente (RF-113).
+    classification: text('classification', { enum: CLASSIFICATIONS }),
     // Null si no se pudo extraer o no tiene 11 dígitos (RF-122).
     extractedCuit: text('extracted_cuit'),
     // Null si no se pudo extraer o es inválido; el texto original queda en extractedAmountRaw (RNF-13).
