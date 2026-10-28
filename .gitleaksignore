@@ -1,0 +1,5 @@
+# Falsos positivos conocidos de gitleaks (AC-225): contraseñas de prueba de los tests, no secretos.
+# Una ya está en main (publicada), así que no se reescribe el historial; el código actual ya no las tiene.
+# Cada línea es el fingerprint que informa gitleaks (commit:archivo:regla:línea).
+29f340364de30baa9abb37560e978d76d828bd69:server/tests/api/permissions.test.ts:generic-api-key:174
+75e4dd6b7c7c65f0a99b0ecbba726e7253908e1d:server/tests/api/recovery.test.ts:generic-api-key:143

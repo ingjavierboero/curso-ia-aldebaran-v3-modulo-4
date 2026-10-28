@@ -8,7 +8,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "eval:llm": "node --env-file-if-exists=../.env scripts/eval/llm-classification.ts",
+    "eval:perf": "TZ=America/Argentina/Buenos_Aires node --env-file-if-exists=../.env scripts/eval/performance.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.137.0",

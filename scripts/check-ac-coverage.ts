@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
-// El PRD los declara fuera de la suite automática: evaluación del LLM real y rendimiento.
-const EXTERNAL = new Set([109, 110, 111, 232, 233, 234]);
+// El PRD los declara fuera de la suite automática: evaluación del LLM real, gitleaks y rendimiento.
+const EXTERNAL = new Set([109, 110, 111, 225, 232, 233, 234]);
 
 function testFiles(dir: string): string[] {
   let entries;
