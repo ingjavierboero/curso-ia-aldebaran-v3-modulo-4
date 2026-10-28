@@ -298,7 +298,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T116 [P] [US6] Test de integración en `server/tests/integration/reminders/reminders-run.test.ts` con reloj falso: inicio a las 11:00 del último día (±1 min) y a las 14:00 tras el cambio, un único recordatorio por cliente Activo con deuda y sin revisión (también sin productos), ninguno a clientes en revisión, sin deuda o Inactivos, contenido con cada factura, total y pedido de comprobante (AC-88, AC-154 a AC-159, AC-162). Además: una corrida interrumpida se retoma el mismo día solo para los clientes que faltan y nunca al día siguiente (AC-246)
+- [X] T116 [P] [US6] Test de integración en `server/tests/integration/reminders/reminders-run.test.ts` con reloj falso: inicio a las 11:00 del último día (±1 min) y a las 14:00 tras el cambio, un único recordatorio por cliente Activo con deuda y sin revisión (también sin productos), ninguno a clientes en revisión, sin deuda o Inactivos, contenido con cada factura, total y pedido de comprobante (AC-88, AC-154 a AC-159, AC-162). Además: una corrida interrumpida se retoma el mismo día solo para los clientes que faltan y nunca al día siguiente (AC-246)
 - [ ] T117 [P] [US6] Test de API en `server/tests/api/dashboard.test.ts`: listado de clientes con deuda vigente con total, cantidad y si está en revisión; recordatorio manual por cualquier perfil registrado con el usuario y visible para Editor y Consulta; bloqueos con mensaje para clientes sin deuda, en revisión o Inactivos (AC-12, AC-13, AC-89, AC-161, AC-163, AC-164)
 
 ### Implementation for User Story 6
