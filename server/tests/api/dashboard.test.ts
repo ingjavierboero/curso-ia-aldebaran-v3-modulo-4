@@ -176,7 +176,7 @@ describe('recordatorio manual desde el dashboard (RF-154, RF-156, RF-157, RF-96)
     await agent.post(`/api/clients/${andes.id}/reminder`);
 
     const text = (t.adapters.mailSender.sent[0]?.text ?? '').replace(/\s+/g, ' ');
-    for (const value of ['00003-00000001', 'agosto de 2026', '$ 10.000,00', '00003-00000002', '$ 12.000,00']) {
+    for (const value of ['00001-00000001', 'agosto de 2026', '$ 10.000,00', '00001-00000002', '$ 12.000,00']) {
       expect(text).toContain(value);
     }
     expect(text).toMatch(/total a pagar.*\$ 22\.000,00/i);

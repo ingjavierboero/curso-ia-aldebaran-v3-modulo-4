@@ -151,8 +151,8 @@ describe('contenido del recordatorio (RF-150, RF-151, RF-210)', () => {
     expect(email!.to).toBe('pagos@losandes.com');
     expect(email!.subject).toMatch(/recordatorio/i);
     for (const [number, period, amount, due] of [
-      ['00003-00000001', 'agosto de 2026', '$ 10.000,00', '31/08/2026'],
-      ['00003-00000002', 'septiembre de 2026', '$ 12.000,00', '30/09/2026'],
+      ['00001-00000001', 'agosto de 2026', '$ 10.000,00', '31/08/2026'],
+      ['00001-00000002', 'septiembre de 2026', '$ 12.000,00', '30/09/2026'],
     ]) {
       expect(text).toContain(number);
       expect(text).toContain(period);
