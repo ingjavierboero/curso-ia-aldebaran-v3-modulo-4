@@ -65,7 +65,7 @@ function issuerIsComplete(s: Settings): s is Settings & { pointOfSale: number } 
 }
 
 /** Productos Activos asignados al cliente, que son los que se facturan (RF-51, RF-94). */
-function activeProducts(db: Db, clientId: number) {
+export function activeProducts(db: Db, clientId: number) {
   return db
     .select({ product: products })
     .from(clientProducts)

@@ -1,8 +1,14 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, asc, count, eq, isNull } from 'drizzle-orm';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
-import type { Conn } from '../db/client.ts';
-import { processErrors } from '../db/schema.ts';
+import type { Conn, Db } from '../db/client.ts';
+import { clients, invoices, processErrors } from '../db/schema.ts';
+import { formatVoucherNumber } from '../documents/format.ts';
+import type { ProcessErrorDto } from '../http/types.ts';
 import { recordClientEvent } from './history.ts';
+
+export class ProcessErrorNotFoundError extends Error {}
+/** El error ya está Resuelto: no se reintenta ni se resuelve otra vez. */
+export class ProcessErrorResolvedError extends Error {}
 
 export type ProcessError = typeof processErrors.$inferSelect;
 export type ProcessOperation = ProcessError['operation'];
@@ -27,7 +33,7 @@ const sameOrNull = (column: SQLiteColumn, value: string | number | null | undefi
  * RF-174: registra un error de proceso Pendiente con la operación, los intentos, el último mensaje y,
  * cuando corresponde, el cliente y el período; el de un cliente queda también en su historial (RF-163).
  * Si ya hay uno Pendiente de la misma operación, cliente, período y factura, lo actualiza en vez de
- * duplicarlo. Los reintentos automáticos y manuales se agregan en US7.
+ * duplicarlo.
  */
 export function recordProcessError(conn: Conn, error: NewProcessError): ProcessError {
   const at = error.now.toISOString();
@@ -95,5 +101,71 @@ export function resolveProcessErrors(conn: Conn, operation: ProcessOperation, no
     .update(processErrors)
     .set({ status: 'resuelto', resolvedBy: 'agente', resolvedAt: at, updatedAt: at })
     .where(and(eq(processErrors.status, 'pendiente'), eq(processErrors.operation, operation)))
+    .run();
+}
+
+/** Errores de proceso Pendientes, del más antiguo al más reciente (RF-175). */
+export function listPendingErrors(db: Db): ProcessErrorDto[] {
+  return db
+    .select({ error: processErrors, clientName: clients.businessName, invoice: invoices })
+    .from(processErrors)
+    .leftJoin(clients, eq(clients.id, processErrors.clientId))
+    .leftJoin(invoices, eq(invoices.id, processErrors.invoiceId))
+    .where(eq(processErrors.status, 'pendiente'))
+    .orderBy(asc(processErrors.createdAt), asc(processErrors.id))
+    .all()
+    .map(({ error, clientName, invoice }) => ({
+      id: error.id,
+      operation: error.operation,
+      clientId: error.clientId,
+      clientName,
+      period: error.period,
+      invoiceId: error.invoiceId,
+      voucherNumber: invoice?.number != null ? formatVoucherNumber(invoice.pointOfSale, invoice.number) : null,
+      attempts: error.attempts,
+      lastErrorMessage: error.lastErrorMessage,
+      createdAt: error.createdAt,
+      updatedAt: error.updatedAt,
+    }));
+}
+
+/** Cantidad de errores Pendientes, para el banner de errores (RF-181). */
+export function pendingErrorCount(db: Db): number {
+  return db.select({ n: count() }).from(processErrors).where(eq(processErrors.status, 'pendiente')).get()?.n ?? 0;
+}
+
+/** Error Pendiente por id; si no existe o ya está Resuelto, el error correspondiente. */
+export function pendingError(conn: Conn, id: number): ProcessError {
+  const error = conn.select().from(processErrors).where(eq(processErrors.id, id)).get();
+  if (!error) throw new ProcessErrorNotFoundError('El error de proceso no existe.');
+  if (error.status !== 'pendiente') throw new ProcessErrorResolvedError('El error de proceso ya está Resuelto.');
+  return error;
+}
+
+/**
+ * Pasa un error Pendiente a Resuelto (RF-179, RF-180): por un usuario que lo marca o por un reintento
+ * manual exitoso, y registra quién lo resolvió (AC-191).
+ */
+export function resolveProcessError(
+  conn: Conn,
+  id: number,
+  input: { by: 'usuario' | 'reintento_manual'; userId: number; now: Date },
+): void {
+  pendingError(conn, id);
+  const at = input.now.toISOString();
+  conn
+    .update(processErrors)
+    .set({ status: 'resuelto', resolvedBy: input.by, resolvedByUserId: input.userId, resolvedAt: at, updatedAt: at })
+    .where(eq(processErrors.id, id))
+    .run();
+}
+
+/** Un reintento manual falló: el error sigue Pendiente con un intento más y el nuevo mensaje (AC-190). */
+export function recordFailedRetry(conn: Conn, id: number, message: string, now: Date): void {
+  const error = pendingError(conn, id);
+  conn
+    .update(processErrors)
+    .set({ attempts: error.attempts + 1, lastErrorMessage: message, updatedAt: now.toISOString() })
+    .where(eq(processErrors.id, id))
     .run();
 }

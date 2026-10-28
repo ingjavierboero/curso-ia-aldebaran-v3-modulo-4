@@ -258,6 +258,22 @@ export interface MockEmailDto {
   attachments: MockAttachmentDto[];
 }
 
+/** `GET /api/review/errors`: error de proceso Pendiente (RF-175). */
+export interface ProcessErrorDto {
+  id: number;
+  operation: 'generacion_factura' | 'envio_factura' | 'envio_recordatorio' | 'revision_casilla';
+  clientId: number | null;
+  clientName: string | null;
+  /** Período de la factura o mes del recordatorio. */
+  period: string | null;
+  invoiceId: number | null;
+  voucherNumber: string | null;
+  attempts: number;
+  lastErrorMessage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {
