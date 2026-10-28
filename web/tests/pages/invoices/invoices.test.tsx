@@ -38,6 +38,7 @@ function mockApi(current: BillingStatusDto, invoices: InvoiceDto[] = [INVOICE]) 
     if (url === '/api/billing/current/cancel') return json(status('cancelado', 'la facturación del mes está cancelada'));
     if (url === '/api/billing/current/reactivate') return json(status('pendiente'));
     if (url === '/api/billing/current' && !init?.method?.match(/POST/)) return json(current);
+    if (url === '/api/invoices/1/status') return json({ ...INVOICE, status: 'pagada' });
     return json({ error: { code: 'no_encontrado', message: 'No existe.' } }, 404);
   });
   vi.stubGlobal('fetch', fetchMock);
@@ -138,5 +139,34 @@ describe('facturación del mes (RF-54 a RF-61)', () => {
     expect(await screen.findByText(/Facturación de octubre de 2026/i)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /facturar ahora/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /cancelar el mes/i })).toBeNull();
+  });
+});
+
+describe('pasar a Pagada desde el listado (RF-147)', () => {
+  it('AC-150: un Editor pasa a Pagada una factura Pendiente de pago, enviando el estado que vio', async () => {
+    loginAs('editor');
+    const fetchMock = mockApi(status('completado', 'facturación del mes ya realizada'));
+    renderPage();
+    const row = (await screen.findByText('00003-00000001')).closest('tr') as HTMLElement;
+    const button = within(row).getByRole('button', { name: 'Pasar a Pagada' });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    const yes = await screen.findByRole('button', { name: 'Sí' });
+    await act(async () => {
+      fireEvent.click(yes);
+    });
+
+    const post = fetchMock.mock.calls.find(([url]) => url === '/api/invoices/1/status');
+    expect(JSON.parse(String(post?.[1]?.body))).toEqual({ to: 'pagada', expectedStatus: 'pendiente_de_pago' });
+    expect(await screen.findByText('Factura pasada a Pagada.')).toBeTruthy();
+  });
+
+  it('RF-13: un usuario Consulta no ve la acción', async () => {
+    loginAs('consulta');
+    mockApi(status('completado', 'facturación del mes ya realizada'));
+    renderPage();
+    const row = (await screen.findByText('00003-00000001')).closest('tr') as HTMLElement;
+    expect(within(row).queryByRole('button', { name: 'Pasar a Pagada' })).toBeNull();
   });
 });

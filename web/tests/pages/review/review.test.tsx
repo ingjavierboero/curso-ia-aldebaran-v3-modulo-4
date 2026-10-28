@@ -1,4 +1,4 @@
-import type { ReviewPaymentDto, UserDto } from '@api-types';
+import type { NoticeDto, ResolvedPaymentDto, ReviewPaymentDto, UserDto } from '@api-types';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -130,5 +130,95 @@ describe('decisiones en la pantalla de revisión', () => {
     renderPage();
     const row = (await screen.findByText('00003-00000001')).closest('tr') as HTMLElement;
     expect(within(row).queryByRole('button', { name: 'Pasar a Pagada' })).toBeNull();
+  });
+});
+
+const NOTICE: NoticeDto = {
+  id: 3,
+  email: {
+    id: 8,
+    from: 'otro@desconocido.com',
+    subject: 'Transferencia',
+    receivedAt: '2026-10-20T13:05:00.000Z',
+    classification: null,
+    attachments: [
+      { id: 11, filename: 'comprobante.pdf', mimeType: 'application/pdf', classification: null, cuit: null, amountCents: null, error: null },
+    ],
+  },
+};
+
+const RESOLVED: ResolvedPaymentDto[] = [
+  {
+    invoice: { ...payment('revision_manual').invoice, id: 1, status: 'pagada', reason: null },
+    decision: 'pagada',
+    decidedBy: { id: 9, name: 'Editora' },
+    decidedAt: '2026-10-20T15:00:00.000Z',
+    previousStatus: 'revision_manual',
+    previousReason: 'monto no coincide',
+    emails: [],
+  },
+  {
+    invoice: { ...payment('pago_recibido').invoice, id: 2, voucherNumber: '00003-00000002', status: 'pendiente_de_pago', reason: null },
+    decision: 'pendiente_de_pago',
+    decidedBy: { id: 9, name: 'Editora' },
+    decidedAt: '2026-10-20T14:00:00.000Z',
+    previousStatus: 'pago_recibido',
+    previousReason: null,
+    emails: [],
+  },
+];
+
+/** API con avisos y resueltos; registra cada llamada. */
+function mockReviewApi(noticeLists: NoticeDto[][]) {
+  let noticeLoads = 0;
+  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url === '/api/review/notices') return json(noticeLists[Math.min(noticeLoads++, noticeLists.length - 1)]);
+    if (url.startsWith('/api/review/resolved')) return json(RESOLVED);
+    if (init?.method === 'POST') return json({ id: 3, status: 'revisado' });
+    return json([]);
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
+const openTab = async (label: RegExp) => {
+  const tab = await screen.findByRole('tab', { name: label });
+  await act(async () => {
+    fireEvent.click(tab);
+  });
+};
+
+describe('avisos y resueltos', () => {
+  it('AC-145, AC-153: muestra los avisos con remitente, asunto, fecha y adjunto, y un Editor marca uno como revisado', async () => {
+    const fetchMock = mockReviewApi([[NOTICE], []]);
+    renderPage();
+    await openTab(/avisos/i);
+
+    const row = (await screen.findByText('otro@desconocido.com')).closest('tr') as HTMLElement;
+    expect(within(row).getByText('Transferencia')).toBeTruthy();
+    expect(within(row).getByText('20/10/2026 10:05')).toBeTruthy();
+    expect(within(row).getByRole('link', { name: 'comprobante.pdf' }).getAttribute('href')).toBe('/api/attachments/11');
+
+    const button = within(row).getByRole('button', { name: 'Marcar como revisado' });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(fetchMock).toHaveBeenCalledWith('/api/review/notices/3/reviewed', expect.objectContaining({ method: 'POST' }));
+    expect(await screen.findByText('Aviso marcado como revisado.')).toBeTruthy();
+  });
+
+  it('AC-238: los resueltos muestran la decisión, el usuario, la fecha, el estado y el motivo previos', async () => {
+    mockReviewApi([[]]);
+    renderPage();
+    await openTab(/resueltos/i);
+
+    const paid = (await screen.findByText('00003-00000001')).closest('tr') as HTMLElement;
+    expect(within(paid).getByText('Pagada')).toBeTruthy();
+    expect(within(paid).getByText('Editora')).toBeTruthy();
+    expect(within(paid).getByText('20/10/2026 12:00')).toBeTruthy();
+    expect(within(paid).getByText('Revisión manual')).toBeTruthy();
+    expect(within(paid).getByText('monto no coincide')).toBeTruthy();
+    const returned = screen.getByText('00003-00000002').closest('tr') as HTMLElement;
+    expect(within(returned).getByText('Devuelta a Pendiente de pago')).toBeTruthy();
   });
 });

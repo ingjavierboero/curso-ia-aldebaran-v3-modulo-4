@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCuit, formatDate, formatMoney, formatPeriod } from '../src/format.ts';
+import { formatCuit, formatDate, formatDateTime, formatMoney, formatPeriod } from '../src/format.ts';
 
 describe('formato de datos en pantalla (plan.md, Diseño de la interfaz)', () => {
   it('el CUIT se muestra con guiones', () => {
@@ -32,5 +32,12 @@ describe('períodos', () => {
   it('el período se muestra con el nombre del mes', () => {
     expect(formatPeriod('2026-10')).toBe('Octubre 2026');
     expect(formatPeriod('2027-01')).toBe('Enero 2027');
+  });
+});
+
+describe('fecha y hora', () => {
+  it('se muestran como DD/MM/AAAA HH:mm en la hora de Argentina', () => {
+    expect(formatDateTime('2026-10-20T13:05:00.000Z')).toBe('20/10/2026 10:05');
+    expect(formatDateTime('2026-10-21T01:00:00.000Z')).toBe('20/10/2026 22:00');
   });
 });
