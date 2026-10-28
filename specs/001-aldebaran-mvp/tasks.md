@@ -229,7 +229,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Implementation for User Story 4
 
-- [ ] T095 [P] [US4] Implementar `server/src/domain/email-classification.ts`
+- [X] T095 [P] [US4] Implementar `server/src/domain/email-classification.ts`
 - [ ] T096 [P] [US4] Implementar `server/src/domain/amount-matching.ts` según research R-09
 - [ ] T097 [US4] Implementar `server/src/domain/payment-rules.ts` usando `amount-matching.ts`, `cuit.ts` y `money.ts`
 - [ ] T098 [P] [US4] Implementar `server/src/adapters/llm/retry-policy.ts` y `server/src/adapters/llm/anthropic.ts` (herramienta con esquema de salida, `maxRetries: 0`, `timeout: 10_000`) y registrarlo en `server/src/adapters/index.ts` (research R-07)
