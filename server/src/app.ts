@@ -10,6 +10,7 @@ import { clientsRouter } from './http/routes/clients.ts';
 import { dashboardRouter } from './http/routes/dashboard.ts';
 import { invoicesRouter } from './http/routes/invoices.ts';
 import { productsRouter } from './http/routes/products.ts';
+import { reviewRouter } from './http/routes/review.ts';
 import { settingsRouter } from './http/routes/settings.ts';
 import { setupRouter } from './http/routes/setup.ts';
 import { usersRouter } from './http/routes/users.ts';
@@ -29,6 +30,7 @@ const apiRouters: RouterFactory[] = [
   billingRouter,
   invoicesRouter,
   dashboardRouter,
+  reviewRouter,
 ];
 
 export interface AppOptions {

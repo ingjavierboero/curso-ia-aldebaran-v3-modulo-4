@@ -299,19 +299,20 @@ describe('pagos resueltos (RF-216)', () => {
     const c = insertInvoice(t.db, { clientId: client.id, period: '2026-10', status: 'pago_recibido' });
     const { agent } = await loggedInAgent(t, { role: 'admin' });
 
-    t.adapters.clock.set('2026-10-18T15:00:00.000Z');
+    // Decisiones en dos días de Argentina, dentro de las 24 h de la sesión: 02:00 UTC del 20 son las
+    // 23:00 del 19 en Argentina, y 01:00 UTC del 21 son las 22:00 del 20.
+    t.adapters.clock.set('2026-10-20T02:00:00.000Z');
     await changeStatus(agent, a.id, 'pagada', 'pago_recibido');
     await changeStatus(agent, b.id, 'pagada', 'pago_recibido');
-    // 01:00 UTC del 21 todavía es el 20 en Argentina.
     t.adapters.clock.set('2026-10-21T01:00:00.000Z');
     await changeStatus(agent, c.id, 'pagada', 'pago_recibido');
 
     const ids = async (query: string) =>
       (await agent.get(`/api/review/resolved${query}`)).body.map((r: { invoice: { id: number } }) => r.invoice.id);
     expect(await ids(`?clientId=${client.id}`)).toEqual([c.id, a.id]);
-    expect(await ids('?from=2026-10-19&to=2026-10-20')).toEqual([c.id]);
-    expect(await ids('?to=2026-10-18')).toEqual([b.id, a.id]);
-    expect(await ids(`?clientId=${other.id}&from=2026-10-19`)).toEqual([]);
+    expect(await ids('?from=2026-10-20&to=2026-10-20')).toEqual([c.id]);
+    expect(await ids('?to=2026-10-19')).toEqual([b.id, a.id]);
+    expect(await ids(`?clientId=${other.id}&from=2026-10-20`)).toEqual([]);
   });
 
   it('un filtro con una fecha inválida se rechaza', async () => {
