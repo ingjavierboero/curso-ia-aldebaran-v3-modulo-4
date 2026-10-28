@@ -79,7 +79,7 @@ pantalla (RF-01); es la base de todas las demás historias.
 **Independent Test**: con el sistema vacío, registrar el primer Admin, crear un Editor y un
 Consulta, y verificar con cada uno qué pantallas y acciones quedan permitidas o rechazadas.
 
-**Acceptance Scenarios** (completos: AC-01 a AC-33, AC-211 a AC-218, AC-222 a AC-224, AC-249 a AC-253 y AC-256):
+**Acceptance Scenarios** (completos: AC-01 a AC-33, AC-211 a AC-218, AC-222 a AC-224, AC-249 a AC-253, AC-256 y AC-257):
 
 1. **Given** el sistema sin usuarios, **When** se registra el primer usuario con una contraseña de
    7 caracteres, **Then** se rechaza; con 8 caracteres queda Activo con perfil Admin (AC-03).
@@ -431,7 +431,9 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   rechazarse conservando el anterior. La condición frente al IVA del emisor MUST ser una de las que
   emiten Factura C (Responsable Monotributo, Monotributista Social, Monotributo Trabajador
   Independiente Promovido o IVA Sujeto Exento) y la fecha de inicio de actividades MUST existir en el
-  calendario (RF-91).
+  calendario (RF-91). La pantalla MUST marcar los datos obligatorios del emisor y el punto de venta y,
+  mientras falte alguno, MUST mostrar un aviso que los nombre y advierta que sin ellos no se factura
+  (RF-221, AC-257).
 - **FR-016** (RF-63 a RF-70, RNF-13): El agente MUST convertir a pesos los productos en dólares con
   la cotización del dólar blue venta de dolarhoy.com al facturar, redondeando cada cuota al
   centavo; registrar cada cotización leída; usar la última registrada si el sitio no responde
@@ -454,7 +456,8 @@ Cada FR resume y agrupa requerimientos del PRD; el texto completo y normativo de
   vencimiento.
 - **FR-048** (RF-219): Si faltan los datos obligatorios de la empresa emisora o el punto de venta, el
   agente MUST NOT generar la factura ni llamar a ARCA y MUST tratar la generación como fallida con el
-  mensaje "faltan los datos de la empresa emisora o el punto de venta".
+  mensaje "faltan los datos de la empresa emisora o el punto de venta: " seguido de los datos que
+  faltan, separados por comas.
 
 **Control de pagos**
 

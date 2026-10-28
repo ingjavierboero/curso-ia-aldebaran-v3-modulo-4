@@ -330,6 +330,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T126 [US7] Completar `server/src/services/process-errors.ts` con reintento manual, resolución y conteo para el banner (RF-176 a RF-181, FR-046)
 - [X] T127 [US7] Agregar las rutas de errores a `server/src/http/routes/review.ts` y el banner de errores a `server/src/services/banners.ts`
 - [X] T128 [P] [US7] Completar la pestaña Errores de `ReviewPage` y el banner de errores en `web/src/components/Banners.tsx`
+- [X] T154 [US7] Nombrar los datos faltantes en el error de RF-219 (`server/src/services/billing.ts`) y, en `web/src/pages/SettingsPage.tsx`, marcar los datos obligatorios del emisor y el punto de venta con un aviso de los que faltan (RF-219, RF-221, AC-242, AC-257), con sus tests en `server/tests/integration/billing/arca-idempotency.test.ts` y `web/tests/pages/settings.test.tsx`
 
 **Checkpoint**: las fallas quedan visibles y se pueden resolver
 
