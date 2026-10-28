@@ -236,7 +236,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T099 [P] [US4] Implementar `server/src/adapters/mail/imap-mailbox.ts` y registrarlo en `server/src/adapters/index.ts` (research R-08)
 - [X] T148 [P] [US4] Implementar `server/src/domain/file-signature.ts` (research R-16)
 - [X] T100 [US4] Implementar `server/src/services/payment-processing.ts`: identificación del cliente, avisos, clasificación por adjunto, decisión de `payment-rules.ts`, transiciones con `invoice-status.ts`, motivos, `invoice_emails` e historial en una transacción. El tipo de cada adjunto sale de `file-signature.ts`, nunca del declarado (RF-117)
-- [ ] T101 [US4] Implementar `server/src/services/mailbox-check.ts` y `server/src/jobs/mailbox-job.ts` con su condición en el tick (RF-99 a RF-109)
+- [X] T101 [US4] Implementar `server/src/services/mailbox-check.ts` y `server/src/jobs/mailbox-job.ts` con su condición en el tick (RF-99 a RF-109)
 
 **Checkpoint**: el circuito facturar → recibir comprobante → Pago recibido o Revisión manual funciona con fakes
 
