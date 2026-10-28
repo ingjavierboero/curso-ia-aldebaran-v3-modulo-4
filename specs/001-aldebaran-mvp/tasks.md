@@ -253,7 +253,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T102 [P] [US5] Test de API en `server/tests/api/review.test.ts`: listado de pagos con evidencia y motivo y sin otros estados, avisos Pendientes, pasar a Pagada o devolver a Pendiente desde Pago recibido y Revisión manual, motivo eliminado, pasar a Pagada desde el listado, aviso Revisado con usuario, resueltos con decisión, usuario, fecha, estado y motivo previos y comprobantes, filtros por cliente y fechas (AC-10, AC-144 a AC-151, AC-153, AC-238)
 - [X] T103 [P] [US5] Test de API en `server/tests/api/review-conflict.test.ts`: cambio de estado con `expectedStatus` desactualizado → `409` con el estado vigente y sin cambios (AC-240)
 - [X] T104 [P] [US5] Test de componente en `web/tests/pages/review.test.tsx`: ante `409` se muestra el mensaje y se recarga la vista (AC-240)
-- [ ] T149 [P] [US5] Test de API en `server/tests/api/attachments.test.ts`: `GET /api/attachments/:id` exige sesión y sirve PDF e imágenes verificados `inline` y cualquier otro archivo como descarga, siempre con `nosniff`, CSP `sandbox` y el nombre de archivo saneado (RNF-16, AC-255)
+- [X] T149 [P] [US5] Test de API en `server/tests/api/attachments.test.ts`: `GET /api/attachments/:id` exige sesión y sirve PDF e imágenes verificados `inline` y cualquier otro archivo como descarga, siempre con `nosniff`, CSP `sandbox` y el nombre de archivo saneado (RNF-16, AC-255)
 
 ### Implementation for User Story 5
 
