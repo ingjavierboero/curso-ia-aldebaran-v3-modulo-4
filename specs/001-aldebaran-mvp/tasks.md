@@ -328,7 +328,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 - [X] T125 [US7] Implementar `server/src/jobs/retry-queue.ts` y conectarlo a `billing.ts`, `invoice-email.ts` y `reminders.ts` (research R-11, RF-171 a RF-174)
 - [X] T126 [US7] Completar `server/src/services/process-errors.ts` con reintento manual, resolución y conteo para el banner (RF-176 a RF-181, FR-046)
-- [ ] T127 [US7] Agregar las rutas de errores a `server/src/http/routes/review.ts` y el banner de errores a `server/src/services/banners.ts`
+- [X] T127 [US7] Agregar las rutas de errores a `server/src/http/routes/review.ts` y el banner de errores a `server/src/services/banners.ts`
 - [ ] T128 [P] [US7] Completar la pestaña Errores de `ReviewPage` y el banner de errores en `web/src/components/Banners.tsx`
 
 **Checkpoint**: las fallas quedan visibles y se pueden resolver

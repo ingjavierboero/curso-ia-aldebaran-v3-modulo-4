@@ -156,6 +156,7 @@ export interface DashboardDto {
   banners: {
     certificate: CertificateBannerDto | null;
     exchangeRate: ExchangeRateBannerDto | null;
+    processErrors: ProcessErrorsBannerDto | null;
   };
   /** Clientes con deuda vigente, de la mayor deuda a la menor (RF-153). */
   debtors: DebtorDto[];
@@ -272,6 +273,12 @@ export interface ProcessErrorDto {
   lastErrorMessage: string;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Banner de errores: hay errores de proceso Pendientes (RF-181). */
+export interface ProcessErrorsBannerDto {
+  count: number;
+  message: string;
 }
 
 /** Cuerpo de toda respuesta de error. */

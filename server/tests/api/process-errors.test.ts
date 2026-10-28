@@ -43,6 +43,17 @@ function sendError() {
     number: 1,
     cae: '71234567890123',
     caeDueDate: '2026-10-25',
+    // Copias del cliente y del emisor, como las guarda la generación: el reenvío arma el PDF con ellas.
+    clientSnapshot: { businessName: client.businessName, cuit: client.cuit, address: client.address, ivaCondition: 1 },
+    issuerSnapshot: {
+      cuit: '20111111112',
+      businessName: 'Molina Hernando Agustina Maria',
+      tradeName: null,
+      address: 'Calle Falsa 123, CABA',
+      ivaCondition: 'Responsable Monotributo',
+      grossIncomeNumber: '901-123456-7',
+      activityStartDate: '2020-01-01',
+    },
   });
   const error = recordProcessError(t.db, {
     operation: 'envio_factura',

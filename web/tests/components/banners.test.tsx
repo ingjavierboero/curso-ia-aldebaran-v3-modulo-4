@@ -46,13 +46,13 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('banners del dashboard', () => {
   it('AC-90: muestra el banner de certificado con su mensaje', async () => {
-    mockDashboard({ certificate: CERTIFICATE, exchangeRate: null });
+    mockDashboard({ certificate: CERTIFICATE, exchangeRate: null, processErrors: null });
     renderAs('consulta');
     expect(await screen.findByText(CERTIFICATE.message)).toBeTruthy();
   });
 
   it('AC-69, RF-70: un Editor confirma la cotización desde el banner y el banner deja de mostrarse', async () => {
-    const fetchMock = mockDashboard({ certificate: null, exchangeRate: EXCHANGE });
+    const fetchMock = mockDashboard({ certificate: null, exchangeRate: EXCHANGE, processErrors: null });
     renderAs('editor');
     expect(await screen.findByText(EXCHANGE.message)).toBeTruthy();
 
@@ -64,14 +64,14 @@ describe('banners del dashboard', () => {
   });
 
   it('RF-13: un usuario Consulta ve el banner de cotización sin el botón para confirmarla', async () => {
-    mockDashboard({ certificate: null, exchangeRate: EXCHANGE });
+    mockDashboard({ certificate: null, exchangeRate: EXCHANGE, processErrors: null });
     renderAs('consulta');
     expect(await screen.findByText(EXCHANGE.message)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /confirmar/i })).toBeNull();
   });
 
   it('sin nada que avisar no muestra ningún banner', async () => {
-    const fetchMock = mockDashboard({ certificate: null, exchangeRate: null });
+    const fetchMock = mockDashboard({ certificate: null, exchangeRate: null, processErrors: null });
     renderAs('admin');
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(screen.queryByRole('alert')).toBeNull();
