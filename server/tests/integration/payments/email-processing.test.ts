@@ -96,6 +96,10 @@ describe('identificación del email (RF-109 a RF-113)', () => {
     ]);
     expect(t.adapters.classifier.calls).toHaveLength(0);
     expect(invoiceById(t, invoice.id)?.status).toBe('pendiente_de_pago');
+    // RF-142: el aviso conserva sus adjuntos, sin clasificar.
+    expect(t.db.select().from(receivedAttachments).all()).toEqual([
+      expect.objectContaining({ receivedEmailId: received?.id, filename: 'comprobante.pdf', classification: null }),
+    ]);
   });
 
   it('AC-103: el remitente se compara sin distinguir mayúsculas', async () => {
