@@ -3,6 +3,7 @@ import {
   AuditOutlined,
   FileTextOutlined,
   HomeOutlined,
+  InboxOutlined,
   SettingOutlined,
   TeamOutlined,
   UserOutlined,
@@ -19,20 +20,24 @@ const { Header, Sider, Content } = Layout;
 
 const ALL_ROLES: Role[] = ['admin', 'editor', 'consulta'];
 
-/** Secciones del menú lateral y los perfiles que las ven (RF-06 a RF-11); cada historia agrega las suyas. */
-const SECTIONS: Array<{ path: string; label: string; icon: ReactNode; roles: Role[] }> = [
+/**
+ * Secciones del menú lateral y los perfiles que las ven (RF-06 a RF-11); cada historia agrega las suyas.
+ * `mockOnly`: solo existe en modo mock (RF-204).
+ */
+const SECTIONS: Array<{ path: string; label: string; icon: ReactNode; roles: Role[]; mockOnly?: boolean }> = [
   { path: '/', label: 'Inicio', icon: <HomeOutlined />, roles: ALL_ROLES },
   { path: '/clientes', label: 'Clientes', icon: <TeamOutlined />, roles: ALL_ROLES },
   { path: '/productos', label: 'Productos', icon: <AppstoreOutlined />, roles: ALL_ROLES },
   { path: '/facturas', label: 'Facturas', icon: <FileTextOutlined />, roles: ALL_ROLES },
   { path: '/revision', label: 'Revisión', icon: <AuditOutlined />, roles: ALL_ROLES },
+  { path: '/casilla-simulada', label: 'Casilla simulada', icon: <InboxOutlined />, roles: ALL_ROLES, mockOnly: true },
   { path: '/usuarios', label: 'Usuarios', icon: <UserOutlined />, roles: ['admin'] },
   { path: '/configuracion', label: 'Configuración', icon: <SettingOutlined />, roles: ALL_ROLES },
 ];
 
 /**
- * Estructura común de todas las pantallas: header con el nombre del sistema, el indicador de
- * redirección de emails (RF-220) y el selector de tema (RNF-15): con sesión va dentro del menú del
+ * Estructura común de todas las pantallas: header con el nombre del sistema, los indicadores del modo
+ * mock (RF-209) y de redirección de emails (RF-220) y el selector de tema (RNF-15): con sesión va dentro del menú del
  * usuario, junto con el menú lateral de las secciones de su perfil.
  */
 export function AppLayout() {
@@ -42,7 +47,9 @@ export function AppLayout() {
   const navigate = useNavigate();
   const { token } = theme.useToken();
   const { pathname } = useLocation();
-  const sections = user ? SECTIONS.filter((section) => section.roles.includes(user.role)) : [];
+  const sections = user
+    ? SECTIONS.filter((section) => section.roles.includes(user.role) && (!section.mockOnly || setup?.mode === 'mock'))
+    : [];
   // /usuarios/12 marca "Usuarios" en el menú.
   const currentSection = `/${pathname.split('/')[1] ?? ''}`;
 
@@ -75,6 +82,7 @@ export function AppLayout() {
               Aldebaran
             </Link>
           </Typography.Title>
+          {setup?.mode === 'mock' && <Tag color="purple">Modo mock: ARCA, LLM y email simulados</Tag>}
           {setup?.emailRedirectTo && <Tag color="warning">Emails redirigidos a {setup.emailRedirectTo}</Tag>}
         </Space>
         {user ? <UserMenu user={user} /> : <ThemeSelector />}

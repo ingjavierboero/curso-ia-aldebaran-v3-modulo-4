@@ -11,7 +11,7 @@ interface LoginForm {
   password: string;
 }
 
-/** Inicio de sesión con email y contraseña (RF-02), con acceso a la recuperación (RF-23). */
+/** Inicio de sesión con email y contraseña (RF-02), con acceso a la recuperación salvo en modo mock (RF-23, RF-199). */
 export function LoginPage() {
   const setup = useSessionStore((state) => state.setup);
   const login = useSessionStore((state) => state.login);
@@ -54,9 +54,11 @@ export function LoginPage() {
           Ingresar
         </Button>
       </Form>
-      <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <Link to="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link>
-      </div>
+      {setup?.mode !== 'mock' && (
+        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          <Link to="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link>
+        </div>
+      )}
     </AuthCard>
   );
 }

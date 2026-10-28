@@ -29,7 +29,7 @@ function renderApp(initialPath: string) {
         element: <AppLayout />,
         children: [
           { index: true, element: <p>Dashboard</p> },
-          { path: 'clientes', element: <p>Clientes</p> },
+          { path: 'clientes', element: <p>Pantalla de clientes</p> },
           { path: 'login', element: <LoginPage /> },
           { path: 'recuperar-contrasena', element: <p>Recuperar contraseña</p> },
         ],
@@ -56,7 +56,7 @@ describe('indicador del modo mock en el header (RF-184, RF-209)', () => {
     await act(async () => {
       await router.navigate('/clientes');
     });
-    expect(screen.getByText('Clientes')).toBeTruthy();
+    expect(screen.getByText('Pantalla de clientes')).toBeTruthy();
     expect(screen.getByText(MOCK_INDICATOR)).toBeTruthy();
   });
 
