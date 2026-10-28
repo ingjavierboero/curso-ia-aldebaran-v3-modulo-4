@@ -165,6 +165,63 @@ export interface InvoiceDto {
   cae: string | null;
 }
 
+/** Adjunto de un email recibido, con el resultado del LLM (RF-124); `classification` es null en un aviso. */
+export interface ReceivedAttachmentDto {
+  id: number;
+  filename: string;
+  mimeType: string;
+  classification: 'si' | 'no' | 'dudoso' | 'error' | null;
+  cuit: string | null;
+  amountCents: number | null;
+  error: string | null;
+}
+
+/** Email recibido con sus adjuntos (RF-141, RF-142, RF-216, RF-217). */
+export interface ReceivedEmailDto {
+  id: number;
+  from: string;
+  subject: string;
+  receivedAt: string;
+  classification: 'si' | 'no' | 'dudoso' | 'error' | null;
+  attachments: ReceivedAttachmentDto[];
+}
+
+/** Factura en la interfaz de revisión, con su motivo si está en Revisión manual. */
+export interface ReviewInvoiceDto {
+  id: number;
+  clientId: number;
+  clientName: string;
+  period: string;
+  voucherNumber: string | null;
+  totalCents: number;
+  dueDate: string;
+  status: InvoiceStatus;
+  reason: string | null;
+}
+
+/** `GET /api/review/payments`: factura en Pago recibido o Revisión manual con su evidencia (RF-141). */
+export interface ReviewPaymentDto {
+  invoice: ReviewInvoiceDto;
+  emails: ReceivedEmailDto[];
+}
+
+/** `GET /api/review/notices`: aviso Pendiente (RF-142). */
+export interface NoticeDto {
+  id: number;
+  email: ReceivedEmailDto;
+}
+
+/** `GET /api/review/resolved`: decisión de un usuario sobre un pago a revisar (RF-216). */
+export interface ResolvedPaymentDto {
+  invoice: ReviewInvoiceDto;
+  decision: 'pagada' | 'pendiente_de_pago';
+  decidedBy: { id: number; name: string };
+  decidedAt: string;
+  previousStatus: 'pago_recibido' | 'revision_manual';
+  previousReason: string | null;
+  emails: ReceivedEmailDto[];
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {
