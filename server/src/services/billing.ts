@@ -8,6 +8,7 @@ import { usdToArsCents } from '../domain/money.ts';
 import { NoExchangeRateError, readRateForInvoice } from './exchange-rates.ts';
 import { sendInvoiceEmail } from './invoice-email.ts';
 import { recordProcessError } from './process-errors.ts';
+import { retryOrFail } from './retries.ts';
 import { getSettings, type Settings } from './settings.ts';
 
 export type Invoice = typeof invoices.$inferSelect;
@@ -308,9 +309,10 @@ export interface BillingRunSummary {
 /**
  * Proceso de facturación del período (RF-51 a RF-53): factura a cada cliente facturable que todavía no
  * tiene la factura del período, de a uno, y deja el período `completado`. Retoma una corrida
- * interrumpida sin duplicar facturas (RF-53, RF-74). Una generación fallida queda como error de proceso
- * Pendiente (RF-174); los reintentos automáticos (RF-171) se suman en US7. Cada factura generada se envía
- * por email enseguida (RF-85). No factura un período cancelado.
+ * interrumpida sin duplicar facturas (RF-53, RF-74). Una generación o un envío fallidos pasan a la cola
+ * de reintentos y el proceso sigue con el siguiente cliente (RF-87, RF-171); un rechazo de ARCA o un
+ * cliente que ya no es facturable quedan enseguida como error de proceso (RF-174). Cada factura generada
+ * se envía por email enseguida (RF-85). No factura un período cancelado.
  */
 export async function runBilling(
   ctx: AppContext,
@@ -373,8 +375,8 @@ async function bill(
       // RF-85: el email sale apenas se genera la factura, sin esperar a las de los demás clientes.
       const sent = await sendInvoiceEmail(ctx, result.invoiceId, 'automatico');
       if (sent.status === 'fallido') {
-        // RF-86: el envío se reintenta sin volver a generar la factura (la cola llega en US7).
-        recordProcessError(db, {
+        // RF-86: el envío se reintenta sin volver a generar la factura.
+        retryOrFail(db, {
           operation: 'envio_factura',
           clientId,
           period: input.period,
@@ -387,14 +389,16 @@ async function bill(
       continue;
     }
     summary.failed.push(clientId);
-    recordProcessError(db, {
-      operation: 'generacion_factura',
+    const failure = {
+      operation: 'generacion_factura' as const,
       clientId,
       period: input.period,
       attempts: 1,
       message: result.message,
       now: adapters.clock.now(),
-    });
+    };
+    if (result.retryable) retryOrFail(db, failure);
+    else recordProcessError(db, failure);
   }
 
   db.update(billingPeriods)
