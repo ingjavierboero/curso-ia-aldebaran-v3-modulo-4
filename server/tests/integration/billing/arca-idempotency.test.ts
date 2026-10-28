@@ -10,7 +10,8 @@ import { assignProduct, configureIssuer, insertClient, insertProduct } from '../
 const OCT_15 = '2026-10-15T14:00:00.000Z';
 
 const MISSING_IVA = 'el cliente no tiene cargada la condición frente al IVA';
-const MISSING_ISSUER = 'faltan los datos de la empresa emisora o el punto de venta';
+/** RF-219: el mensaje nombra los datos que faltan. */
+const MISSING_ISSUER = (fields: string) => `faltan los datos de la empresa emisora o el punto de venta: ${fields}`;
 
 function billingApp(overrides: Partial<typeof settings.$inferInsert> = {}) {
   const t = createTestApp({ now: OCT_15 });
@@ -225,8 +226,8 @@ describe('fallas antes de llamar a ARCA (RF-82, RF-83, RF-68, RF-219)', () => {
     expect(t.db.select().from(invoices).all()).toHaveLength(0);
     expect(t.adapters.arca.requests).toHaveLength(0);
     expect(errors(t).map((e) => [e.clientId, e.lastErrorMessage])).toEqual([
-      [a.id, MISSING_ISSUER],
-      [b.id, MISSING_ISSUER],
+      [a.id, MISSING_ISSUER('razón social')],
+      [b.id, MISSING_ISSUER('razón social')],
     ]);
   });
 
@@ -238,6 +239,24 @@ describe('fallas antes de llamar a ARCA (RF-82, RF-83, RF-68, RF-219)', () => {
 
     expect(invoiceOf(t, client.id)).toBeUndefined();
     expect(t.adapters.arca.requests).toHaveLength(0);
-    expect(errors(t)).toEqual([expect.objectContaining({ clientId: client.id, lastErrorMessage: MISSING_ISSUER })]);
+    expect(errors(t)).toEqual([
+      expect.objectContaining({ clientId: client.id, lastErrorMessage: MISSING_ISSUER('punto de venta') }),
+    ]);
+  });
+
+  it('RF-219: el mensaje nombra cada dato que falta, separados por comas', async () => {
+    const t = billingApp({
+      retryCount: 0,
+      pointOfSale: null,
+      issuerGrossIncomeNumber: null,
+      issuerActivityStartDate: null,
+    });
+    billableClient(t);
+
+    await run(t);
+
+    expect(errors(t)[0]?.lastErrorMessage).toBe(
+      MISSING_ISSUER('punto de venta, número de ingresos brutos, fecha de inicio de actividades'),
+    );
   });
 });

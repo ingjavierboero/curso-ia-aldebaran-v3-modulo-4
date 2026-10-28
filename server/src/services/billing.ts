@@ -9,7 +9,7 @@ import { NoExchangeRateError, readRateForInvoice } from './exchange-rates.ts';
 import { sendInvoiceEmail } from './invoice-email.ts';
 import { recordProcessError } from './process-errors.ts';
 import { retryOrFail } from './retries.ts';
-import { getSettings, type Settings } from './settings.ts';
+import { getSettings, missingForBilling, type Settings } from './settings.ts';
 
 export type Invoice = typeof invoices.$inferSelect;
 export type BillingTrigger = NonNullable<typeof billingPeriods.$inferSelect.triggeredBy>;
@@ -17,7 +17,9 @@ export type BillingTrigger = NonNullable<typeof billingPeriods.$inferSelect.trig
 /** Factura C (RF-71). */
 const VOUCHER_TYPE = 11 as const;
 
-export const MISSING_ISSUER = 'faltan los datos de la empresa emisora o el punto de venta'; // RF-219
+/** RF-219: el mensaje nombra los datos que faltan. */
+const missingIssuer = (fields: string[]) =>
+  `faltan los datos de la empresa emisora o el punto de venta: ${fields.join(', ')}`;
 export const MISSING_IVA = 'el cliente no tiene cargada la condición frente al IVA'; // RF-83
 const NO_RATE = 'no se pudo leer la cotización del dólar y no hay ninguna registrada'; // RF-68
 
@@ -52,16 +54,9 @@ function withPointOfSaleLock<T>(db: Db, pointOfSale: number, task: () => Promise
 
 // ------------------------------------------------------------------ Datos de la factura
 
-/** RF-219: datos obligatorios de la empresa emisora (RF-91) y punto de venta (RF-73). */
+/** RF-219: están todos los datos obligatorios de la empresa emisora (RF-91) y el punto de venta (RF-73). */
 function issuerIsComplete(s: Settings): s is Settings & { pointOfSale: number } {
-  return Boolean(
-    s.pointOfSale &&
-      s.issuerBusinessName &&
-      s.issuerAddress &&
-      s.issuerIvaCondition &&
-      s.issuerGrossIncomeNumber &&
-      s.issuerActivityStartDate,
-  );
+  return missingForBilling(s).length === 0;
 }
 
 /** Productos Activos asignados al cliente, que son los que se facturan (RF-51, RF-94). */
@@ -145,7 +140,7 @@ export async function generateInvoice(
 ): Promise<GenerationResult> {
   const { db, adapters, env } = ctx;
   const settings = getSettings(db);
-  if (!issuerIsComplete(settings)) return failed(MISSING_ISSUER);
+  if (!issuerIsComplete(settings)) return failed(missingIssuer(missingForBilling(settings)));
 
   // Una factura ya registrada no se vuelve a generar (RF-74).
   let invoice = invoiceOf(db, input.clientId, input.period);

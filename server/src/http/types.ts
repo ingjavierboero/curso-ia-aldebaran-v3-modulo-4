@@ -50,6 +50,8 @@ export interface SettingsDto {
   issuerTradeName: string | null;
   /** CUIT del emisor, de ARCA_CUIT: solo lectura. */
   issuerCuit: string;
+  /** Datos obligatorios del emisor y el punto de venta que faltan para facturar (RF-221): solo lectura. */
+  missingForBilling: string[];
 }
 
 /**

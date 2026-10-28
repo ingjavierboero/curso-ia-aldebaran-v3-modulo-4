@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { settings } from '../../src/db/schema.ts';
 import { createTestApp, loggedInAgent } from '../helpers/test-app.ts';
+import { configureIssuer } from '../helpers/test-db.ts';
 
 const current = (t: ReturnType<typeof createTestApp>) => t.db.select().from(settings).get();
 
@@ -182,5 +183,39 @@ describe('permisos (RF-10, RF-13)', () => {
       }
       expect(current(t)).toEqual(before);
     }
+  });
+});
+
+describe('datos que faltan para facturar (RF-219, RF-221)', () => {
+  it('AC-257: la configuración informa los datos obligatorios del emisor y el punto de venta que faltan', async () => {
+    const t = createTestApp();
+    configureIssuer(t.db, { issuerGrossIncomeNumber: null });
+    const { agent } = await loggedInAgent(t, { role: 'consulta' });
+
+    expect((await agent.get('/api/settings')).body.missingForBilling).toEqual(['número de ingresos brutos']);
+  });
+
+  it('AC-257: cuando un Admin completa el dato que faltaba, la lista queda vacía', async () => {
+    const t = createTestApp();
+    configureIssuer(t.db, { issuerGrossIncomeNumber: null });
+    const { agent } = await loggedInAgent(t, { role: 'admin' });
+
+    const res = await agent.put('/api/settings').send({ issuerGrossIncomeNumber: '901-123456-7' });
+
+    expect(res.body.missingForBilling).toEqual([]);
+  });
+
+  it('sin configurar nada, faltan el punto de venta y todos los datos obligatorios del emisor, en orden', async () => {
+    const t = createTestApp();
+    const { agent } = await loggedInAgent(t, { role: 'admin' });
+
+    expect((await agent.get('/api/settings')).body.missingForBilling).toEqual([
+      'punto de venta',
+      'razón social',
+      'domicilio comercial',
+      'condición frente al IVA',
+      'número de ingresos brutos',
+      'fecha de inicio de actividades',
+    ]);
   });
 });
