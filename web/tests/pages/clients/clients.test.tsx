@@ -1,4 +1,4 @@
-import type { ClientDto, ProductDto, UserDto } from '@api-types';
+import type { ClientEventDto, ClientListItemDto, ProductDto, UserDto } from '@api-types';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -7,7 +7,7 @@ import { ClientsPage } from '../../../src/pages/clients/ClientsPage.tsx';
 import { useSessionStore } from '../../../src/stores/session.ts';
 import { ThemeProvider } from '../../../src/theme/theme.tsx';
 
-const CLIENTS: ClientDto[] = [
+const CLIENTS: ClientListItemDto[] = [
   {
     id: 1,
     businessName: 'Los Andes SRL',
@@ -17,6 +17,7 @@ const CLIENTS: ClientDto[] = [
     ivaCondition: 1,
     status: 'activo',
     createdAt: '2026-10-20T12:00:00Z',
+    debtCents: 2_200_000,
   },
   {
     id: 2,
@@ -27,12 +28,40 @@ const CLIENTS: ClientDto[] = [
     ivaCondition: null,
     status: 'inactivo',
     createdAt: '2026-10-01T12:00:00Z',
+    debtCents: 0,
   },
 ];
 
 const ABONO: ProductDto = { id: 10, name: 'Abono', priceCents: 1_500_000, currency: 'ARS', status: 'activo' };
 const SOPORTE: ProductDto = { id: 11, name: 'Soporte', priceCents: 12_050, currency: 'USD', status: 'activo' };
 const VIEJO: ProductDto = { id: 12, name: 'Viejo', priceCents: 100, currency: 'ARS', status: 'inactivo' };
+
+const agent = { type: 'agente' as const, userId: null, userName: null };
+const user = (userName: string) => ({ type: 'usuario' as const, userId: 5, userName });
+const HISTORY: ClientEventDto[] = [
+  { id: 1, type: 'alta', occurredAt: '2026-10-20T12:00:00.000Z', actor: user('Editora'), payload: {} },
+  {
+    id: 2,
+    type: 'factura_generada',
+    occurredAt: '2026-10-20T12:15:00.000Z',
+    actor: agent,
+    payload: { voucherNumber: '00003-00000001', period: '2026-10' },
+  },
+  {
+    id: 3,
+    type: 'email_enviado',
+    occurredAt: '2026-10-20T17:30:00.000Z',
+    actor: user('Consultor'),
+    payload: { kind: 'recordatorio', trigger: 'manual', to: 'pagos@losandes.com' },
+  },
+  {
+    id: 4,
+    type: 'estado_factura',
+    occurredAt: '2026-10-21T12:00:00.000Z',
+    actor: agent,
+    payload: { from: 'pendiente_de_pago', to: 'revision_manual', reason: 'monto no coincide' },
+  },
+];
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -48,6 +77,7 @@ function mockApi(assigned: ProductDto[] = [ABONO]) {
       return json([ABONO, SOPORTE, VIEJO].filter((p) => productIds.includes(p.id)));
     }
     if (url === '/api/clients/1/products') return json(assigned);
+    if (url === '/api/clients/1/history') return json(HISTORY);
     return json({ error: { code: 'no_encontrado', message: 'No existe.' } }, 404);
   });
   vi.stubGlobal('fetch', fetchMock);
@@ -225,5 +255,30 @@ describe('detalle del cliente (RF-214) y asignación de productos (RF-49, RF-50)
     expect(screen.queryByRole('button', { name: /asignar productos/i })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Desasignar' })).toBeNull();
     expect(screen.queryByRole('button', { name: /modificar/i })).toBeNull();
+  });
+});
+
+describe('deuda e historial del cliente (RF-158, RF-163)', () => {
+  it('AC-165: el listado muestra la deuda vigente de cada cliente', async () => {
+    mockApi();
+    renderAt('/clientes');
+    const andes = (await screen.findByText('Los Andes SRL')).closest('tr') as HTMLElement;
+    expect(within(andes).getByText('$ 22.000,00')).toBeTruthy();
+    const baja = screen.getByText('Baja SA').closest('tr') as HTMLElement;
+    expect(within(baja).getByText('$ 0,00')).toBeTruthy();
+  });
+
+  it('AC-170, AC-12: el detalle muestra el historial en orden, con fecha y hora, qué pasó y quién lo hizo', async () => {
+    loginAs('consulta');
+    mockApi();
+    renderAt('/clientes/1');
+
+    const timeline = await screen.findByRole('list', { name: 'Historial del cliente' });
+    const items = within(timeline).getAllByRole('listitem').map((item) => item.textContent ?? '');
+    expect(items).toHaveLength(4);
+    expect(items[0]).toMatch(/20\/10\/2026 09:00.*Alta del cliente.*Editora/);
+    expect(items[1]).toMatch(/Factura generada.*00003-00000001.*Agente/);
+    expect(items[2]).toMatch(/Recordatorio manual enviado.*pagos@losandes\.com.*Consultor/);
+    expect(items[3]).toMatch(/Pendiente de pago → Revisión manual.*monto no coincide.*Agente/);
   });
 });

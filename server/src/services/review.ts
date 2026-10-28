@@ -91,7 +91,7 @@ function emailsByIds(conn: Conn, ids: number[]): ReceivedEmailDto[] {
 }
 
 /** Emails asociados a una factura (RF-139), del más antiguo al más reciente. */
-function emailsOfInvoice(conn: Conn, invoiceId: number): ReceivedEmailDto[] {
+export function emailsOfInvoice(conn: Conn, invoiceId: number): ReceivedEmailDto[] {
   const ids = conn
     .select({ id: receivedEmails.id })
     .from(invoiceEmails)

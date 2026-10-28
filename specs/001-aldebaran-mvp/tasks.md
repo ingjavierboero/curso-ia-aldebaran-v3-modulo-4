@@ -344,15 +344,15 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 8 ⚠️
 
-- [ ] T129 [P] [US8] Test de API en `server/tests/api/listings.test.ts`: listado y detalle de clientes, productos y facturas con sus campos, filtros de facturas por estado, cliente y período, filtro de clientes por estado y búsqueda por razón social o CUIT, detalle de factura con cambios de estado y emails, descarga del PDF por cualquier perfil (AC-165 a AC-169, AC-175, AC-176, AC-236, AC-239)
-- [ ] T130 [P] [US8] Test de API en `server/tests/api/history.test.ts`: historial con todos los eventos de AC-170 en orden y con su actor (AC-170)
-- [ ] T131 [P] [US8] Test de API en `server/tests/api/reports.test.ts`: reportes de facturación, cobranza y deuda con los valores de los AC, filtro por rango de períodos y CSV con las mismas filas y columnas (AC-171 a AC-174, AC-177)
+- [X] T129 [P] [US8] Test de API en `server/tests/api/listings.test.ts`: listado y detalle de clientes, productos y facturas con sus campos, filtros de facturas por estado, cliente y período, filtro de clientes por estado y búsqueda por razón social o CUIT, detalle de factura con cambios de estado y emails, descarga del PDF por cualquier perfil (AC-165 a AC-169, AC-175, AC-176, AC-236, AC-239)
+- [X] T130 [P] [US8] Test de API en `server/tests/api/history.test.ts`: historial con todos los eventos de AC-170 en orden y con su actor (AC-170)
+- [X] T131 [P] [US8] Test de API en `server/tests/api/reports.test.ts`: reportes de facturación, cobranza y deuda con los valores de los AC, filtro por rango de períodos y CSV con las mismas filas y columnas (AC-171 a AC-174, AC-177)
 
 ### Implementation for User Story 8
 
-- [ ] T132 [US8] Completar `server/src/http/routes/invoices.ts` con filtros, detalle y PDF, y `server/src/http/routes/clients.ts` con filtros, búsqueda e historial
-- [ ] T133 [P] [US8] Implementar `server/src/services/reports.ts`, el generador CSV en `server/src/documents/csv.ts` y `server/src/http/routes/reports.ts`
-- [ ] T134 [P] [US8] Completar en web `InvoicesPage` (filtros y detalle), `ClientDetailPage` (historial) y agregar `ReportsPage` con descarga CSV en `web/src/pages/`
+- [X] T132 [US8] Completar `server/src/http/routes/invoices.ts` con filtros, detalle y PDF, y `server/src/http/routes/clients.ts` con filtros, búsqueda e historial
+- [X] T133 [P] [US8] Implementar `server/src/services/reports.ts`, el generador CSV en `server/src/documents/csv.ts` y `server/src/http/routes/reports.ts`
+- [X] T134 [P] [US8] Completar en web `InvoicesPage` (filtros y detalle), `ClientDetailPage` (historial) y agregar `ReportsPage` con descarga CSV en `web/src/pages/`
 
 **Checkpoint**: todas las historias funcionan de forma independiente
 

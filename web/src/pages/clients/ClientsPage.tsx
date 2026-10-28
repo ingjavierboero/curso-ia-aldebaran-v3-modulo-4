@@ -1,5 +1,5 @@
 import { EditOutlined, PlusOutlined, StopOutlined, UndoOutlined } from '@ant-design/icons';
-import type { ClientDto, ClientInput, ClientIvaCondition } from '@api-types';
+import type { ClientInput, ClientIvaCondition, ClientListItemDto } from '@api-types';
 import { App, Button, Input, Segmented, Space, Table, Tag, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -7,11 +7,11 @@ import styled from 'styled-components';
 import { api } from '../../api/client.ts';
 import { TableAction } from '../../components/TableAction.tsx';
 import { errorMessage } from '../../forms.ts';
-import { formatCuit } from '../../format.ts';
+import { formatCuit, formatMoney } from '../../format.ts';
 import { useCanEdit } from '../../stores/session.ts';
 import { ClientForm, ivaConditionLabel } from './ClientForm.tsx';
 
-type StatusFilter = ClientDto['status'] | 'todos';
+type StatusFilter = ClientListItemDto['status'] | 'todos';
 
 const STATUS_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
   { value: 'todos', label: 'Todos' },
@@ -28,7 +28,7 @@ const Toolbar = styled.div`
 `;
 
 /** RF-169: busca por razón social (sin distinguir mayúsculas) o por los dígitos del CUIT. */
-function matches(client: ClientDto, search: string): boolean {
+function matches(client: ClientListItemDto, search: string): boolean {
   const text = search.trim().toLowerCase();
   if (!text) return true;
   const digits = text.replace(/\D/g, '');
@@ -40,17 +40,17 @@ export function ClientsPage() {
   const canEdit = useCanEdit();
   const { message } = App.useApp();
   const navigate = useNavigate();
-  const [clients, setClients] = useState<ClientDto[]>([]);
+  const [clients, setClients] = useState<ClientListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<StatusFilter>('todos');
   const [search, setSearch] = useState('');
   // `undefined`: formulario cerrado; `null`: alta; un cliente: modificación.
-  const [editing, setEditing] = useState<ClientDto | null | undefined>(undefined);
+  const [editing, setEditing] = useState<ClientListItemDto | null | undefined>(undefined);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setClients(await api.get<ClientDto[]>('/clients'));
+      setClients(await api.get<ClientListItemDto[]>('/clients'));
     } catch (e) {
       message.error(errorMessage(e));
     } finally {
@@ -70,7 +70,7 @@ export function ClientsPage() {
     await load();
   }
 
-  async function changeStatus(client: ClientDto) {
+  async function changeStatus(client: ClientListItemDto) {
     const deactivate = client.status === 'activo';
     try {
       await api.post(`/clients/${client.id}/${deactivate ? 'deactivate' : 'reactivate'}`);
@@ -107,7 +107,7 @@ export function ClientsPage() {
           </Button>
         )}
       </Toolbar>
-      <Table<ClientDto>
+      <Table<ClientListItemDto>
         rowKey="id"
         loading={loading}
         dataSource={visible}
@@ -134,9 +134,15 @@ export function ClientsPage() {
               code === null ? <Typography.Text type="warning">Sin cargar</Typography.Text> : ivaConditionLabel(code),
           },
           {
+            title: 'Deuda vigente',
+            dataIndex: 'debtCents',
+            align: 'right',
+            render: (cents: number) => <span style={{ whiteSpace: 'nowrap' }}>{formatMoney(cents, 'ARS')}</span>,
+          },
+          {
             title: 'Estado',
             dataIndex: 'status',
-            render: (value: ClientDto['status']) =>
+            render: (value: ClientListItemDto['status']) =>
               value === 'activo' ? <Tag color="green">Activo</Tag> : <Tag>Inactivo</Tag>,
           },
           ...(canEdit
@@ -146,7 +152,7 @@ export function ClientsPage() {
                   key: 'acciones',
                   align: 'center' as const,
                   width: 110,
-                  render: (_: unknown, client: ClientDto) => {
+                  render: (_: unknown, client: ClientListItemDto) => {
                     const active = client.status === 'activo';
                     return (
                       <Space size={4}>

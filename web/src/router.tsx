@@ -13,6 +13,7 @@ import { ProductsPage } from './pages/products/ProductsPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { ReviewPage } from './pages/review/ReviewPage.tsx';
 import { RecoveryRequestPage } from './pages/RecoveryRequestPage.tsx';
+import { ReportsPage } from './pages/ReportsPage.tsx';
 import { ResetPasswordPage } from './pages/ResetPasswordPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import { UsersPage } from './pages/UsersPage.tsx';
@@ -39,6 +40,7 @@ export const routes: RouteObject[] = [
           { path: 'productos', element: <ProductsPage /> },
           { path: 'facturas', element: <InvoicesPage /> },
           { path: 'revision', element: <ReviewPage /> },
+          { path: 'reportes', element: <ReportsPage /> },
           { path: 'casilla-simulada', element: <MockMailboxPage /> },
           { path: 'perfil', element: <ProfilePage /> },
           { path: 'configuracion', element: <SettingsPage /> },

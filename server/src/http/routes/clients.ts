@@ -16,6 +16,7 @@ import {
   setClientStatus,
   updateClient,
 } from '../../services/clients.ts';
+import { listClientHistory } from '../../services/history.ts';
 import { ProductNotFoundError } from '../../services/products.ts';
 import { conflict, notFound, unprocessable } from '../errors.ts';
 import { canEdit } from '../middleware/require-role.ts';
@@ -26,6 +27,7 @@ import {
   CLIENT_IVA_CONDITIONS,
   type ClientDto,
   type ClientIvaCondition,
+  type ClientListItemDto,
 } from '../types.ts';
 import { idParam, parse } from '../validate.ts';
 import { toProductDto } from './products.ts';
@@ -65,6 +67,12 @@ const toDto = (client: Client): ClientDto => ({
   createdAt: client.createdAt,
 });
 
+/** Filtros del listado de clientes (RF-169). */
+const listFilters = z.object({
+  status: z.enum(['activo', 'inactivo'], { error: 'El estado debe ser activo o inactivo.' }).optional(),
+  q: z.string().max(200, 'La búsqueda es demasiado larga.').optional(),
+});
+
 /** Con un middleware antes del handler, Express no infiere el tipo de `:id` desde la ruta. */
 type WithId = Request<{ id: string }>;
 
@@ -80,8 +88,8 @@ function toHttpError(error: unknown): unknown {
 
 /**
  * Clientes: todos los perfiles los ven; Admin y Editor los dan de alta, modifican, dan de baja y
- * reactivan, y les asignan productos (RF-34 a RF-41, RF-49, RF-50, RF-214). Los filtros, la búsqueda
- * y el historial se suman en T132.
+ * reactivan, y les asignan productos (RF-34 a RF-41, RF-49, RF-50, RF-214). El listado se filtra por
+ * estado y se busca por razón social o CUIT (RF-169); cada cliente tiene su historial (RF-163).
  */
 export function clientsRouter(ctx: AppContext): Router {
   const router = Router();
@@ -97,8 +105,19 @@ export function clientsRouter(ctx: AppContext): Router {
     }
   };
 
-  router.get('/clients', (_req, res) => {
-    res.json(listClients(ctx.db).map(toDto));
+  router.get('/clients', (req, res) => {
+    const filters = parse(listFilters, req.query);
+    const list: ClientListItemDto[] = listClients(ctx.db, filters).map((client) => ({
+      ...toDto(client),
+      debtCents: client.debtCents,
+    }));
+    res.json(list);
+  });
+
+  router.get('/clients/:id/history', (req, res) => {
+    const id = idParam(req.params.id);
+    run(() => getClient(ctx.db, id));
+    res.json(listClientHistory(ctx.db, id));
   });
 
   router.get('/clients/:id', (req, res) => {
