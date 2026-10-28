@@ -1,6 +1,7 @@
-import { and, asc, eq, inArray, ne } from 'drizzle-orm';
+import { and, asc, eq, inArray, like, ne, or, type SQL, sql, sum } from 'drizzle-orm';
 import type { Conn, Db } from '../db/client.ts';
-import { clientProducts, clients, products } from '../db/schema.ts';
+import { clientProducts, clients, invoices, products } from '../db/schema.ts';
+import { OWED_STATUSES } from '../domain/invoice-status.ts';
 import type { ClientInput } from '../http/types.ts';
 import { normalizeEmail } from './auth.ts';
 import { type ActorRef, recordClientEvent } from './history.ts';
@@ -16,8 +17,39 @@ export class ClientNotFoundError extends Error {}
 /** Solo se asignan productos Activos (RF-49, AC-47). */
 export class InactiveProductError extends Error {}
 
-export function listClients(conn: Conn): Client[] {
-  return conn.select().from(clients).orderBy(asc(clients.businessName), asc(clients.id)).all();
+export interface ClientFilters {
+  status?: Client['status'];
+  /** Parte de la razón social, sin distinguir mayúsculas, o del CUIT, con o sin guiones (RF-169). */
+  q?: string;
+}
+
+/**
+ * Clientes Activos e Inactivos por razón social (RF-158), con su deuda vigente total: la suma de sus
+ * facturas adeudadas. Se filtran por estado y se buscan por razón social o CUIT (RF-169).
+ */
+export function listClients(conn: Conn, filters: ClientFilters = {}): Array<Client & { debtCents: number }> {
+  const conditions: SQL[] = [];
+  if (filters.status) conditions.push(eq(clients.status, filters.status));
+  const q = filters.q?.trim();
+  if (q) {
+    const digits = q.replace(/[\s.-]/g, '');
+    const byName = like(sql`lower(${clients.businessName})`, `%${q.toLowerCase()}%`);
+    conditions.push(/^\d+$/.test(digits) ? (or(byName, like(clients.cuit, `%${digits}%`)) as SQL) : byName);
+  }
+  const debt = conn
+    .select({ clientId: invoices.clientId, debtCents: sum(invoices.totalCents).mapWith(Number).as('debt_cents') })
+    .from(invoices)
+    .where(inArray(invoices.status, [...OWED_STATUSES]))
+    .groupBy(invoices.clientId)
+    .as('debt');
+  return conn
+    .select({ client: clients, debtCents: debt.debtCents })
+    .from(clients)
+    .leftJoin(debt, eq(debt.clientId, clients.id))
+    .where(conditions.length ? and(...conditions) : undefined)
+    .orderBy(asc(clients.businessName), asc(clients.id))
+    .all()
+    .map(({ client, debtCents }) => ({ ...client, debtCents: debtCents ?? 0 }));
 }
 
 export function getClient(conn: Conn, id: number): Client {

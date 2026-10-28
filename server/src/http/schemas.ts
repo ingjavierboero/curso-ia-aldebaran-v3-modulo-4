@@ -21,3 +21,6 @@ export const calendarDate = (message: string) =>
     const date = new Date(Date.UTC(y, m - 1, d));
     return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
   }, message);
+
+/** Período `YYYY-MM` con un mes del 01 al 12 (data-model.md). */
+export const period = (message: string) => z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, message);

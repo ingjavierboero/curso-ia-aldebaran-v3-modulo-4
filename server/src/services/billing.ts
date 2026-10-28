@@ -5,7 +5,9 @@ import type { Db } from '../db/client.ts';
 import { billingPeriods, clientProducts, clients, invoiceItems, invoices, products } from '../db/schema.ts';
 import { invoiceDates } from '../domain/billing-dates.ts';
 import { usdToArsCents } from '../domain/money.ts';
+import { formatVoucherNumber } from '../documents/format.ts';
 import { NoExchangeRateError, readRateForInvoice } from './exchange-rates.ts';
+import { recordClientEvent } from './history.ts';
 import { sendInvoiceEmail } from './invoice-email.ts';
 import { recordProcessError } from './process-errors.ts';
 import { retryOrFail } from './retries.ts';
@@ -100,6 +102,35 @@ const caeRequestOf = (invoice: Invoice, receiverCuit: string): CaeRequest => ({
   totalCents: invoice.totalCents,
 });
 
+// ------------------------------------------------------------------ Factura emitida
+
+/**
+ * Registra la factura como emitida con su CAE, en Pendiente de pago, y el evento "factura generada" en
+ * el historial del cliente (RF-163), en la misma transacción.
+ */
+function markIssued(ctx: AppContext, invoice: Invoice, cae: { cae: string; caeDueDate: string }) {
+  const now = ctx.adapters.clock.now();
+  ctx.db.transaction((tx) => {
+    tx.update(invoices)
+      .set({ ...cae, status: 'pendiente_de_pago', updatedAt: now.toISOString() })
+      .where(eq(invoices.id, invoice.id))
+      .run();
+    recordClientEvent(tx, {
+      clientId: invoice.clientId,
+      type: 'factura_generada',
+      payload: {
+        invoiceId: invoice.id,
+        period: invoice.period,
+        voucherNumber: invoice.number === null ? null : formatVoucherNumber(invoice.pointOfSale, invoice.number),
+        totalCents: invoice.totalCents,
+        cae: cae.cae,
+      },
+      actor: { type: 'agente' },
+      at: now,
+    });
+  });
+}
+
 // ------------------------------------------------------------------ Comprobantes ya autorizados
 
 /**
@@ -116,10 +147,7 @@ async function settleReservedNumber(ctx: AppContext, invoice: Invoice): Promise<
   const now = adapters.clock.now().toISOString();
 
   if (voucher && voucher.receiverCuit === receiverCuit && voucher.totalCents === invoice.totalCents) {
-    db.update(invoices)
-      .set({ cae: voucher.cae, caeDueDate: voucher.caeDueDate, status: 'pendiente_de_pago', updatedAt: now })
-      .where(eq(invoices.id, invoice.id))
-      .run();
+    markIssued(ctx, invoice, { cae: voucher.cae, caeDueDate: voucher.caeDueDate });
     return true;
   }
   db.update(invoices).set({ number: null, updatedAt: now }).where(eq(invoices.id, invoice.id)).run();
@@ -269,10 +297,7 @@ async function requestCae(ctx: AppContext, invoice: Invoice, receiverCuit: strin
 
   try {
     const { cae, caeDueDate } = await adapters.arca.requestCae(request);
-    db.update(invoices)
-      .set({ cae, caeDueDate, status: 'pendiente_de_pago', updatedAt: stamp() })
-      .where(eq(invoices.id, invoice.id))
-      .run();
+    markIssued(ctx, { ...invoice, number }, { cae, caeDueDate });
     return { status: 'generada', invoiceId: invoice.id };
   } catch (error) {
     if (error instanceof ArcaRejectionError) {

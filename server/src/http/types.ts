@@ -182,6 +182,42 @@ export interface InvoiceDto {
   cae: string | null;
 }
 
+/** Quién originó un cambio o un evento: el agente o un usuario, con su nombre (RF-163, RF-217). */
+export interface ActorDto {
+  type: 'agente' | 'usuario';
+  userId: number | null;
+  userName: string | null;
+}
+
+/** `GET /api/invoices/:id`: detalle de una factura emitida (RF-217). */
+export interface InvoiceDetailDto {
+  invoice: InvoiceDto;
+  pdfUrl: string;
+  items: Array<{ description: string; originalPriceCents: number; originalCurrency: Currency; amountCents: number }>;
+  statusChanges: Array<{
+    fromStatus: InvoiceStatus | 'generando';
+    toStatus: InvoiceStatus | 'generando';
+    reason: string | null;
+    actor: ActorDto;
+    changedAt: string;
+  }>;
+  emails: ReceivedEmailDto[];
+}
+
+/** `GET /api/clients/:id/history`: evento del historial del cliente (RF-163). */
+export interface ClientEventDto {
+  id: number;
+  type: string;
+  occurredAt: string;
+  actor: ActorDto;
+  payload: Record<string, unknown>;
+}
+
+/** Cliente en el listado, con su deuda vigente total (RF-158). */
+export interface ClientListItemDto extends ClientDto {
+  debtCents: number;
+}
+
 /** Adjunto de un email recibido, con el resultado del LLM (RF-124); `classification` es null en un aviso. */
 export interface ReceivedAttachmentDto {
   id: number;

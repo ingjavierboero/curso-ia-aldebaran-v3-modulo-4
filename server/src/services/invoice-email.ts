@@ -28,31 +28,23 @@ function currentDebt(ctx: AppContext, clientId: number, invoiceId: number) {
   };
 }
 
-/**
- * Envía el email de una factura ya generada con su PDF adjunto (RF-84 a RF-90, RF-93, RF-215). La deuda
- * vigente se calcula en cada intento; la factura y su PDF no cambian (RF-88). Va al email de facturación
- * vigente del cliente y nunca a un cliente Inactivo (RF-96). El envío queda registrado en `sent_emails` y
- * en el historial del cliente (AC-78). Lo usan la corrida y los reintentos de envío (RF-86).
- */
-export async function sendInvoiceEmail(
-  ctx: AppContext,
-  invoiceId: number,
-  trigger: InvoiceEmailTrigger,
-  userId?: number,
-): Promise<InvoiceEmailResult> {
-  const { db, adapters, env } = ctx;
-  const invoice = db.select().from(invoices).where(eq(invoices.id, invoiceId)).get();
-  if (!invoice || invoice.status === 'generando' || !invoice.cae || !invoice.caeDueDate || invoice.number === null) {
-    return { status: 'omitido', reason: 'la factura todavía no tiene CAE' };
-  }
-  const client = db.select().from(clients).where(eq(clients.id, invoice.clientId)).get();
-  if (!client || client.status !== 'activo') return { status: 'omitido', reason: 'el cliente está Inactivo' };
+type Invoice = typeof invoices.$inferSelect;
 
+/**
+ * PDF de una factura emitida, armado con las copias guardadas al emitirla (RF-92, RF-93): siempre el
+ * mismo documento, sin importar cambios posteriores del cliente o del emisor. Lo usan el email (RF-84)
+ * y la descarga desde el listado (RF-162).
+ */
+export async function invoicePdf(
+  ctx: AppContext,
+  invoice: Invoice & { number: number; cae: string; caeDueDate: string },
+): Promise<{ filename: string; content: Uint8Array }> {
+  const { db, env } = ctx;
   const items = db.select().from(invoiceItems).where(eq(invoiceItems.invoiceId, invoice.id)).all();
   const rate = invoice.exchangeRateId
     ? db.select().from(exchangeRates).where(eq(exchangeRates.id, invoice.exchangeRateId)).get()
     : undefined;
-  const pdfData: InvoicePdfData = {
+  const data: InvoicePdfData = {
     mode: env.mode,
     issuer: invoice.issuerSnapshot as InvoicePdfData['issuer'],
     client: invoice.clientSnapshot as InvoicePdfData['client'],
@@ -70,6 +62,32 @@ export async function sendInvoiceEmail(
     caeDueDate: invoice.caeDueDate,
     exchangeRate: rate ? { rateCents: rate.rateCents, source: rate.source, readAt: rate.readAt } : null,
   };
+  return {
+    filename: `factura-C-${formatVoucherNumber(invoice.pointOfSale, invoice.number)}.pdf`,
+    content: await renderInvoicePdf(data),
+  };
+}
+
+/**
+ * Envía el email de una factura ya generada con su PDF adjunto (RF-84 a RF-90, RF-93, RF-215). La deuda
+ * vigente se calcula en cada intento; la factura y su PDF no cambian (RF-88). Va al email de facturación
+ * vigente del cliente y nunca a un cliente Inactivo (RF-96). El envío queda registrado en `sent_emails` y
+ * en el historial del cliente (AC-78). Lo usan la corrida y los reintentos de envío (RF-86).
+ */
+export async function sendInvoiceEmail(
+  ctx: AppContext,
+  invoiceId: number,
+  trigger: InvoiceEmailTrigger,
+  userId?: number,
+): Promise<InvoiceEmailResult> {
+  const { db, adapters, env } = ctx;
+  const invoice = db.select().from(invoices).where(eq(invoices.id, invoiceId)).get();
+  if (!invoice || invoice.status === 'generando' || !invoice.cae || !invoice.caeDueDate || invoice.number === null) {
+    return { status: 'omitido', reason: 'la factura todavía no tiene CAE' };
+  }
+  const issued = { ...invoice, number: invoice.number, cae: invoice.cae, caeDueDate: invoice.caeDueDate };
+  const client = db.select().from(clients).where(eq(clients.id, invoice.clientId)).get();
+  if (!client || client.status !== 'activo') return { status: 'omitido', reason: 'el cliente está Inactivo' };
 
   const settings = getSettings(db);
   const voucherNumber = formatVoucherNumber(invoice.pointOfSale, invoice.number);
@@ -83,7 +101,7 @@ export async function sendInvoiceEmail(
     totalCents: invoice.totalCents,
     dueDate: invoice.dueDate,
     ...currentDebt(ctx, client.id, invoice.id),
-    pdf: { filename: `factura-C-${voucherNumber}.pdf`, content: await renderInvoicePdf(pdfData) },
+    pdf: await invoicePdf(ctx, issued),
   });
 
   try {

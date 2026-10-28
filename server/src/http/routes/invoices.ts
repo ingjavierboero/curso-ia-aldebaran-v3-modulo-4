@@ -1,9 +1,7 @@
-import { desc, eq, ne } from 'drizzle-orm';
 import { type Request, Router } from 'express';
 import { z } from 'zod';
 import type { AppContext } from '../../context.ts';
-import { clients, invoices } from '../../db/schema.ts';
-import { formatVoucherNumber } from '../../documents/format.ts';
+import { invoiceDetail, invoicePdfOf, listInvoices } from '../../services/invoices.ts';
 import {
   changeInvoiceStatus,
   InvoiceNotFoundError,
@@ -13,7 +11,7 @@ import {
 import { AppError, conflict, notFound } from '../errors.ts';
 import { canEdit } from '../middleware/require-role.ts';
 import { currentUser } from '../middleware/session.ts';
-import type { InvoiceDto, InvoiceStatus } from '../types.ts';
+import { period } from '../schemas.ts';
 import { idParam, parse } from '../validate.ts';
 
 /** RF-143 a RF-147: un usuario solo pasa facturas a Pagada o a Pendiente de pago. */
@@ -23,6 +21,15 @@ const statusChange = z.object({
   expectedStatus: z.enum(['generando', 'pendiente_de_pago', 'pago_recibido', 'revision_manual', 'pagada'], {
     error: 'Falta el estado que tenía la factura (expectedStatus).',
   }),
+});
+
+/** Filtros del listado de facturas (RF-168). */
+const listFilters = z.object({
+  status: z
+    .enum(['pendiente_de_pago', 'pago_recibido', 'revision_manual', 'pagada'], { error: 'El estado no es válido.' })
+    .optional(),
+  clientId: z.coerce.number().int().positive('El cliente no es válido.').optional(),
+  period: period('El período no es válido: tiene que ser AAAA-MM.').optional(),
 });
 
 /** Traduce los errores del cambio de estado a respuestas de la API. */
@@ -37,35 +44,40 @@ function toHttpError(error: unknown): unknown {
 
 /**
  * Facturas emitidas (RF-160): todos los perfiles las ven, de la más reciente a la más antigua. Las que
- * todavía se están generando no se muestran. Admin y Editor cambian su estado (RF-143 a RF-147). Los
- * filtros, el detalle y el PDF se suman en T132.
+ * todavía se están generando no se muestran. Se filtran por estado, cliente y período (RF-168); cada una
+ * tiene su detalle (RF-217) y su PDF (RF-162). Admin y Editor cambian su estado (RF-143 a RF-147).
  */
 export function invoicesRouter(ctx: AppContext): Router {
   const router = Router();
 
-  router.get('/invoices', (_req, res) => {
-    const rows = ctx.db
-      .select({ invoice: invoices, clientName: clients.businessName })
-      .from(invoices)
-      .innerJoin(clients, eq(invoices.clientId, clients.id))
-      .where(ne(invoices.status, 'generando'))
-      .orderBy(desc(invoices.issueDate), desc(invoices.id))
-      .all();
-    const list: InvoiceDto[] = rows.map(({ invoice, clientName }) => ({
-      id: invoice.id,
-      clientId: invoice.clientId,
-      clientName,
-      period: invoice.period,
-      pointOfSale: invoice.pointOfSale,
-      number: invoice.number,
-      voucherNumber: invoice.number === null ? null : formatVoucherNumber(invoice.pointOfSale, invoice.number),
-      issueDate: invoice.issueDate,
-      dueDate: invoice.dueDate,
-      totalCents: invoice.totalCents,
-      status: invoice.status as InvoiceStatus,
-      cae: invoice.cae,
-    }));
-    res.json(list);
+  router.get('/invoices', (req, res) => {
+    res.json(listInvoices(ctx.db, parse(listFilters, req.query)));
+  });
+
+  router.get('/invoices/:id', (req, res) => {
+    const id = idParam(req.params.id);
+    try {
+      res.json(invoiceDetail(ctx.db, id));
+    } catch (error) {
+      throw toHttpError(error);
+    }
+  });
+
+  // RF-162: cualquier perfil descarga el PDF de una factura emitida.
+  router.get('/invoices/:id/pdf', async (req, res) => {
+    const id = idParam(req.params.id);
+    let pdf: { filename: string; content: Uint8Array };
+    try {
+      pdf = await invoicePdfOf(ctx, id);
+    } catch (error) {
+      throw toHttpError(error);
+    }
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${pdf.filename}"`,
+      'Cache-Control': 'private, no-store',
+    });
+    res.end(Buffer.from(pdf.content));
   });
 
   // RF-143 a RF-147, RF-218: cambio de estado que hace un Admin o un Editor, con control optimista.
