@@ -368,7 +368,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T138 Ejecutar `gitleaks detect` sobre todo el historial y corregir cualquier hallazgo (AC-225, SC-009)
 - [X] T139 Ejecutar `npm run test:coverage-ac` y agregar los tests que falten hasta que no quede ningún AC sin cubrir (SC-010)
 - [X] T140 Recorrer `specs/001-aldebaran-mvp/quickstart.md` §1 y §2 y registrar el resultado
-- [ ] T141 [P] Verificar que los comandos y variables documentados en `AGENTS.md` coinciden con los scripts y con `.env.example`, y actualizar la documentación si cambió algo
+- [X] T141 [P] Verificar que los comandos y variables documentados en `AGENTS.md` coinciden con los scripts y con `.env.example`, y actualizar la documentación si cambió algo
 - [ ] T142 Abrir el PR de la última fase (Phase 12) contra `main` con el resumen de la fase y de los gates cumplidos (`npm run test`, `npm run test:coverage-ac`, gitleaks, quickstart), para la revisión humana que exige la Constitución
 
 ---

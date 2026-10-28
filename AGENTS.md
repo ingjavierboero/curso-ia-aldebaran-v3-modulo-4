@@ -21,8 +21,17 @@ npm run dev        # levanta server + web
 npm run dev:mock   # levanta server + web en modo mock, sin credenciales (http://localhost:5173)
 npm run db:reset:mock  # borra la base del modo mock (data/aldebaran-mock.db) para empezar de cero
 npm run test       # corre toda la suite (Vitest)
+npm run typecheck --workspaces  # chequeo de tipos de server y web
+npm run test:coverage-ac        # lista los AC del PRD sin test (tiene que salir vacío)
+gitleaks detect    # escaneo de secretos de todo el historial (AC-225; binario aparte, no es de npm)
 npm run build      # compila la web en web/dist
 npm start          # levanta la API y sirve la web compilada con la CSP estricta (http://localhost:3000)
+```
+Evaluaciones fuera de la suite (usan los servicios reales y tienen costo; ver `specs/001-aldebaran-mvp/quickstart.md`):
+```bash
+npm run eval:llm -w server   # aciertos del LLM real sobre server/scripts/eval/fixtures/ (AC-109 a AC-111)
+npm run eval:perf -w server -- todos --mock  # rendimiento (AC-232 a AC-234); sin --mock exige
+                                             # EMAIL_REDIRECT_TO y --confirmar
 ```
 Con `npm start` la web se abre en el puerto del server, así que `APP_URL` tiene que apuntar ahí (por ejemplo
 `http://localhost:3000`) para que los links de los emails funcionen.
@@ -30,12 +39,13 @@ Variables de entorno (`.env`, nunca commiteado; plantilla en `.env.example`):
 `ANTHROPIC_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `ARCA_CUIT`, `ARCA_CERT_PATH`, `ARCA_KEY_PATH`.
 Las rutas relativas se toman desde la raíz del repo. Opcionales: `PORT`, `DATABASE_PATH`, `APP_URL` (dirección
 de la web para los links de los emails; por defecto `http://localhost:5173`),
-`SCHEDULER_ENABLED` (procesos automáticos de facturación y casilla; solo corren con `true`, así que en
-desarrollo se dejan apagados), `EMAIL_REDIRECT_TO` (solo desarrollo: manda todos los emails a esa casilla)
-y `MOCK_MODE` (con `true` simula ARCA, el LLM y el email; ver "Modo mock" en `PRD.md`). En modo mock no hace
-falta ninguna otra variable: usa siempre su propia base `data/aldebaran-mock.db` (ignora `DATABASE_PATH`),
-`ARCA_CUIT` vale `20111111112` si no está definida y `SCHEDULER_ENABLED` se toma como `true` si no está definida.
-Fuera del modo mock nunca se toca `data/aldebaran-mock.db`.
+`SCHEDULER_ENABLED` (procesos automáticos de facturación, recordatorios, revisión de la casilla y reintentos;
+solo corren con `true`, así que en desarrollo se dejan apagados), `EMAIL_REDIRECT_TO` (solo desarrollo: manda
+todos los emails a esa casilla) y `MOCK_MODE` (con `true` simula ARCA, el LLM y el email; ver "Modo mock"
+en `PRD.md`). En modo mock no hace falta ninguna otra variable: usa siempre su propia base
+`data/aldebaran-mock.db` (ignora `DATABASE_PATH`), `ARCA_CUIT` vale `20111111112` si no está definida y
+`SCHEDULER_ENABLED` se toma como `true` si no está definida. Fuera del modo mock nunca se toca
+`data/aldebaran-mock.db`.
 
 ## Qué NO hacer
 - No apuntar nunca a los endpoints productivos de ARCA: solo homologación.
