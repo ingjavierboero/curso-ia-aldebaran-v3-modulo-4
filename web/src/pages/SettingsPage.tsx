@@ -148,10 +148,18 @@ export function SettingsPage() {
           style={{ marginBottom: 16, maxWidth: 960 }}
         />
       )}
+      {settings.missingForBilling.length > 0 && (
+        // RF-221: los datos obligatorios que faltan; sin ellos la facturación falla (RF-219).
+        <Alert
+          type="warning"
+          showIcon
+          title={`No se pueden generar facturas hasta completar: ${settings.missingForBilling.join(', ')}.`}
+          style={{ marginBottom: 16, maxWidth: 960 }}
+        />
+      )}
       <Form<SettingsForm>
         form={form}
         layout="vertical"
-        requiredMark={false}
         disabled={!canEdit}
         initialValues={toForm(settings)}
         onFinish={submit}
@@ -165,7 +173,7 @@ export function SettingsPage() {
               <Form.Item label="CUIT" htmlFor="issuerCuit" tooltip="Sale de la variable de entorno ARCA_CUIT.">
                 <Input id="issuerCuit" value={formatCuit(settings.issuerCuit)} disabled />
               </Form.Item>
-              <Form.Item label="Razón social" name="issuerBusinessName">
+              <Form.Item label="Razón social" name="issuerBusinessName" required>
                 <Input />
               </Form.Item>
               <Form.Item
@@ -175,16 +183,16 @@ export function SettingsPage() {
               >
                 <Input placeholder="Opcional" />
               </Form.Item>
-              <Form.Item label="Domicilio comercial" name="issuerAddress">
+              <Form.Item label="Domicilio comercial" name="issuerAddress" required>
                 <Input />
               </Form.Item>
-              <Form.Item label="Condición frente al IVA" name="issuerIvaCondition">
+              <Form.Item label="Condición frente al IVA" name="issuerIvaCondition" required>
                 <Select options={IVA_OPTIONS} placeholder="Elegí una condición" />
               </Form.Item>
-              <Form.Item label="Número de ingresos brutos" name="issuerGrossIncomeNumber">
+              <Form.Item label="Número de ingresos brutos" name="issuerGrossIncomeNumber" required>
                 <Input />
               </Form.Item>
-              <Form.Item label="Fecha de inicio de actividades" name="issuerActivityStartDate">
+              <Form.Item label="Fecha de inicio de actividades" name="issuerActivityStartDate" required>
                 <DatePicker format="DD/MM/YYYY" placeholder="DD/MM/AAAA" style={{ width: '100%' }} />
               </Form.Item>
             </Grid>
@@ -192,7 +200,7 @@ export function SettingsPage() {
 
           <Card title="Facturación">
             <Grid>
-              <Form.Item label="Punto de venta de ARCA" name="pointOfSale">
+              <Form.Item label="Punto de venta de ARCA" name="pointOfSale" required>
                 <InputNumber min={1} max={99999} precision={0} style={{ width: '100%' }} />
               </Form.Item>
               <Form.Item label="Hora de facturación (día 15)" name="billingTime" rules={TIME_RULES}>
