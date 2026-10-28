@@ -298,15 +298,15 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T116 [P] [US6] Test de integración en `server/tests/integration/reminders/reminders-run.test.ts` con reloj falso: inicio a las 11:00 del último día (±1 min) y a las 14:00 tras el cambio, un único recordatorio por cliente Activo con deuda y sin revisión (también sin productos), ninguno a clientes en revisión, sin deuda o Inactivos, contenido con cada factura, total y pedido de comprobante (AC-88, AC-154 a AC-159, AC-162). Además: una corrida interrumpida se retoma el mismo día solo para los clientes que faltan y nunca al día siguiente (AC-246)
-- [ ] T117 [P] [US6] Test de API en `server/tests/api/dashboard.test.ts`: listado de clientes con deuda vigente con total, cantidad y si está en revisión; recordatorio manual por cualquier perfil registrado con el usuario y visible para Editor y Consulta; bloqueos con mensaje para clientes sin deuda, en revisión o Inactivos (AC-12, AC-13, AC-89, AC-161, AC-163, AC-164)
+- [X] T116 [P] [US6] Test de integración en `server/tests/integration/reminders/reminders-run.test.ts` con reloj falso: inicio a las 11:00 del último día (±1 min) y a las 14:00 tras el cambio, un único recordatorio por cliente Activo con deuda y sin revisión (también sin productos), ninguno a clientes en revisión, sin deuda o Inactivos, contenido con cada factura, total y pedido de comprobante (AC-88, AC-154 a AC-159, AC-162). Además: una corrida interrumpida se retoma el mismo día solo para los clientes que faltan y nunca al día siguiente (AC-246)
+- [X] T117 [P] [US6] Test de API en `server/tests/api/dashboard.test.ts`: listado de clientes con deuda vigente con total, cantidad y si está en revisión; recordatorio manual por cualquier perfil registrado con el usuario y visible para Editor y Consulta; bloqueos con mensaje para clientes sin deuda, en revisión o Inactivos (AC-12, AC-13, AC-89, AC-161, AC-163, AC-164)
 
 ### Implementation for User Story 6
 
-- [ ] T118 [US6] Implementar `server/src/services/reminders.ts` (armado con las facturas adeudadas actuales y validaciones) y la plantilla de recordatorio en `server/src/documents/email-templates.ts`
-- [ ] T119 [US6] Implementar `server/src/jobs/reminders-job.ts` con `reminder_runs` y su condición en el tick, retomando el mismo día una corrida interrumpida (RF-149)
-- [ ] T120 [US6] Completar `GET /api/dashboard` con el listado de deuda y agregar `POST /api/clients/:id/reminder` en `server/src/http/routes/dashboard.ts`
-- [ ] T121 [P] [US6] Implementar en web `DashboardPage` con el listado, los banners y el botón de recordatorio en `web/src/pages/DashboardPage.tsx`
+- [X] T118 [US6] Implementar `server/src/services/reminders.ts` (armado con las facturas adeudadas actuales y validaciones) y la plantilla de recordatorio en `server/src/documents/email-templates.ts`
+- [X] T119 [US6] Implementar `server/src/jobs/reminders-job.ts` con `reminder_runs` y su condición en el tick, retomando el mismo día una corrida interrumpida (RF-149)
+- [X] T120 [US6] Completar `GET /api/dashboard` con el listado de deuda y agregar `POST /api/clients/:id/reminder` en `server/src/http/routes/dashboard.ts`
+- [X] T121 [P] [US6] Implementar en web `DashboardPage` con el listado, los banners y el botón de recordatorio en `web/src/pages/DashboardPage.tsx`
 
 **Checkpoint**: recordatorios y dashboard funcionando
 

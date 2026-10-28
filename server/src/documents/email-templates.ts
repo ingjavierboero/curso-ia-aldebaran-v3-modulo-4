@@ -84,3 +84,57 @@ export function invoiceEmail(input: InvoiceEmailInput): OutgoingEmail {
     attachments: [{ filename: input.pdf.filename, mimeType: 'application/pdf', content: input.pdf.content }],
   };
 }
+
+/** Factura adeudada tal como se detalla en el recordatorio (RF-150). */
+export interface ReminderInvoice {
+  voucherNumber: string;
+  period: string;
+  totalCents: number;
+  dueDate: string;
+}
+
+/** Datos del email recordatorio, automático o manual (RF-149 a RF-151, RF-215). */
+export interface ReminderEmailInput {
+  mode: Mode;
+  to: string;
+  clientName: string;
+  /** Nombre de fantasía de la empresa emisora o, si no tiene, su razón social (RF-215). */
+  senderName: string;
+  /** Facturas adeudadas del cliente al momento del envío, de la más antigua a la más reciente. */
+  invoices: ReminderInvoice[];
+}
+
+/**
+ * Recordatorio de deuda: detalla cada factura adeudada con su número, período, importe y vencimiento, el
+ * total a pagar y pide responder con el comprobante (RF-150, RF-151). No lleva la leyenda de homologación,
+ * que es solo del email de la factura (RF-90); en modo mock indica que es simulado (RF-210).
+ */
+export function reminderEmail(input: ReminderEmailInput): OutgoingEmail {
+  const totalCents = input.invoices.reduce((sum, invoice) => sum + invoice.totalCents, 0);
+  return {
+    fromName: input.senderName,
+    to: input.to,
+    subject: `Recordatorio de pago - ${input.senderName}`,
+    text: [
+      `Hola, ${input.clientName}:`,
+      '',
+      input.invoices.length === 1
+        ? 'Te recordamos que tenés una factura pendiente de pago:'
+        : 'Te recordamos que tenés estas facturas pendientes de pago:',
+      '',
+      ...input.invoices.map(
+        (invoice) =>
+          `- Factura C ${invoice.voucherNumber}, período ${formatPeriod(invoice.period)}: ` +
+          `${formatMoney(invoice.totalCents)}, vence el ${formatDate(invoice.dueDate)}.`,
+      ),
+      '',
+      `Total a pagar: ${formatMoney(totalCents)}.`,
+      '',
+      'Cuando hagas el pago, respondé este email adjuntando el comprobante de pago.',
+      '',
+      ...mockNoticeLines(input.mode),
+      'Saludos,',
+      input.senderName,
+    ].join('\n'),
+  };
+}

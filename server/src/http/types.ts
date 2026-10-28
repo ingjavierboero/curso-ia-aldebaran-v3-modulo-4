@@ -140,11 +140,25 @@ export interface ExchangeRateBannerDto {
 }
 
 /** `GET /api/dashboard`: banners del dashboard (los clientes con deuda se suman en US6). */
+/** Cliente con deuda vigente en el dashboard (RF-153). */
+export interface DebtorDto {
+  clientId: number;
+  businessName: string;
+  clientStatus: EntityStatus;
+  /** Suma de sus facturas adeudadas. */
+  debtCents: number;
+  owedInvoices: number;
+  /** Tiene al menos una factura en Revisión manual. */
+  inReview: boolean;
+}
+
 export interface DashboardDto {
   banners: {
     certificate: CertificateBannerDto | null;
     exchangeRate: ExchangeRateBannerDto | null;
   };
+  /** Clientes con deuda vigente, de la mayor deuda a la menor (RF-153). */
+  debtors: DebtorDto[];
 }
 
 export type InvoiceStatus = 'pendiente_de_pago' | 'pago_recibido' | 'revision_manual' | 'pagada';
