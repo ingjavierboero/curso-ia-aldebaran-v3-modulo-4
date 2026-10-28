@@ -4,12 +4,14 @@ import { API_CSP } from './http/csp.ts';
 import { apiNotFound, errorHandler } from './http/middleware/errors.ts';
 import { securityHeaders } from './http/middleware/security-headers.ts';
 import { requireSession } from './http/middleware/session.ts';
+import { attachmentsRouter } from './http/routes/attachments.ts';
 import { authRouter } from './http/routes/auth.ts';
 import { billingRouter } from './http/routes/billing.ts';
 import { clientsRouter } from './http/routes/clients.ts';
 import { dashboardRouter } from './http/routes/dashboard.ts';
 import { invoicesRouter } from './http/routes/invoices.ts';
 import { productsRouter } from './http/routes/products.ts';
+import { reviewRouter } from './http/routes/review.ts';
 import { settingsRouter } from './http/routes/settings.ts';
 import { setupRouter } from './http/routes/setup.ts';
 import { usersRouter } from './http/routes/users.ts';
@@ -29,6 +31,8 @@ const apiRouters: RouterFactory[] = [
   billingRouter,
   invoicesRouter,
   dashboardRouter,
+  reviewRouter,
+  attachmentsRouter,
 ];
 
 export interface AppOptions {

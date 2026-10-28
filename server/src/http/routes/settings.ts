@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { AppContext } from '../../context.ts';
 import { getSettings, updateSettings } from '../../services/settings.ts';
 import { onlyAdmin } from '../middleware/require-role.ts';
+import { calendarDate } from '../schemas.ts';
 import { ISSUER_IVA_CONDITIONS, type IssuerIvaCondition, type SettingsDto } from '../types.ts';
 import { parse } from '../validate.ts';
 
@@ -16,14 +17,6 @@ const integerBetween = (label: string, min: number, max: number) =>
     .int(`${label} debe ser un número entero.`)
     .min(min, `${label} debe estar entre ${min} y ${max}.`)
     .max(max, `${label} debe estar entre ${min} y ${max}.`);
-
-/** Fecha civil `YYYY-MM-DD` que existe en el calendario. */
-const calendarDate = z.string().refine((value) => {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [y, m, d] = value.split('-').map(Number) as [number, number, number];
-  const date = new Date(Date.UTC(y, m - 1, d));
-  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
-}, 'La fecha de inicio de actividades no es válida.');
 
 const text = (label: string) => z.string().trim().min(1, `${label} no puede quedar vacío.`);
 
@@ -45,7 +38,7 @@ const updateSchema = z.strictObject({
     error: `La condición frente al IVA debe ser ${ISSUER_IVA_CONDITIONS.join(', ')}.`,
   }),
   issuerGrossIncomeNumber: text('El número de ingresos brutos'),
-  issuerActivityStartDate: calendarDate,
+  issuerActivityStartDate: calendarDate('La fecha de inicio de actividades no es válida.'),
   issuerTradeName: text('El nombre de fantasía').nullable(),
 }).partial();
 

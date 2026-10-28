@@ -63,3 +63,18 @@ export function formatPeriodLong(period: string): string {
   const { year, name } = monthOf(period);
   return `${name} de ${year}`;
 }
+
+const DATE_TIME = new Intl.DateTimeFormat('es-AR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+  timeZone: 'America/Argentina/Buenos_Aires',
+});
+
+/** Fecha y hora de un instante como `DD/MM/AAAA HH:mm`, en la hora de Argentina (RNF-12). */
+export function formatDateTime(value: string): string {
+  return DATE_TIME.format(new Date(value)).replace(',', '');
+}

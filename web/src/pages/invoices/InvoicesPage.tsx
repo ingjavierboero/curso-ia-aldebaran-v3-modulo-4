@@ -1,9 +1,13 @@
+import { CheckCircleOutlined } from '@ant-design/icons';
 import type { InvoiceDto } from '@api-types';
 import { App, Table, Tag, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/client.ts';
 import { errorMessage } from '../../forms.ts';
+import { TableAction } from '../../components/TableAction.tsx';
 import { formatDate, formatMoney, formatPeriod } from '../../format.ts';
+import { useCanEdit } from '../../stores/session.ts';
+import { changeInvoiceStatus } from '../review/status-change.ts';
 import { BillingCard } from './BillingCard.tsx';
 
 /** Etiqueta y color fijo de cada estado de factura (plan.md, Diseño de la interfaz). */
@@ -16,10 +20,12 @@ export const INVOICE_STATUS_TAGS: Record<InvoiceDto['status'], { color: string; 
 
 /**
  * Facturas: el estado de la facturación del mes con sus acciones y el listado de facturas emitidas
- * (RF-160). Los filtros, el detalle y el PDF se suman en US8.
+ * (RF-160), donde un Admin o Editor pasa a Pagada una factura Pendiente de pago (RF-147). Los filtros, el
+ * detalle y el PDF se suman en US8.
  */
 export function InvoicesPage() {
   const { message } = App.useApp();
+  const canEdit = useCanEdit();
   const [invoices, setInvoices] = useState<InvoiceDto[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -72,6 +78,27 @@ export function InvoicesPage() {
               <Tag color={INVOICE_STATUS_TAGS[status].color}>{INVOICE_STATUS_TAGS[status].label}</Tag>
             ),
           },
+          ...(canEdit
+            ? [
+                {
+                  title: 'Acciones',
+                  key: 'acciones',
+                  align: 'center' as const,
+                  width: 100,
+                  // RF-147: un Admin o Editor pasa a Pagada una factura Pendiente de pago.
+                  render: (_: unknown, invoice: InvoiceDto) =>
+                    invoice.status === 'pendiente_de_pago' && (
+                      <TableAction
+                        label="Pasar a Pagada"
+                        icon={<CheckCircleOutlined />}
+                        confirm="¿Pasar la factura a Pagada?"
+                        confirmDescription="Deja de contar como deuda del cliente."
+                        onClick={() => changeInvoiceStatus(message, invoice, 'pagada', load)}
+                      />
+                    ),
+                },
+              ]
+            : []),
         ]}
       />
     </>

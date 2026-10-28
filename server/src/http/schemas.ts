@@ -12,3 +12,12 @@ export const email = z.string({ error: 'El email es obligatorio.' }).trim().pipe
 
 export const requiredText = (label: string) =>
   z.string({ error: `${label} es obligatorio.` }).trim().min(1, `${label} es obligatorio.`);
+
+/** Fecha civil `YYYY-MM-DD` que existe en el calendario (31/02 no). */
+export const calendarDate = (message: string) =>
+  z.string().refine((value) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const [y, m, d] = value.split('-').map(Number) as [number, number, number];
+    const date = new Date(Date.UTC(y, m - 1, d));
+    return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+  }, message);
