@@ -1,5 +1,6 @@
 import {
   AppstoreOutlined,
+  AuditOutlined,
   FileTextOutlined,
   HomeOutlined,
   SettingOutlined,
@@ -24,6 +25,7 @@ const SECTIONS: Array<{ path: string; label: string; icon: ReactNode; roles: Rol
   { path: '/clientes', label: 'Clientes', icon: <TeamOutlined />, roles: ALL_ROLES },
   { path: '/productos', label: 'Productos', icon: <AppstoreOutlined />, roles: ALL_ROLES },
   { path: '/facturas', label: 'Facturas', icon: <FileTextOutlined />, roles: ALL_ROLES },
+  { path: '/revision', label: 'Revisión', icon: <AuditOutlined />, roles: ALL_ROLES },
   { path: '/usuarios', label: 'Usuarios', icon: <UserOutlined />, roles: ['admin'] },
   { path: '/configuracion', label: 'Configuración', icon: <SettingOutlined />, roles: ALL_ROLES },
 ];
