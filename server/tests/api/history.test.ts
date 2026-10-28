@@ -120,7 +120,7 @@ describe('historial del cliente (RF-163)', () => {
       ['baja', oct31('16:00'), 'usuario', 'Editora'],
       ['reactivacion', oct31('16:05'), 'usuario', 'Editora'],
     ]);
-    expect(events[1]?.payload).toMatchObject({ changes: { businessName: 'Los Andes SA' } });
+    expect(events[1]?.payload).toMatchObject({ changes: { businessName: { from: 'Los Andes', to: 'Los Andes SA' } } });
     expect(events[5]?.payload).toMatchObject({ operation: 'envio_recordatorio' });
     expect(events[6]?.payload).toMatchObject({ kind: 'recordatorio', trigger: 'manual' });
     expect(events[8]?.payload).toMatchObject({ from: 'pendiente_de_pago', to: 'pago_recibido' });
