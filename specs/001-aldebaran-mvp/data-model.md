@@ -167,7 +167,8 @@ factura y a la revisión manual pendiente del cliente.
 
 `received_email_id`, `filename`, `mime_type` (verificado por la firma del archivo, nunca el declarado;
 research R-16), `content` (blob), `classification`
-(`si` \| `no` \| `dudoso` \| `error`), `extracted_cuit` (null si no se extrajo o no tiene 11 dígitos),
+(`si` \| `no` \| `dudoso` \| `error`; null en los adjuntos de un aviso, que no se clasifican, RF-113 y
+RF-142), `extracted_cuit` (null si no se extrajo o no tiene 11 dígitos),
 `extracted_amount_cents` (null si no se extrajo), `extracted_amount_raw` (para RNF-13).
 
 ### notices (RF-113, RF-142, RF-148)

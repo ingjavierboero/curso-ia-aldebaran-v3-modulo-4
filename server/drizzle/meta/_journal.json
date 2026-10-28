@@ -8,6 +8,13 @@
       "when": 1792542344212,
       "tag": "0000_inicial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793150396905,
+      "tag": "0001_adjuntos_de_avisos",
+      "breakpoints": true
     }
   ]
 }

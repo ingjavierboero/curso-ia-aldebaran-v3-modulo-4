@@ -84,3 +84,16 @@ export function recordProcessError(conn: Conn, error: NewProcessError): ProcessE
   }
   return saved;
 }
+
+/**
+ * Pasa a Resuelto los errores Pendientes de una operación sin cliente, por ejemplo el de revisión de la
+ * casilla cuando vuelve a estar disponible (RF-106).
+ */
+export function resolveProcessErrors(conn: Conn, operation: ProcessOperation, now: Date): void {
+  const at = now.toISOString();
+  conn
+    .update(processErrors)
+    .set({ status: 'resuelto', resolvedBy: 'agente', resolvedAt: at, updatedAt: at })
+    .where(and(eq(processErrors.status, 'pendiente'), eq(processErrors.operation, operation)))
+    .run();
+}

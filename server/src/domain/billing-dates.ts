@@ -94,3 +94,11 @@ export function invoiceDates(period: string, generatedAt: Date): InvoiceDates {
   // Las fechas `YYYY-MM-DD` se comparan bien como texto.
   return { issueDate, serviceFrom: `${period}-01`, serviceTo, dueDate: issueDate > serviceTo ? issueDate : serviceTo };
 }
+
+/**
+ * Instante en que empieza el día civil `YYYY-MM-DD` en Argentina. Argentina usa UTC-3 todo el año (no
+ * tiene horario de verano desde 2009), así que el desplazamiento es fijo.
+ */
+export function startOfArgentinaDay(isoDate: string): Date {
+  return new Date(`${isoDate}T00:00:00-03:00`);
+}
