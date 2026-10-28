@@ -259,7 +259,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 - [X] T105 [US5] Implementar `server/src/services/review.ts` (pagos, avisos, resueltos y transiciones de usuario con `UPDATE ... WHERE status = ?`, research R-14)
 - [X] T106 [US5] Implementar `server/src/http/routes/review.ts` y `POST /api/invoices/:id/status` en `server/src/http/routes/invoices.ts`
-- [ ] T150 [US5] Implementar `server/src/http/attachment-response.ts` y `server/src/http/routes/attachments.ts` (research R-16)
+- [X] T150 [US5] Implementar `server/src/http/attachment-response.ts` y `server/src/http/routes/attachments.ts` (research R-16)
 - [ ] T107 [P] [US5] Implementar en web `ReviewPage` con las pestañas Pagos, Avisos, Errores (vacía hasta US7) y Resueltos en `web/src/pages/review/`, y el botón "Pasar a Pagada" en `InvoicesPage` para facturas Pendiente de pago, con `expectedStatus` (RF-147)
 
 **Checkpoint**: el circuito de cobranza se cierra con la decisión humana
