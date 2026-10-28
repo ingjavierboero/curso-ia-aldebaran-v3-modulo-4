@@ -4,8 +4,8 @@ import { RequireRole } from './components/RequireRole.tsx';
 import { RequireSession } from './components/RequireSession.tsx';
 import { ClientDetailPage } from './pages/clients/ClientDetailPage.tsx';
 import { ClientsPage } from './pages/clients/ClientsPage.tsx';
+import { DashboardPage } from './pages/DashboardPage.tsx';
 import { FirstAdminPage } from './pages/FirstAdminPage.tsx';
-import { HomePage } from './pages/HomePage.tsx';
 import { InvoicesPage } from './pages/invoices/InvoicesPage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { MockMailboxPage } from './pages/mock-mailbox/MockMailboxPage.tsx';
@@ -33,7 +33,7 @@ export const routes: RouteObject[] = [
       {
         element: <RequireSession />,
         children: [
-          { index: true, element: <HomePage /> },
+          { index: true, element: <DashboardPage /> },
           { path: 'clientes', element: <ClientsPage /> },
           { path: 'clientes/:id', element: <ClientDetailPage /> },
           { path: 'productos', element: <ProductsPage /> },
