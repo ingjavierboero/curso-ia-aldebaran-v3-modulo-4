@@ -11,3 +11,8 @@ data/
 # Dependencias y builds
 node_modules/
 dist/
+
+# Sets y reportes de las evaluaciones externas: pueden tener datos reales (RNF-14)
+server/scripts/eval/fixtures/*
+!server/scripts/eval/fixtures/README.md
+server/scripts/eval/reports/
