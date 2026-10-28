@@ -47,6 +47,9 @@ export interface InvoicePdfData {
 export const HOMOLOGATION_NOTICE =
   'Comprobante emitido en el ambiente de homologación de ARCA: no tiene validez fiscal.'; // RF-90
 
+/** Leyenda de todo lo que el sistema genera en modo mock: el PDF de cada factura y cada email (RF-210). */
+export const MOCK_NOTICE = 'Documento generado en modo mock: es simulado y no corresponde a una operación real.';
+
 const MARGIN = 50;
 const PAGE_WIDTH = 595.28; // A4
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
@@ -55,7 +58,7 @@ const ivaLabel = (code: number) => CLIENT_IVA_CONDITIONS[code as ClientIvaCondit
 
 /**
  * PDF de una Factura C con todos los datos de RF-93, los datos de la empresa emisora y su CUIT sin el
- * nombre de fantasía (RF-92) y la leyenda de homologación (RF-90).
+ * nombre de fantasía (RF-92), la leyenda de homologación (RF-90) y, en modo mock, la de simulado (RF-210).
  */
 export function renderInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   const title = `Factura C ${formatVoucherNumber(data.pointOfSale, data.number)}`;
@@ -76,6 +79,7 @@ export function renderInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
 
   // Leyenda de homologación arriba, bien visible (RF-90).
   doc.font('Helvetica-Bold').fontSize(10).fillColor('#b00020').text(HOMOLOGATION_NOTICE, { align: 'center' });
+  if (data.mode === 'mock') doc.text(MOCK_NOTICE, { align: 'center' });
   doc.fillColor('black').moveDown(0.8);
 
   // Encabezado: tipo de comprobante, número y emisión.

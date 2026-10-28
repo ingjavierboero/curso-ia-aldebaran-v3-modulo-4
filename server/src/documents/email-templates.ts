@@ -1,6 +1,10 @@
 import type { OutgoingEmail } from '../adapters/types.ts';
+import type { Mode } from '../http/types.ts';
 import { formatDate, formatMoney, formatPeriod } from './format.ts';
-import { HOMOLOGATION_NOTICE } from './invoice-pdf.ts';
+import { HOMOLOGATION_NOTICE, MOCK_NOTICE } from './invoice-pdf.ts';
+
+/** Párrafos finales que todo email del modo mock lleva para indicar que es simulado (RF-210). */
+export const mockNoticeLines = (mode: Mode): string[] => (mode === 'mock' ? [MOCK_NOTICE, ''] : []);
 
 /** Nombre del remitente de los emails internos del sistema, que no van a clientes (RF-215 no aplica). */
 export const SYSTEM_SENDER_NAME = 'Aldebaran';
@@ -31,6 +35,7 @@ export function passwordRecoveryEmail(input: {
 
 /** Datos del email de una factura (RF-84, RF-88 a RF-90, RF-215). */
 export interface InvoiceEmailInput {
+  mode: Mode;
   to: string;
   clientName: string;
   /** Nombre de fantasía de la empresa emisora o, si no tiene, su razón social (RF-215). */
@@ -48,7 +53,8 @@ export interface InvoiceEmailInput {
 
 /**
  * Email de una factura: la informa con su PDF adjunto, avisa la deuda pendiente y pide responder con el
- * comprobante de pago. Mientras se factura en homologación lo indica (RF-90).
+ * comprobante de pago. Mientras se factura en homologación lo indica (RF-90) y, en modo mock, también
+ * que es simulado (RF-210).
  */
 export function invoiceEmail(input: InvoiceEmailInput): OutgoingEmail {
   const debt = input.includesPrevious
@@ -71,6 +77,7 @@ export function invoiceEmail(input: InvoiceEmailInput): OutgoingEmail {
       '',
       HOMOLOGATION_NOTICE,
       '',
+      ...mockNoticeLines(input.mode),
       'Saludos,',
       input.senderName,
     ].join('\n'),
