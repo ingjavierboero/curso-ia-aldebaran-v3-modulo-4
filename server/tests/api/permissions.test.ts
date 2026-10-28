@@ -171,7 +171,7 @@ describe('un usuario Consulta no modifica nada (RF-13)', () => {
 
     const password = await agent
       .post('/api/auth/password')
-      .send({ currentPassword: TEST_PASSWORD, newPassword: 'otra-clave-segura-1' });
+      .send({ currentPassword: TEST_PASSWORD, newPassword: 'clave-nueva-123' });
     expect(password.status).toBe(204);
 
     const reminder = await agent.post(`/api/clients/${s.client.id}/reminder`);

@@ -140,7 +140,7 @@ describe('confirmación de la nueva contraseña (RF-27, RF-29, RF-33)', () => {
 
     expect((await confirm(t, token, 'clave-nueva-123')).status).toBe(204);
     expect((await checkToken(t, token)).status).toBe(400);
-    expect((await confirm(t, token, 'otra-clave-456')).status).toBe(400);
+    expect((await confirm(t, token, 'clave-nueva-456')).status).toBe(400);
     expect((await login(t, 'ana@empresa.com', 'clave-nueva-123')).status).toBe(200);
   });
 
