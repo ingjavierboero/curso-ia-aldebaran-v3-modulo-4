@@ -6,6 +6,7 @@ import { systemClock } from './clock.ts';
 import { createDolarhoySource } from './fx/dolarhoy.ts';
 import { createAnthropicClassifier } from './llm/anthropic.ts';
 import { mockClassifier } from './llm/mock.ts';
+import { createImapMailbox } from './mail/imap-mailbox.ts';
 import { createMockMail } from './mail/mock-mailbox.ts';
 import { createSmtpSender } from './mail/smtp-sender.ts';
 import type { Adapters, Clock } from './types.ts';
@@ -59,7 +60,7 @@ export function createAdapters(env: Env, db: Db, clock: Clock = systemClock): Ad
     }),
     classifier: createAnthropicClassifier(env.anthropicApiKey ?? ''),
     mailSender: createSmtpSender(env),
-    mailbox: pending<Adapters['mailbox']>('La lectura de la casilla por IMAP'), // US4
+    mailbox: createImapMailbox({ user: env.gmailUser ?? '', appPassword: env.gmailAppPassword ?? '' }),
     fx,
   };
 }

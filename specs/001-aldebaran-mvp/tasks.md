@@ -233,7 +233,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T096 [P] [US4] Implementar `server/src/domain/amount-matching.ts` según research R-09
 - [X] T097 [US4] Implementar `server/src/domain/payment-rules.ts` usando `amount-matching.ts`, `cuit.ts` y `money.ts`
 - [X] T098 [P] [US4] Implementar `server/src/adapters/llm/retry-policy.ts` y `server/src/adapters/llm/anthropic.ts` (herramienta con esquema de salida, `maxRetries: 0`, `timeout: 10_000`) y registrarlo en `server/src/adapters/index.ts` (research R-07)
-- [ ] T099 [P] [US4] Implementar `server/src/adapters/mail/imap-mailbox.ts` y registrarlo en `server/src/adapters/index.ts` (research R-08)
+- [X] T099 [P] [US4] Implementar `server/src/adapters/mail/imap-mailbox.ts` y registrarlo en `server/src/adapters/index.ts` (research R-08)
 - [ ] T148 [P] [US4] Implementar `server/src/domain/file-signature.ts` (research R-16)
 - [ ] T100 [US4] Implementar `server/src/services/payment-processing.ts`: identificación del cliente, avisos, clasificación por adjunto, decisión de `payment-rules.ts`, transiciones con `invoice-status.ts`, motivos, `invoice_emails` e historial en una transacción. El tipo de cada adjunto sale de `file-signature.ts`, nunca del declarado (RF-117)
 - [ ] T101 [US4] Implementar `server/src/services/mailbox-check.ts` y `server/src/jobs/mailbox-job.ts` con su condición en el tick (RF-99 a RF-109)

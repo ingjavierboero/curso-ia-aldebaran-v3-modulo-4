@@ -20,7 +20,7 @@ interface FakeMessage {
   uid: number;
   internalDate: Date;
   envelope: { messageId: string; subject: string; from: Array<{ address: string; name?: string }> };
-  bodyStructure: Record<string, unknown>;
+  bodyStructure: { type: string } & Record<string, unknown>;
   /** Contenido de cada parte, por número de parte. */
   parts: Record<string, string | Uint8Array>;
 }
@@ -159,6 +159,25 @@ describe('lectura de la casilla por IMAP (research R-08)', () => {
         content: new Uint8Array(DOCX),
         inline: false,
       },
+    ]);
+  });
+
+  it('un adjunto inline con nombre de archivo y sin Content-ID (como los de Apple Mail) cuenta como adjunto', async () => {
+    const appleMail: FakeMessage = {
+      ...MESSAGE,
+      bodyStructure: {
+        type: 'multipart/mixed',
+        childNodes: [
+          { part: '1', type: 'text/plain' },
+          { part: '2', type: 'application/pdf', disposition: 'inline', dispositionParameters: { filename: 'comprobante.pdf' } },
+        ],
+      },
+      parts: { '1': 'Adjunto el comprobante.', '2': PDF },
+    };
+    const fake = fakeClient([appleMail]);
+    const [email] = await createImapMailbox({ user: 'u', appPassword: 'p' }, () => fake.client).fetchSince(new Date(0));
+    expect(email?.attachments).toEqual([
+      { filename: 'comprobante.pdf', mimeType: 'application/pdf', content: new Uint8Array(PDF), inline: false },
     ]);
   });
 
