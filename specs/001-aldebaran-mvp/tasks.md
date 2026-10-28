@@ -304,7 +304,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 ### Implementation for User Story 6
 
 - [X] T118 [US6] Implementar `server/src/services/reminders.ts` (armado con las facturas adeudadas actuales y validaciones) y la plantilla de recordatorio en `server/src/documents/email-templates.ts`
-- [ ] T119 [US6] Implementar `server/src/jobs/reminders-job.ts` con `reminder_runs` y su condición en el tick, retomando el mismo día una corrida interrumpida (RF-149)
+- [X] T119 [US6] Implementar `server/src/jobs/reminders-job.ts` con `reminder_runs` y su condición en el tick, retomando el mismo día una corrida interrumpida (RF-149)
 - [ ] T120 [US6] Completar `GET /api/dashboard` con el listado de deuda y agregar `POST /api/clients/:id/reminder` en `server/src/http/routes/dashboard.ts`
 - [ ] T121 [P] [US6] Implementar en web `DashboardPage` con el listado, los banners y el botón de recordatorio en `web/src/pages/DashboardPage.tsx`
 
