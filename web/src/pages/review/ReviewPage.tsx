@@ -1,9 +1,11 @@
-import type { NoticeDto, ReviewPaymentDto } from '@api-types';
-import { App, Badge, Empty, Space, Tabs, Typography } from 'antd';
+import type { NoticeDto, ProcessErrorDto, ReviewPaymentDto } from '@api-types';
+import { App, Badge, Space, Tabs, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { api } from '../../api/client.ts';
 import { errorMessage } from '../../forms.ts';
 import { useCanEdit } from '../../stores/session.ts';
+import { ErrorsTab } from './ErrorsTab.tsx';
 import { NoticesTab } from './NoticesTab.tsx';
 import { PaymentsTab } from './PaymentsTab.tsx';
 import { ResolvedTab } from './ResolvedTab.tsx';
@@ -25,6 +27,9 @@ export function ReviewPage() {
   const { message } = App.useApp();
   const [payments, setPayments] = useState<ReviewPaymentDto[]>([]);
   const [notices, setNotices] = useState<NoticeDto[]>([]);
+  const [errors, setErrors] = useState<ProcessErrorDto[]>([]);
+  // La pestaña abierta va en la URL, así el banner de errores lleva directo a la suya (`?tab=errores`).
+  const [params, setParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
 
   const loadPayments = useCallback(async () => {
@@ -43,14 +48,24 @@ export function ReviewPage() {
     }
   }, [message]);
 
+  const loadErrors = useCallback(async () => {
+    try {
+      setErrors(await api.get<ProcessErrorDto[]>('/review/errors'));
+    } catch (e) {
+      message.error(errorMessage(e));
+    }
+  }, [message]);
+
   useEffect(() => {
-    void Promise.all([loadPayments(), loadNotices()]).finally(() => setLoading(false));
-  }, [loadPayments, loadNotices]);
+    void Promise.all([loadPayments(), loadNotices(), loadErrors()]).finally(() => setLoading(false));
+  }, [loadPayments, loadNotices, loadErrors]);
 
   return (
     <>
       <Typography.Title level={3}>Revisión</Typography.Title>
       <Tabs
+        activeKey={params.get('tab') ?? 'pagos'}
+        onChange={(tab) => setParams({ tab }, { replace: true })}
         items={[
           {
             key: 'pagos',
@@ -64,8 +79,8 @@ export function ReviewPage() {
           },
           {
             key: 'errores',
-            label: 'Errores',
-            children: <Empty description="No hay errores de proceso pendientes." />,
+            label: tabLabel('Errores', errors.length),
+            children: <ErrorsTab errors={errors} loading={loading} canEdit={canEdit} reload={loadErrors} />,
           },
           { key: 'resueltos', label: 'Resueltos', children: <ResolvedTab /> },
         ]}

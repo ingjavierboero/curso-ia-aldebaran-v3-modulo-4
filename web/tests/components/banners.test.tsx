@@ -1,5 +1,6 @@
 import type { DashboardDto, UserDto } from '@api-types';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Banners } from '../../src/components/Banners.tsx';
 import { useSessionStore } from '../../src/stores/session.ts';
@@ -16,6 +17,8 @@ const CERTIFICATE = {
   expiresAt: '2026-10-14',
   message: 'El certificado de ARCA venció el 14/10/2026: no se puede realizar la facturación.',
 };
+
+const ERRORS_MESSAGE = 'Hay 2 errores de proceso pendientes: revisalos en la pestaña Errores de Revisión.';
 
 const json = (body: unknown) =>
   new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -35,9 +38,11 @@ function renderAs(role: UserDto['role']) {
     user: { id: 9, name: 'Usuario', email: 'u@empresa.com', role, status: 'activo' },
     userChecked: true,
   });
+  // El banner de errores lleva un link a la revisión: necesita el router.
+  const router = createMemoryRouter([{ path: '/', element: <Banners /> }]);
   render(
     <ThemeProvider>
-      <Banners />
+      <RouterProvider router={router} />
     </ThemeProvider>,
   );
 }
@@ -75,5 +80,16 @@ describe('banners del dashboard', () => {
     renderAs('admin');
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('AC-192: con errores de proceso Pendientes muestra el banner con la cantidad y un link a la revisión', async () => {
+    mockDashboard({
+      certificate: null,
+      exchangeRate: null,
+      processErrors: { count: 2, message: ERRORS_MESSAGE },
+    });
+    renderAs('consulta');
+    expect(await screen.findByText(ERRORS_MESSAGE)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /ver errores/i }).getAttribute('href')).toBe('/revision?tab=errores');
   });
 });
