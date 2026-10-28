@@ -30,7 +30,7 @@ function mockApi(
   debtors: DebtorDto[],
   reminderReply: () => Response = () => json({ status: 'enviado', sentAt: '2026-10-20T13:00:00.000Z' }),
 ) {
-  const dashboard: DashboardDto = { banners: { certificate: null, exchangeRate: null }, debtors };
+  const dashboard: DashboardDto = { banners: { certificate: null, exchangeRate: null, processErrors: null }, debtors };
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) =>
     url.endsWith('/reminder') && init?.method === 'POST' ? reminderReply() : json(dashboard),
   );

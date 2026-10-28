@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type { AppContext } from '../../context.ts';
-import { getSettings, updateSettings } from '../../services/settings.ts';
+import { getSettings, missingForBilling, updateSettings } from '../../services/settings.ts';
 import { onlyAdmin } from '../middleware/require-role.ts';
 import { calendarDate } from '../schemas.ts';
 import { ISSUER_IVA_CONDITIONS, type IssuerIvaCondition, type SettingsDto } from '../types.ts';
@@ -50,7 +50,12 @@ export function settingsRouter(ctx: AppContext): Router {
   const toDto = (): SettingsDto => {
     const current = getSettings(ctx.db);
     const issuerIvaCondition = current.issuerIvaCondition as IssuerIvaCondition | null;
-    return { ...current, issuerIvaCondition, issuerCuit: ctx.env.arcaCuit };
+    return {
+      ...current,
+      issuerIvaCondition,
+      issuerCuit: ctx.env.arcaCuit,
+      missingForBilling: missingForBilling(current),
+    };
   };
 
   router.get('/settings', (_req, res) => {

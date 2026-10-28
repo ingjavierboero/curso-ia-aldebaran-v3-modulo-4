@@ -320,16 +320,17 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 7 ⚠️
 
-- [ ] T122 [P] [US7] Test de integración en `server/tests/integration/errors/retry-queue.test.ts` con reloj falso: segundo intento a los 5 min (±1) con éxito sin error; 4 intentos y error Pendiente con cliente, operación, período, intentos y último mensaje para generación, envío de factura y recordatorio; reintentos en 0 → un intento; espera de 10 min; otro cliente no espera los reintentos; reenvío sin regenerar la factura (AC-79, AC-80, AC-178 a AC-182, AC-184). Además: la cola se retoma tras un reinicio con el intento guardado y un reintento de recordatorio se cancela sin error si el cliente ya no corresponde (AC-247)
-- [ ] T123 [P] [US7] Test de API en `server/tests/api/process-errors.test.ts`: listado de Pendientes sin Resueltos, reintento manual con un único intento que genera y envía la factura, reenvío solo del email, error que sigue Pendiente con el nuevo mensaje, marcar Resuelto con usuario, banner con la cantidad y que desaparece, recordatorio manual fallido sin error de proceso (AC-186 a AC-194). Además: el reintento manual de una generación se bloquea con mensaje si el cliente está Inactivo o sin productos Activos (AC-248)
-- [ ] T124 [P] [US7] Test de API en `server/tests/api/reminder-retry.test.ts`: reintento manual de un recordatorio recalculado con la deuda actual y bloqueado con mensaje, dejando el error Pendiente, si el cliente no tiene deuda, está en revisión o está Inactivo (RF-178 aclarado, FR-046)
+- [X] T122 [P] [US7] Test de integración en `server/tests/integration/errors/retry-queue.test.ts` con reloj falso: segundo intento a los 5 min (±1) con éxito sin error; 4 intentos y error Pendiente con cliente, operación, período, intentos y último mensaje para generación, envío de factura y recordatorio; reintentos en 0 → un intento; espera de 10 min; otro cliente no espera los reintentos; reenvío sin regenerar la factura (AC-79, AC-80, AC-178 a AC-182, AC-184). Además: la cola se retoma tras un reinicio con el intento guardado y un reintento de recordatorio se cancela sin error si el cliente ya no corresponde (AC-247)
+- [X] T123 [P] [US7] Test de API en `server/tests/api/process-errors.test.ts`: listado de Pendientes sin Resueltos, reintento manual con un único intento que genera y envía la factura, reenvío solo del email, error que sigue Pendiente con el nuevo mensaje, marcar Resuelto con usuario, banner con la cantidad y que desaparece, recordatorio manual fallido sin error de proceso (AC-186 a AC-194). Además: el reintento manual de una generación se bloquea con mensaje si el cliente está Inactivo o sin productos Activos (AC-248)
+- [X] T124 [P] [US7] Test de API en `server/tests/api/reminder-retry.test.ts`: reintento manual de un recordatorio recalculado con la deuda actual y bloqueado con mensaje, dejando el error Pendiente, si el cliente no tiene deuda, está en revisión o está Inactivo (RF-178 aclarado, FR-046)
 
 ### Implementation for User Story 7
 
-- [ ] T125 [US7] Implementar `server/src/jobs/retry-queue.ts` y conectarlo a `billing.ts`, `invoice-email.ts` y `reminders.ts` (research R-11, RF-171 a RF-174)
-- [ ] T126 [US7] Completar `server/src/services/process-errors.ts` con reintento manual, resolución y conteo para el banner (RF-176 a RF-181, FR-046)
-- [ ] T127 [US7] Agregar las rutas de errores a `server/src/http/routes/review.ts` y el banner de errores a `server/src/services/banners.ts`
-- [ ] T128 [P] [US7] Completar la pestaña Errores de `ReviewPage` y el banner de errores en `web/src/components/Banners.tsx`
+- [X] T125 [US7] Implementar `server/src/jobs/retry-queue.ts` y conectarlo a `billing.ts`, `invoice-email.ts` y `reminders.ts` (research R-11, RF-171 a RF-174)
+- [X] T126 [US7] Completar `server/src/services/process-errors.ts` con reintento manual, resolución y conteo para el banner (RF-176 a RF-181, FR-046)
+- [X] T127 [US7] Agregar las rutas de errores a `server/src/http/routes/review.ts` y el banner de errores a `server/src/services/banners.ts`
+- [X] T128 [P] [US7] Completar la pestaña Errores de `ReviewPage` y el banner de errores en `web/src/components/Banners.tsx`
+- [X] T154 [US7] Nombrar los datos faltantes en el error de RF-219 (`server/src/services/billing.ts`) y, en `web/src/pages/SettingsPage.tsx`, marcar los datos obligatorios del emisor y el punto de venta con un aviso de los que faltan (RF-219, RF-221, AC-242, AC-257), con sus tests en `server/tests/integration/billing/arca-idempotency.test.ts` y `web/tests/pages/settings.test.tsx`
 
 **Checkpoint**: las fallas quedan visibles y se pueden resolver
 

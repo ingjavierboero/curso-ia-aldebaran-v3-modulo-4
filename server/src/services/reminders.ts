@@ -68,7 +68,7 @@ export function clientsToRemind(db: Db): Client[] {
 
 export interface SendReminderInput {
   clientId: number;
-  trigger: 'automatico' | 'manual';
+  trigger: 'automatico' | 'manual' | 'reintento_manual';
   /** Usuario que lo envía desde el dashboard; sin usuario, lo envía el agente. */
   userId?: number;
   /** Mes de la corrida de fin de mes (`YYYY-MM`), para retomarla si se interrumpe (RF-149). */

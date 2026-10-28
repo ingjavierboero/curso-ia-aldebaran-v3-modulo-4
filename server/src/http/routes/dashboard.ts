@@ -1,6 +1,6 @@
 import { type Request, Router } from 'express';
 import type { AppContext } from '../../context.ts';
-import { certificateBanner, exchangeRateBanner } from '../../services/banners.ts';
+import { certificateBanner, exchangeRateBanner, processErrorsBanner } from '../../services/banners.ts';
 import { ClientNotFoundError } from '../../services/clients.ts';
 import { listDebtors } from '../../services/debt.ts';
 import { confirmFallback } from '../../services/exchange-rates.ts';
@@ -15,14 +15,18 @@ import { idParam } from '../validate.ts';
 type WithId = Request<{ id: string }>;
 
 /**
- * Dashboard: clientes con deuda vigente (RF-153), banners de certificado y cotización (RF-69, RF-97,
- * RF-98) y el recordatorio manual, que puede enviar cualquier perfil (RF-12, RF-154).
+ * Dashboard: clientes con deuda vigente (RF-153), banners de certificado, cotización y errores (RF-69,
+ * RF-97, RF-98, RF-181) y el recordatorio manual, que puede enviar cualquier perfil (RF-12, RF-154).
  */
 export function dashboardRouter(ctx: AppContext): Router {
   const router = Router();
 
   const dashboard = async (): Promise<DashboardDto> => ({
-    banners: { certificate: await certificateBanner(ctx), exchangeRate: exchangeRateBanner(ctx.db) },
+    banners: {
+      certificate: await certificateBanner(ctx),
+      exchangeRate: exchangeRateBanner(ctx.db),
+      processErrors: processErrorsBanner(ctx.db),
+    },
     debtors: listDebtors(ctx.db),
   });
 

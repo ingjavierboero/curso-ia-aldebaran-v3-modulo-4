@@ -1,4 +1,4 @@
-import type { NoticeDto, ResolvedPaymentDto, ReviewPaymentDto, UserDto } from '@api-types';
+import type { NoticeDto, ProcessErrorDto, ResolvedPaymentDto, ReviewPaymentDto, UserDto } from '@api-types';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -220,5 +220,132 @@ describe('avisos y resueltos', () => {
     expect(within(paid).getByText('monto no coincide')).toBeTruthy();
     const returned = screen.getByText('00003-00000002').closest('tr') as HTMLElement;
     expect(within(returned).getByText('Devuelta a Pendiente de pago')).toBeTruthy();
+  });
+});
+
+const processError = (id: number, overrides: Partial<ProcessErrorDto> = {}): ProcessErrorDto => ({
+  id,
+  operation: 'generacion_factura',
+  clientId: 7,
+  clientName: 'Los Andes SRL',
+  period: '2026-10',
+  invoiceId: null,
+  voucherNumber: null,
+  attempts: 4,
+  lastErrorMessage: 'WSFEv1 no respondió a tiempo',
+  createdAt: '2026-10-15T14:15:00.000Z',
+  updatedAt: '2026-10-15T14:15:00.000Z',
+  ...overrides,
+});
+
+/** API con errores de proceso: `errorLists` son las respuestas de cada carga; `action` la del POST. */
+function mockErrorsApi(
+  errorLists: ProcessErrorDto[][],
+  action: () => Response = () => json({ status: 'resuelto' }),
+) {
+  let loads = 0;
+  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url === '/api/review/errors') return json(errorLists[Math.min(loads++, errorLists.length - 1)]);
+    if (url.startsWith('/api/review/errors/') && init?.method === 'POST') return action();
+    return json([]);
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return { fetchMock, loads: () => loads };
+}
+
+/** Confirma una acción de la fila del error de ese cliente. */
+async function confirmErrorAction(client: string, label: string) {
+  const row = (await screen.findByText(client)).closest('tr') as HTMLElement;
+  await act(async () => {
+    fireEvent.click(within(row).getByRole('button', { name: label }));
+  });
+  await act(async () => {
+    fireEvent.click(await screen.findByRole('button', { name: 'Sí' }));
+  });
+}
+
+describe('errores de proceso (RF-175 a RF-180)', () => {
+  it('AC-186: la pestaña Errores lista los Pendientes con cliente, operación, período, intentos y último mensaje', async () => {
+    const send = { operation: 'envio_factura' as const, clientName: 'Estudio Ríos', voucherNumber: '00003-00000002' };
+    mockErrorsApi([[processError(5), processError(6, send)]]);
+    renderPage();
+    await openTab(/errores/i);
+
+    const row = (await screen.findByText('Los Andes SRL')).closest('tr') as HTMLElement;
+    expect(within(row).getByText('Generación de factura')).toBeTruthy();
+    expect(within(row).getByText('Octubre 2026')).toBeTruthy();
+    expect(within(row).getByText('4')).toBeTruthy();
+    expect(within(row).getByText('WSFEv1 no respondió a tiempo')).toBeTruthy();
+    const sendRow = screen.getByText('Estudio Ríos').closest('tr') as HTMLElement;
+    expect(within(sendRow).getByText('Envío de factura')).toBeTruthy();
+    expect(within(sendRow).getByText('00003-00000002')).toBeTruthy();
+  });
+
+  it('AC-187: un Editor reintenta un error y, si sale bien, se avisa y se recarga la lista', async () => {
+    const { fetchMock, loads } = mockErrorsApi([[processError(5)], []]);
+    renderPage();
+    await openTab(/errores/i);
+
+    await confirmErrorAction('Los Andes SRL', 'Reintentar');
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/review/errors/5/retry', expect.objectContaining({ method: 'POST' }));
+    expect(await screen.findByText('Reintento exitoso: el error quedó Resuelto.')).toBeTruthy();
+    expect(loads()).toBe(2);
+  });
+
+  it('AC-190, AC-248: si el reintento falla o se bloquea, muestra el mensaje de la API y recarga la lista', async () => {
+    const { loads } = mockErrorsApi([[processError(5)]], () =>
+      json(
+        { error: { code: 'cliente_no_facturable', message: 'El cliente está Inactivo: no se puede generar su factura.' } },
+        422,
+      ),
+    );
+    renderPage();
+    await openTab(/errores/i);
+
+    await confirmErrorAction('Los Andes SRL', 'Reintentar');
+
+    expect(await screen.findByText('El cliente está Inactivo: no se puede generar su factura.')).toBeTruthy();
+    expect(loads()).toBe(2);
+  });
+
+  it('AC-191: un Editor marca un error como Resuelto', async () => {
+    const { fetchMock } = mockErrorsApi([[processError(5)], []]);
+    renderPage();
+    await openTab(/errores/i);
+
+    await confirmErrorAction('Los Andes SRL', 'Marcar como resuelto');
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/review/errors/5/resolve', expect.objectContaining({ method: 'POST' }));
+    expect(await screen.findByText('Error marcado como resuelto.')).toBeTruthy();
+  });
+
+  it('un error de revisión de la casilla no se reintenta a mano, pero se puede marcar como resuelto', async () => {
+    const mailbox = { operation: 'revision_casilla' as const, clientId: null, clientName: null, period: null };
+    mockErrorsApi([[processError(8, mailbox)]]);
+    renderPage();
+    await openTab(/errores/i);
+
+    const row = (await screen.findByText('Revisión de la casilla')).closest('tr') as HTMLElement;
+    expect(within(row).queryByRole('button', { name: 'Reintentar' })).toBeNull();
+    expect(within(row).getByRole('button', { name: 'Marcar como resuelto' })).toBeTruthy();
+  });
+
+  it('RF-13: un usuario Consulta ve los errores sin las acciones', async () => {
+    loginAs('consulta');
+    mockErrorsApi([[processError(5)]]);
+    renderPage();
+    await openTab(/errores/i);
+
+    const row = (await screen.findByText('Los Andes SRL')).closest('tr') as HTMLElement;
+    expect(within(row).queryByRole('button', { name: 'Reintentar' })).toBeNull();
+    expect(within(row).queryByRole('button', { name: 'Marcar como resuelto' })).toBeNull();
+  });
+
+  it('sin errores Pendientes, la pestaña lo indica', async () => {
+    mockErrorsApi([[]]);
+    renderPage();
+    await openTab(/errores/i);
+    expect(await screen.findByText('No hay errores de proceso pendientes.')).toBeTruthy();
   });
 });

@@ -50,6 +50,8 @@ export interface SettingsDto {
   issuerTradeName: string | null;
   /** CUIT del emisor, de ARCA_CUIT: solo lectura. */
   issuerCuit: string;
+  /** Datos obligatorios del emisor y el punto de venta que faltan para facturar (RF-221): solo lectura. */
+  missingForBilling: string[];
 }
 
 /**
@@ -156,6 +158,7 @@ export interface DashboardDto {
   banners: {
     certificate: CertificateBannerDto | null;
     exchangeRate: ExchangeRateBannerDto | null;
+    processErrors: ProcessErrorsBannerDto | null;
   };
   /** Clientes con deuda vigente, de la mayor deuda a la menor (RF-153). */
   debtors: DebtorDto[];
@@ -256,6 +259,28 @@ export interface MockEmailDto {
   /** Fecha de envío o, en un recibido, el momento de la carga (RF-196, RF-201). */
   createdAt: string;
   attachments: MockAttachmentDto[];
+}
+
+/** `GET /api/review/errors`: error de proceso Pendiente (RF-175). */
+export interface ProcessErrorDto {
+  id: number;
+  operation: 'generacion_factura' | 'envio_factura' | 'envio_recordatorio' | 'revision_casilla';
+  clientId: number | null;
+  clientName: string | null;
+  /** Período de la factura o mes del recordatorio. */
+  period: string | null;
+  invoiceId: number | null;
+  voucherNumber: string | null;
+  attempts: number;
+  lastErrorMessage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Banner de errores: hay errores de proceso Pendientes (RF-181). */
+export interface ProcessErrorsBannerDto {
+  count: number;
+  message: string;
 }
 
 /** Cuerpo de toda respuesta de error. */

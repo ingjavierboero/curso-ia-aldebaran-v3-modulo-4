@@ -2,8 +2,9 @@ import type { AppContext } from '../context.ts';
 import type { Db } from '../db/client.ts';
 import { civilDate } from '../domain/billing-dates.ts';
 import { formatDate, formatInstantDate, formatMoney } from '../documents/format.ts';
-import type { CertificateBannerDto, ExchangeRateBannerDto } from '../http/types.ts';
+import type { CertificateBannerDto, ExchangeRateBannerDto, ProcessErrorsBannerDto } from '../http/types.ts';
 import { pendingFallback } from './exchange-rates.ts';
+import { pendingErrorCount } from './process-errors.ts';
 
 /** RF-98: el banner avisa desde que faltan 30 días o menos para el vencimiento. */
 const WARNING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
@@ -52,5 +53,18 @@ export function exchangeRateBanner(db: Db): ExchangeRateBannerDto | null {
     message:
       'dolarhoy.com no respondió: se facturó con la última cotización registrada, ' +
       `${formatMoney(fallback.rateCents)}, leída el ${formatInstantDate(fallback.readAt)}.`,
+  };
+}
+
+/** Banner de errores (RF-181): la cantidad de errores de proceso Pendientes, mientras haya alguno. */
+export function processErrorsBanner(db: Db): ProcessErrorsBannerDto | null {
+  const count = pendingErrorCount(db);
+  if (count === 0) return null;
+  return {
+    count,
+    message:
+      count === 1
+        ? 'Hay 1 error de proceso pendiente: revisalo en la pestaña Errores de Revisión.'
+        : `Hay ${count} errores de proceso pendientes: revisalos en la pestaña Errores de Revisión.`,
   };
 }

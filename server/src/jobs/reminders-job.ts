@@ -2,7 +2,8 @@ import { and, eq } from 'drizzle-orm';
 import type { AppContext } from '../context.ts';
 import { reminderRuns, sentEmails } from '../db/schema.ts';
 import { currentPeriod, isAtOrAfterTime, isLastDayOfMonth } from '../domain/billing-dates.ts';
-import { clientsToRemind, ReminderBlockedError, sendReminder } from '../services/reminders.ts';
+import { clientsToRemind, ReminderBlockedError, ReminderSendError, sendReminder } from '../services/reminders.ts';
+import { retryOrFail } from '../services/retries.ts';
 import { getSettings } from '../services/settings.ts';
 import type { ScheduledProcess } from './scheduler.ts';
 
@@ -49,9 +50,18 @@ export function createRemindersJob(ctx: AppContext): ScheduledProcess {
         try {
           await sendReminder(ctx, { clientId: client.id, trigger: 'automatico', reminderMonth: month });
         } catch (error) {
-          // El cliente pudo cambiar durante la corrida; un envío fallido no frena a los demás (sus
-          // reintentos llegan con US7).
-          if (!(error instanceof ReminderBlockedError)) {
+          // El cliente pudo cambiar durante la corrida (ReminderBlockedError): no corresponde enviarle nada.
+          // Un envío fallido pasa a la cola de reintentos y no frena a los demás (RF-171).
+          if (error instanceof ReminderSendError) {
+            retryOrFail(ctx.db, {
+              operation: 'envio_recordatorio',
+              clientId: client.id,
+              period: month,
+              attempts: 1,
+              message: error.message,
+              now: ctx.adapters.clock.now(),
+            });
+          } else if (!(error instanceof ReminderBlockedError)) {
             console.error(`No se pudo enviar un recordatorio: ${error instanceof Error ? error.name : typeof error}`);
           }
         }

@@ -8,7 +8,8 @@ import { usdToArsCents } from '../domain/money.ts';
 import { NoExchangeRateError, readRateForInvoice } from './exchange-rates.ts';
 import { sendInvoiceEmail } from './invoice-email.ts';
 import { recordProcessError } from './process-errors.ts';
-import { getSettings, type Settings } from './settings.ts';
+import { retryOrFail } from './retries.ts';
+import { getSettings, missingForBilling, type Settings } from './settings.ts';
 
 export type Invoice = typeof invoices.$inferSelect;
 export type BillingTrigger = NonNullable<typeof billingPeriods.$inferSelect.triggeredBy>;
@@ -16,7 +17,9 @@ export type BillingTrigger = NonNullable<typeof billingPeriods.$inferSelect.trig
 /** Factura C (RF-71). */
 const VOUCHER_TYPE = 11 as const;
 
-export const MISSING_ISSUER = 'faltan los datos de la empresa emisora o el punto de venta'; // RF-219
+/** RF-219: el mensaje nombra los datos que faltan. */
+const missingIssuer = (fields: string[]) =>
+  `faltan los datos de la empresa emisora o el punto de venta: ${fields.join(', ')}`;
 export const MISSING_IVA = 'el cliente no tiene cargada la condición frente al IVA'; // RF-83
 const NO_RATE = 'no se pudo leer la cotización del dólar y no hay ninguna registrada'; // RF-68
 
@@ -51,20 +54,13 @@ function withPointOfSaleLock<T>(db: Db, pointOfSale: number, task: () => Promise
 
 // ------------------------------------------------------------------ Datos de la factura
 
-/** RF-219: datos obligatorios de la empresa emisora (RF-91) y punto de venta (RF-73). */
+/** RF-219: están todos los datos obligatorios de la empresa emisora (RF-91) y el punto de venta (RF-73). */
 function issuerIsComplete(s: Settings): s is Settings & { pointOfSale: number } {
-  return Boolean(
-    s.pointOfSale &&
-      s.issuerBusinessName &&
-      s.issuerAddress &&
-      s.issuerIvaCondition &&
-      s.issuerGrossIncomeNumber &&
-      s.issuerActivityStartDate,
-  );
+  return missingForBilling(s).length === 0;
 }
 
 /** Productos Activos asignados al cliente, que son los que se facturan (RF-51, RF-94). */
-function activeProducts(db: Db, clientId: number) {
+export function activeProducts(db: Db, clientId: number) {
   return db
     .select({ product: products })
     .from(clientProducts)
@@ -144,7 +140,7 @@ export async function generateInvoice(
 ): Promise<GenerationResult> {
   const { db, adapters, env } = ctx;
   const settings = getSettings(db);
-  if (!issuerIsComplete(settings)) return failed(MISSING_ISSUER);
+  if (!issuerIsComplete(settings)) return failed(missingIssuer(missingForBilling(settings)));
 
   // Una factura ya registrada no se vuelve a generar (RF-74).
   let invoice = invoiceOf(db, input.clientId, input.period);
@@ -308,9 +304,10 @@ export interface BillingRunSummary {
 /**
  * Proceso de facturación del período (RF-51 a RF-53): factura a cada cliente facturable que todavía no
  * tiene la factura del período, de a uno, y deja el período `completado`. Retoma una corrida
- * interrumpida sin duplicar facturas (RF-53, RF-74). Una generación fallida queda como error de proceso
- * Pendiente (RF-174); los reintentos automáticos (RF-171) se suman en US7. Cada factura generada se envía
- * por email enseguida (RF-85). No factura un período cancelado.
+ * interrumpida sin duplicar facturas (RF-53, RF-74). Una generación o un envío fallidos pasan a la cola
+ * de reintentos y el proceso sigue con el siguiente cliente (RF-87, RF-171); un rechazo de ARCA o un
+ * cliente que ya no es facturable quedan enseguida como error de proceso (RF-174). Cada factura generada
+ * se envía por email enseguida (RF-85). No factura un período cancelado.
  */
 export async function runBilling(
   ctx: AppContext,
@@ -373,8 +370,8 @@ async function bill(
       // RF-85: el email sale apenas se genera la factura, sin esperar a las de los demás clientes.
       const sent = await sendInvoiceEmail(ctx, result.invoiceId, 'automatico');
       if (sent.status === 'fallido') {
-        // RF-86: el envío se reintenta sin volver a generar la factura (la cola llega en US7).
-        recordProcessError(db, {
+        // RF-86: el envío se reintenta sin volver a generar la factura.
+        retryOrFail(db, {
           operation: 'envio_factura',
           clientId,
           period: input.period,
@@ -387,14 +384,16 @@ async function bill(
       continue;
     }
     summary.failed.push(clientId);
-    recordProcessError(db, {
-      operation: 'generacion_factura',
+    const failure = {
+      operation: 'generacion_factura' as const,
       clientId,
       period: input.period,
       attempts: 1,
       message: result.message,
       now: adapters.clock.now(),
-    });
+    };
+    if (result.retryable) retryOrFail(db, failure);
+    else recordProcessError(db, failure);
   }
 
   db.update(billingPeriods)
