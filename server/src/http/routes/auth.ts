@@ -74,6 +74,10 @@ export function authRouter(ctx: AppContext): Router {
   });
 
   router.post('/auth/recovery', async (req, res) => {
+    // RF-199: en modo mock no hay recuperación de contraseña, así no queda ningún email en la casilla simulada.
+    if (ctx.env.mode === 'mock') {
+      throw new AppError(403, 'solo_fuera_de_mock', 'La recuperación de contraseña no está disponible en modo mock.');
+    }
     const { email } = parse(recoveryRequestSchema, req.body);
     try {
       await requestPasswordRecovery(ctx.db, ctx, email);

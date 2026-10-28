@@ -222,6 +222,28 @@ export interface ResolvedPaymentDto {
   emails: ReceivedEmailDto[];
 }
 
+/** Adjunto de un email de la casilla simulada, con su tipo verificado por la firma (RNF-16). */
+export interface MockAttachmentDto {
+  id: number;
+  filename: string;
+  mimeType: string;
+}
+
+/** `GET /api/mock-mailbox`: email enviado o recibido de la casilla simulada (RF-197, RF-198). */
+export interface MockEmailDto {
+  id: number;
+  direction: 'enviado' | 'recibido';
+  messageId: string;
+  from: string;
+  fromName: string | null;
+  to: string;
+  subject: string;
+  body: string;
+  /** Fecha de envío o, en un recibido, el momento de la carga (RF-196, RF-201). */
+  createdAt: string;
+  attachments: MockAttachmentDto[];
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {

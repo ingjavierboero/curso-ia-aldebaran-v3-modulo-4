@@ -282,7 +282,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Implementation for User Story 9
 
-- [ ] T113 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (multipart, `403` fuera de mock, visibilidad por perfil). Guarda el tipo verificado con `file-signature.ts` y sirve los adjuntos con `attachment-response.ts` (RNF-16)
+- [X] T113 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (JSON con los adjuntos en base64 según contracts/http-api.md, `403` fuera de mock, visibilidad por perfil). Guarda el tipo verificado con `file-signature.ts` y sirve los adjuntos con `attachment-response.ts` (RNF-16)
 - [ ] T114 [US9] Agregar las marcas de modo mock (RF-210), conservando la leyenda de homologación, a `server/src/documents/invoice-pdf.ts` y `server/src/documents/email-templates.ts` (el banner de certificado ya no se muestra en mock desde la Fase 5, RF-208)
 - [ ] T115 [P] [US9] Implementar en web `MockMailboxPage` (listado, detalle con adjuntos y formulario de carga) en `web/src/pages/mock-mailbox/`, el indicador en `web/src/components/AppLayout.tsx` y el ocultamiento de la recuperación en `LoginPage`
 
