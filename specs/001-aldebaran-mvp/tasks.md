@@ -366,7 +366,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 - [X] T136 [P] Script de evaluación del LLM real en `server/scripts/eval/llm-classification.ts` (`npm run eval:llm -w server`) con el set de ≥ 20 adjuntos por clase en `server/scripts/eval/fixtures/` (no versionado si contiene datos reales) y reporte de aciertos por clase (AC-109 a AC-111, RNF-14)
 - [X] T137 [P] Scripts de rendimiento en `server/scripts/eval/performance.ts` (`npm run eval:perf -w server`) para p95 por email, 50 facturas y 50 recordatorios (AC-232 a AC-234)
 - [X] T138 Ejecutar `gitleaks detect` sobre todo el historial y corregir cualquier hallazgo (AC-225, SC-009)
-- [ ] T139 Ejecutar `npm run test:coverage-ac` y agregar los tests que falten hasta que no quede ningún AC sin cubrir (SC-010)
+- [X] T139 Ejecutar `npm run test:coverage-ac` y agregar los tests que falten hasta que no quede ningún AC sin cubrir (SC-010)
 - [ ] T140 Recorrer `specs/001-aldebaran-mvp/quickstart.md` §1 y §2 y registrar el resultado
 - [ ] T141 [P] Verificar que los comandos y variables documentados en `AGENTS.md` coinciden con los scripts y con `.env.example`, y actualizar la documentación si cambió algo
 - [ ] T142 Abrir el PR de la última fase (Phase 12) contra `main` con el resumen de la fase y de los gates cumplidos (`npm run test`, `npm run test:coverage-ac`, gitleaks, quickstart), para la revisión humana que exige la Constitución
