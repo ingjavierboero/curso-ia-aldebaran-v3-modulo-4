@@ -274,17 +274,17 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 ### Tests for User Story 9 ⚠️
 
-- [ ] T108 [P] [US9] Test de integración en `server/tests/integration/mock/end-to-end.test.ts` con el modo mock real: arranque solo con `MOCK_MODE`, facturación del día 15, sin llamadas a ARCA, al LLM ni a Gmail, clasificación por nombre de archivo y cambios de estado con sus motivos, procesamiento en la siguiente revisión (AC-196 a AC-199, AC-203, AC-204)
-- [ ] T109 [P] [US9] Test de integración en `server/tests/integration/mock/mock-markings.test.ts`: PDF y emails marcados como simulados, CUIT emisor `20111111112` o `ARCA_CUIT`, sin banner de certificado (AC-205 a AC-207). Además: el PDF y el email de cada factura llevan también la leyenda de homologación (AC-207)
-- [ ] T110 [P] [US9] Test de integración en `server/tests/integration/mock/db-separation.test.ts`: datos creados en un modo no aparecen en el otro; error de arranque con `DATABASE_PATH` apuntando a la base mock fuera de mock (AC-208 a AC-210)
-- [ ] T111 [P] [US9] Test de API en `server/tests/api/mock-mailbox.test.ts`: Admin ve enviados y recibidos, Editor y Consulta solo recibidos de clientes, Consulta no puede cargar, email con remitente propio ignorado, recuperación de contraseña rechazada en mock, casilla inaccesible fuera de mock (AC-200 a AC-202, AC-219 a AC-221). Además: un adjunto cargado con contenido HTML se guarda como `application/octet-stream` y solo se puede descargar, con `nosniff` y CSP `sandbox`, y un PDF verificado se muestra (AC-255)
-- [ ] T112 [P] [US9] Test de componente en `web/tests/components/header.test.tsx`: indicador "Modo mock: ARCA, LLM y email simulados" solo en mock y sin opción de recuperar contraseña en el login (AC-195, AC-202)
+- [X] T108 [P] [US9] Test de integración en `server/tests/integration/mock/end-to-end.test.ts` con el modo mock real: arranque solo con `MOCK_MODE`, facturación del día 15, sin llamadas a ARCA, al LLM ni a Gmail, clasificación por nombre de archivo y cambios de estado con sus motivos, procesamiento en la siguiente revisión (AC-196 a AC-199, AC-203, AC-204)
+- [X] T109 [P] [US9] Test de integración en `server/tests/integration/mock/mock-markings.test.ts`: PDF y emails marcados como simulados, CUIT emisor `20111111112` o `ARCA_CUIT`, sin banner de certificado (AC-205 a AC-207). Además: el PDF y el email de cada factura llevan también la leyenda de homologación (AC-207)
+- [X] T110 [P] [US9] Test de integración en `server/tests/integration/mock/db-separation.test.ts`: datos creados en un modo no aparecen en el otro; error de arranque con `DATABASE_PATH` apuntando a la base mock fuera de mock (AC-208 a AC-210)
+- [X] T111 [P] [US9] Test de API en `server/tests/api/mock-mailbox.test.ts`: Admin ve enviados y recibidos, Editor y Consulta solo recibidos de clientes, Consulta no puede cargar, email con remitente propio ignorado, recuperación de contraseña rechazada en mock, casilla inaccesible fuera de mock (AC-200 a AC-202, AC-219 a AC-221). Además: un adjunto cargado con contenido HTML se guarda como `application/octet-stream` y solo se puede descargar, con `nosniff` y CSP `sandbox`, y un PDF verificado se muestra (AC-255)
+- [X] T112 [P] [US9] Test de componente en `web/tests/components/header.test.tsx`: indicador "Modo mock: ARCA, LLM y email simulados" solo en mock y sin opción de recuperar contraseña en el login (AC-195, AC-202)
 
 ### Implementation for User Story 9
 
-- [ ] T113 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (multipart, `403` fuera de mock, visibilidad por perfil). Guarda el tipo verificado con `file-signature.ts` y sirve los adjuntos con `attachment-response.ts` (RNF-16)
-- [ ] T114 [US9] Agregar las marcas de modo mock (RF-210), conservando la leyenda de homologación, a `server/src/documents/invoice-pdf.ts` y `server/src/documents/email-templates.ts` (el banner de certificado ya no se muestra en mock desde la Fase 5, RF-208)
-- [ ] T115 [P] [US9] Implementar en web `MockMailboxPage` (listado, detalle con adjuntos y formulario de carga) en `web/src/pages/mock-mailbox/`, el indicador en `web/src/components/AppLayout.tsx` y el ocultamiento de la recuperación en `LoginPage`
+- [X] T113 [US9] Implementar `server/src/services/mock-mailbox.ts` y `server/src/http/routes/mock-mailbox.ts` (JSON con los adjuntos en base64 según contracts/http-api.md, `403` fuera de mock, visibilidad por perfil). Guarda el tipo verificado con `file-signature.ts` y sirve los adjuntos con `attachment-response.ts` (RNF-16)
+- [X] T114 [US9] Agregar las marcas de modo mock (RF-210), conservando la leyenda de homologación, a `server/src/documents/invoice-pdf.ts` y `server/src/documents/email-templates.ts` (el banner de certificado ya no se muestra en mock desde la Fase 5, RF-208)
+- [X] T115 [P] [US9] Implementar en web `MockMailboxPage` (listado, detalle con adjuntos y formulario de carga) en `web/src/pages/mock-mailbox/`, el indicador en `web/src/components/AppLayout.tsx` y el ocultamiento de la recuperación en `LoginPage`
 
 **Checkpoint**: quickstart.md §2 se puede recorrer completo
 

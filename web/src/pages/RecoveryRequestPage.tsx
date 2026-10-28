@@ -1,13 +1,18 @@
 import { MailOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input, Result } from 'antd';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, Navigate } from 'react-router';
 import { api } from '../api/client.ts';
 import { AuthCard } from '../components/AuthCard.tsx';
 import { emailRules, errorMessage } from '../forms.ts';
+import { useSessionStore } from '../stores/session.ts';
 
-/** Pedido de recuperación de contraseña (RF-23). El mensaje es el mismo para cualquier email (RF-25). */
+/**
+ * Pedido de recuperación de contraseña (RF-23). El mensaje es el mismo para cualquier email (RF-25). En
+ * modo mock no hay recuperación (RF-199): lleva al inicio de sesión.
+ */
 export function RecoveryRequestPage() {
+  const mode = useSessionStore((state) => state.setup?.mode);
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -24,6 +29,8 @@ export function RecoveryRequestPage() {
       setSending(false);
     }
   }
+
+  if (mode === 'mock') return <Navigate to="/login" replace />;
 
   if (confirmation) {
     return (

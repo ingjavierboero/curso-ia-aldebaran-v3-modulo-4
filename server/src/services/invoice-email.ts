@@ -74,6 +74,7 @@ export async function sendInvoiceEmail(
   const settings = getSettings(db);
   const voucherNumber = formatVoucherNumber(invoice.pointOfSale, invoice.number);
   const email = invoiceEmail({
+    mode: env.mode,
     to: client.billingEmail,
     clientName: client.businessName,
     senderName: settings.issuerTradeName || settings.issuerBusinessName || client.businessName,

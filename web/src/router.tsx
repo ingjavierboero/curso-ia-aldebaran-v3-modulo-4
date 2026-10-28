@@ -8,6 +8,7 @@ import { FirstAdminPage } from './pages/FirstAdminPage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { InvoicesPage } from './pages/invoices/InvoicesPage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
+import { MockMailboxPage } from './pages/mock-mailbox/MockMailboxPage.tsx';
 import { ProductsPage } from './pages/products/ProductsPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { ReviewPage } from './pages/review/ReviewPage.tsx';
@@ -38,6 +39,7 @@ export const routes: RouteObject[] = [
           { path: 'productos', element: <ProductsPage /> },
           { path: 'facturas', element: <InvoicesPage /> },
           { path: 'revision', element: <ReviewPage /> },
+          { path: 'casilla-simulada', element: <MockMailboxPage /> },
           { path: 'perfil', element: <ProfilePage /> },
           { path: 'configuracion', element: <SettingsPage /> },
           {
