@@ -9,6 +9,7 @@ import { errorMessage } from '../../forms.ts';
 import { formatCuit, formatDate } from '../../format.ts';
 import { useCanEdit } from '../../stores/session.ts';
 import { AssignedProducts } from './AssignedProducts.tsx';
+import { ClientHistory } from './ClientHistory.tsx';
 import { ClientForm, ivaConditionLabel } from './ClientForm.tsx';
 
 const Header = styled.div`
@@ -29,7 +30,7 @@ const Sections = styled.div`
   gap: 16px;
 `;
 
-/** Detalle de un cliente con sus datos y sus productos asignados (RF-214, RF-49, RF-50). */
+/** Detalle de un cliente con sus datos, sus productos asignados y su historial (RF-214, RF-49, RF-50, RF-163). */
 export function ClientDetailPage() {
   const { id } = useParams();
   const canEdit = useCanEdit();
@@ -150,6 +151,7 @@ export function ClientDetailPage() {
           canEdit={canEdit}
           onChange={setAssigned}
         />
+        <ClientHistory key={`${client.id}-${client.status}-${client.businessName}`} clientId={client.id} />
       </Sections>
       {editing && <ClientForm client={client} onSubmit={save} onClose={() => setEditing(false)} />}
     </>

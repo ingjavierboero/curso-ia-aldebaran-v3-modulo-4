@@ -1,4 +1,4 @@
-import type { BillingStatusDto, InvoiceDto, UserDto } from '@api-types';
+import type { BillingStatusDto, InvoiceDetailDto, InvoiceDto, UserDto } from '@api-types';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { InvoicesPage } from '../../../src/pages/invoices/InvoicesPage.tsx';
@@ -20,6 +20,50 @@ const INVOICE: InvoiceDto = {
   cae: '70000000000001',
 };
 
+const DETAIL: InvoiceDetailDto = {
+  invoice: { ...INVOICE, status: 'pagada' },
+  pdfUrl: '/api/invoices/1/pdf',
+  items: [
+    { description: 'Abono mensual', originalPriceCents: 10_000, originalCurrency: 'USD', amountCents: 20_160_000 },
+  ],
+  statusChanges: [
+    {
+      fromStatus: 'pendiente_de_pago',
+      toStatus: 'revision_manual',
+      reason: 'monto no coincide',
+      actor: { type: 'agente', userId: null, userName: null },
+      changedAt: '2026-10-20T13:00:00.000Z',
+    },
+    {
+      fromStatus: 'revision_manual',
+      toStatus: 'pagada',
+      reason: null,
+      actor: { type: 'usuario', userId: 4, userName: 'Editora' },
+      changedAt: '2026-10-21T10:00:00.000Z',
+    },
+  ],
+  emails: [
+    {
+      id: 5,
+      from: 'pagos@losandes.com',
+      subject: 'Pago octubre',
+      receivedAt: '2026-10-20T12:55:00.000Z',
+      classification: 'si',
+      attachments: [
+        {
+          id: 9,
+          filename: 'comprobante.pdf',
+          mimeType: 'application/pdf',
+          classification: 'si',
+          cuit: '30711111111',
+          amountCents: 14_000_000,
+          error: null,
+        },
+      ],
+    },
+  ],
+};
+
 const status = (s: BillingStatusDto['status'], reason: string | null = null): BillingStatusDto => ({
   period: '2026-10',
   status: s,
@@ -32,7 +76,9 @@ const json = (body: unknown, code = 200) =>
 /** Simula la API de facturación; `current` es el estado del período en curso. */
 function mockApi(current: BillingStatusDto, invoices: InvoiceDto[] = [INVOICE]) {
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
-    if (url === '/api/invoices') return json(invoices);
+    if (url === '/api/invoices' || url.startsWith('/api/invoices?')) return json(invoices);
+    if (url === '/api/invoices/1') return json(DETAIL);
+    if (url === '/api/clients') return json([{ id: 7, businessName: 'Los Andes SRL' }]);
     if (url === '/api/settings') return json({ billingTime: '11:00' });
     if (url === '/api/billing/current/bill-now') return json(status('en_curso', 'facturación en curso'), 202);
     if (url === '/api/billing/current/cancel') return json(status('cancelado', 'la facturación del mes está cancelada'));
@@ -170,3 +216,60 @@ describe('pasar a Pagada desde el listado (RF-147)', () => {
     expect(within(row).queryByRole('button', { name: 'Pasar a Pagada' })).toBeNull();
   });
 });
+
+describe('filtros, detalle y PDF de las facturas (RF-162, RF-168, RF-217)', () => {
+  it('AC-169: cada factura tiene el link para descargar su PDF', async () => {
+    loginAs('consulta');
+    mockApi(status('completado', 'la facturación del mes ya se hizo'));
+    renderPage();
+    const row = (await screen.findByText('00003-00000001')).closest('tr') as HTMLElement;
+    expect(within(row).getByRole('link', { name: 'Descargar PDF' }).getAttribute('href')).toBe('/api/invoices/1/pdf');
+  });
+
+  it('AC-175: filtrar por estado y por cliente vuelve a pedir el listado con esos filtros', async () => {
+    const fetchMock = mockApi(status('completado', 'la facturación del mes ya se hizo'));
+    renderPage();
+    await screen.findByText('00003-00000001');
+
+    await chooseOption('Filtrar por estado', 'Pendiente de pago');
+    await chooseOption('Filtrar por cliente', 'Los Andes SRL');
+
+    const urls = fetchMock.mock.calls.map(([url]) => String(url));
+    expect(urls).toContain('/api/invoices?status=pendiente_de_pago');
+    expect(urls).toContain('/api/invoices?status=pendiente_de_pago&clientId=7');
+  });
+
+  it('AC-239: un click en la fila abre el detalle con cuotas, PDF, cambios de estado con su actor y el comprobante', async () => {
+    loginAs('consulta');
+    mockApi(status('completado', 'la facturación del mes ya se hizo'));
+    renderPage();
+    const cell = await screen.findByText('00003-00000001');
+    await act(async () => {
+      fireEvent.click(cell);
+    });
+
+    const detail = await screen.findByRole('dialog');
+    expect(within(detail).getByText('Abono mensual (US$ 100,00)')).toBeTruthy();
+    const pdf = within(detail).getByRole('link', { name: /descargar pdf/i });
+    expect(pdf.getAttribute('href')).toBe('/api/invoices/1/pdf');
+    const changes = within(within(detail).getByRole('list', { name: 'Cambios de estado' }))
+      .getAllByRole('listitem')
+      .map((item) => item.textContent ?? '');
+    expect(changes[0]).toMatch(/20\/10\/2026 10:00.*Pendiente de pago → Revisión manual.*monto no coincide.*Agente/);
+    expect(changes[1]).toMatch(/21\/10\/2026 07:00.*Revisión manual → Pagada.*Editora/);
+    const attachment = within(detail).getByRole('link', { name: 'comprobante.pdf' });
+    expect(attachment.getAttribute('href')).toBe('/api/attachments/9');
+    expect(within(detail).getByText(/30-71111111-1/)).toBeTruthy();
+  });
+});
+
+/** Elige una opción de un Select de antd por su etiqueta accesible. */
+async function chooseOption(label: string, option: string) {
+  await act(async () => {
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: label }));
+  });
+  const item = await screen.findByTitle(option);
+  await act(async () => {
+    fireEvent.click(item);
+  });
+}

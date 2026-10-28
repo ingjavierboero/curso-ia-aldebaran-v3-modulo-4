@@ -352,7 +352,7 @@ test antes de su implementación y verlo fallar. Cada test nombra en su `it(...)
 
 - [X] T132 [US8] Completar `server/src/http/routes/invoices.ts` con filtros, detalle y PDF, y `server/src/http/routes/clients.ts` con filtros, búsqueda e historial
 - [X] T133 [P] [US8] Implementar `server/src/services/reports.ts`, el generador CSV en `server/src/documents/csv.ts` y `server/src/http/routes/reports.ts`
-- [ ] T134 [P] [US8] Completar en web `InvoicesPage` (filtros y detalle), `ClientDetailPage` (historial) y agregar `ReportsPage` con descarga CSV en `web/src/pages/`
+- [X] T134 [P] [US8] Completar en web `InvoicesPage` (filtros y detalle), `ClientDetailPage` (historial) y agregar `ReportsPage` con descarga CSV en `web/src/pages/`
 
 **Checkpoint**: todas las historias funcionan de forma independiente
 
