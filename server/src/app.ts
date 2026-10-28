@@ -12,6 +12,7 @@ import { dashboardRouter } from './http/routes/dashboard.ts';
 import { invoicesRouter } from './http/routes/invoices.ts';
 import { mockMailboxRouter } from './http/routes/mock-mailbox.ts';
 import { productsRouter } from './http/routes/products.ts';
+import { reportsRouter } from './http/routes/reports.ts';
 import { reviewRouter } from './http/routes/review.ts';
 import { settingsRouter } from './http/routes/settings.ts';
 import { setupRouter } from './http/routes/setup.ts';
@@ -35,6 +36,7 @@ const apiRouters: RouterFactory[] = [
   reviewRouter,
   attachmentsRouter,
   mockMailboxRouter,
+  reportsRouter,
 ];
 
 export interface AppOptions {

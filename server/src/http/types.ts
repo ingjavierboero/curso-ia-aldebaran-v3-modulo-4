@@ -319,6 +319,38 @@ export interface ProcessErrorsBannerDto {
   message: string;
 }
 
+/** `GET /api/reports/billing`: facturas emitidas de un período (RF-164). */
+export interface BillingReportRow {
+  period: string;
+  invoiceCount: number;
+  totalCents: number;
+}
+
+/** `GET /api/reports/collections`: cobranza de un período (RF-165). */
+export interface CollectionsReportRow {
+  period: string;
+  totalCents: number;
+  paidCents: number;
+  paymentReceivedCents: number;
+  /** Pendiente de pago y Revisión manual. */
+  owedCents: number;
+}
+
+/** `GET /api/reports/debt`: cliente con deuda vigente y sus facturas adeudadas (RF-166). */
+export interface DebtReportRow {
+  clientId: number;
+  businessName: string;
+  debtCents: number;
+  invoices: Array<{
+    invoiceId: number;
+    voucherNumber: string | null;
+    period: string;
+    totalCents: number;
+    dueDate: string;
+    status: InvoiceStatus;
+  }>;
+}
+
 /** Cuerpo de toda respuesta de error. */
 export interface ApiErrorBody {
   error: {
