@@ -639,7 +639,7 @@ Los criterios de aceptación transversales de FR-041 a FR-045 son AC-225 a AC-22
 - **SC-008** (Objetivos): un evaluador sin credenciales de ARCA, del LLM ni de email recorre el
   circuito completo (facturar, enviar, recibir y validar un comprobante) en modo mock.
 - **SC-009** (AC-225): un escaneo de secretos sobre todo el historial del repositorio no reporta
-  ningún hallazgo.
+  ningún hallazgo. Se verifica fuera de la suite, con `gitleaks detect` antes de cada PR.
 - **SC-010** (Constitución, Principio I): el 100 % de los criterios de aceptación del PRD que no se
   declaran externos a la suite tienen un test automatizado que los referencia.
 
